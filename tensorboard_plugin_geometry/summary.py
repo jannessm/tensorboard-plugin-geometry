@@ -5,8 +5,8 @@ from tensorboard.compat.proto.tensor_pb2 import TensorProto
 from tensorboard.compat.proto.tensor_shape_pb2 import TensorShapeProto
 import json
 
-import metadata
-from plugin_data_pb2 import GeoPluginData
+from . import metadata
+from .plugin_data_pb2 import GeoPluginData
 
 def add_geometry(writer, tag, vertices, faces=None, features=None, config_dict=None, global_step=None, walltime=None):
   '''Add meshes or 3D point clouds to TensorBoard. The visualization is based on Three.js,

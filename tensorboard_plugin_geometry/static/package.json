@@ -1,0 +1,31 @@
+{
+  "name": "geometry_renderer",
+  "version": "1.0.0",
+  "description": "display geometries in tensorboard",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.6.4",
+    "@types/three": "^0.103.2",
+    "three": "^0.120.1",
+    "ts-loader": "^8.0.3",
+    "typescript": "^4.0.2",
+    "vue": "^2.6.12",
+    "vue-class-component": "^7.2.5",
+    "vue-material": "^1.0.0-beta-15",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "devDependencies": {
+    "css-loader": "^4.2.2",
+    "style-loader": "^1.2.1",
+    "vue-template-loader": "^1.1.0"
+  }
+}

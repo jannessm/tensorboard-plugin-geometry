@@ -1,5 +1,6 @@
-from plugin_data_pb2 import GeoPluginData
 from tensorboard.compat.proto.summary_pb2 import SummaryMetadata
+
+from .plugin_data_pb2 import GeoPluginData
 
 PLUGIN_NAME = "geometries"
 
@@ -62,6 +63,37 @@ def create_summary_metadata(name, display_name, content_type, components, shape,
     summary_description=description,
     plugin_data=plugin_data,
   )
+
+def parse_plugin_metadata(content):
+  """Parse summary metadata to a Python object.
+  Arguments:
+    content: The `content` field of a `SummaryMetadata` proto
+      corresponding to the mesh plugin.
+  Returns:
+    A `GeoPluginData` protobuf object.
+  Raises: Error if the version of the plugin is not supported.
+  """
+  if not isinstance(content, bytes):
+    raise TypeError("Content type must be bytes.")
+  result = GeoPluginData.FromString(content)
+  
+  if not 0 <= result.version <= get_current_version():
+    raise ValueError(
+        "Unknown metadata version: %s. The latest version known to "
+        "this build of TensorBoard is %s; perhaps a newer build is "
+        "available?" % (result.version, get_current_version())
+    )
+  
+  # Add components field to older version of the proto.
+  if result.components == 0:
+    result.components = get_components_bitmask(
+      [
+        GeoPluginData.VERTICES,
+        GeoPluginData.FACES,
+        GeoPluginData.FEATURES,
+      ]
+    )
+  return result
 
 def get_instance_name(tag, content_type):
   return "%s_%s" % (
