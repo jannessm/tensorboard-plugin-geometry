@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
-		"outDir": "./dist",
+		"outDir": "build",
 		// this aligns with Vue's browser support
     "target": "es5",
     // this enables stricter inference for data properties on `this`
