@@ -11,6 +11,8 @@
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"sourceMap": true,
+		"noImplicitAny": false,
+		"allowJs": true,
 	},
 	"include": [ "./src/**/*.ts" ],
 }

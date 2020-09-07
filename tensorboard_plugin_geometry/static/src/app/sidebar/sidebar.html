@@ -1,0 +1,20 @@
+
+<div class="sidebar">
+  <div class="sidebar-section">
+    <h3>Runs</h3>
+
+    <md-field>
+      <md-input v-model="regex" placeholder="Write a regex to filter runs" @input="filterRuns"></md-input>
+    </md-field>
+
+    <div v-for="(run, i) in runs">
+      <span v-if="display[i]">
+        <md-checkbox v-model="checked[i]" @change="exclusive = false"></md-checkbox>
+        <md-radio class="double_checkbox" v-model="exclusive" :value="run" @change="exclusify(run)">{{ run }}</md-radio>
+      </span>
+    </div>
+
+    <md-button @click="toggleAll()">TOGGLE ALL RUNS</md-button>
+  </div>
+  <span class="logdir">{{ logdir }}</span>
+</div>

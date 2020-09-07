@@ -19,13 +19,15 @@ class GeoPlugin(base_plugin.TBPlugin):
     self._multiplexer = context.multiplexer
     self._tag_server = TagServer(self._multiplexer, self.plugin_name)
     self._data_server = DataServer(self._multiplexer, self._tag_server)
+    self._logdir = context.logdir
 
   def get_plugin_apps(self):
     return {
       "/app": self._serve_js,
       "/app/index": self._serve_js,
       "/tags": self._serve_tags,
-      "/data": self._serve_data
+      "/data": self._serve_data,
+      "/logdir": self._serve_logdir
     }
 
   ### Upon loading TensorBoard in browser
@@ -48,8 +50,8 @@ class GeoPlugin(base_plugin.TBPlugin):
   ### Route handling
   @wrappers.Request.application
   def _serve_js(self, request):
-    base_path = osp.join(osp.dirname(__file__), "static", "dist")
-    print(request.path[-5:])
+    base_path = osp.join(osp.dirname(__file__), "static", "bundle")
+
     if request.path[-3:] == 'app':
       filepath = osp.join(base_path, "render.js")
     elif request.path[-5:] == 'index':
@@ -73,7 +75,7 @@ class GeoPlugin(base_plugin.TBPlugin):
       list of all tags that are relevant to this plugin.
     """
     return werkzeug.Response(
-      self._tag_server.get_tags_response(self.plugin_name),
+      json.dumps(self._tag_server.get_tags_response()),
       content_type="application/json"
     )
 
@@ -97,3 +99,9 @@ class GeoPlugin(base_plugin.TBPlugin):
       return werkzeug.Response("Bad content_type", "text/plain", 400)
 
     return werkzeug.Response(response, "arraybuffer")
+
+  @wrappers.Request.application
+  def _serve_logdir(self, request):
+    return werkzeug.Response(
+      json.dumps({ 'logdir': self._logdir}), content_type="application/javascript"
+    )
