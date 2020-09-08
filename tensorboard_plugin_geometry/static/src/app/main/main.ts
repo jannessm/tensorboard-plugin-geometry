@@ -16,6 +16,7 @@ interface Tag {
 interface Tags {
   name: string;
   runs: Tag[];
+  display: boolean;
 }
 
 @WithRender
@@ -45,7 +46,8 @@ export default class MainComponent extends Vue {
           if (this.data.tags.filter(val => val.name === tag).length === 0) {
             this.data.tags.push({
               name: tag,
-              runs: []
+              runs: [],
+              display: true
             });
           }
 
@@ -68,10 +70,15 @@ export default class MainComponent extends Vue {
     if (!!this.tag_regex) {
       this.data.tags.unshift(<Tags>{
         name: this.tag_regex,
-        runs: []
+        runs: [],
+        display: true
       });
     } 
     
     this.last_regex = this.tag_regex;
+
+    this.data.tags.forEach((tag) => {
+      tag.display = !!tag.name.match(this.tag_regex);
+    });
   }
 }
