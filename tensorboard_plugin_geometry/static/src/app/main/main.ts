@@ -5,6 +5,8 @@ import {ApiService} from '../api';
 import WithRender from './main.html'
 import SidebarComponent from '../sidebar/sidebar';
 
+import './main.scss';
+
 // The @Component decorator indicates the class is a Vue component
 @WithRender
 @Component({

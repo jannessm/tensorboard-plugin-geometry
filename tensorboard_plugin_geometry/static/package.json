@@ -14,6 +14,7 @@
     "@types/node": "^14.6.4",
     "@types/three": "^0.103.2",
     "axios": "^0.20.0",
+    "material-design-icons-iconfont": "^6.1.0",
     "sass": "^1.26.10",
     "sass-loader": "^10.0.2",
     "three": "^0.120.1",
@@ -28,7 +29,9 @@
   },
   "devDependencies": {
     "css-loader": "^4.2.2",
+    "file-loader": "^6.1.0",
     "style-loader": "^1.2.1",
+    "ttf-loader": "^1.0.2",
     "vue-template-loader": "^1.1.0"
   }
 }

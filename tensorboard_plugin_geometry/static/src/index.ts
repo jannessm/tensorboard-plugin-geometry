@@ -1,16 +1,19 @@
 import Vue from 'vue';
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
+import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import {
   MdButton,
   MdCheckbox,
   MdField,
+  MdIcon,
   MdRadio,
 } from 'vue-material/dist/components';
 
 Vue.use(MdButton);
 Vue.use(MdCheckbox);
 Vue.use(MdField);
+Vue.use(MdIcon);
 Vue.use(MdRadio);
 
 import MainComponent from './app/main/main';

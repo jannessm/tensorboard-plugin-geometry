@@ -24,7 +24,8 @@ class GeoPlugin(base_plugin.TBPlugin):
   def get_plugin_apps(self):
     return {
       "/app": self._serve_js,
-      "/app/index": self._serve_js,
+      "/app/*": self._serve_js,
+      "/assets/*": self._serve_assets,
       "/tags": self._serve_tags,
       "/data": self._serve_data,
       "/logdir": self._serve_logdir
@@ -51,18 +52,37 @@ class GeoPlugin(base_plugin.TBPlugin):
   @wrappers.Request.application
   def _serve_js(self, request):
     base_path = osp.join(osp.dirname(__file__), "static", "bundle")
+    req_path = request.path.split('/')
+    req_path = req_path[len(req_path) - 1]
 
-    if request.path[-3:] == 'app':
+    if req_path == 'app':
       filepath = osp.join(base_path, "render.js")
-    elif request.path[-5:] == 'index':
+    elif req_path == 'index':
       filepath = osp.join(base_path, 'index.js')
-
     
     with open(filepath) as infile:
       contents = infile.read()
     return werkzeug.Response(
       contents, content_type="application/javascript"
     )
+
+  @wrappers.Request.application
+  def _serve_assets(self, request):
+    base_path = osp.join(osp.dirname(__file__), "static", "bundle", "assets")
+    req_path = request.path.split('/')
+    req_path = req_path[len(req_path) - 1]
+    
+    filepath = osp.join(base_path, req_path)
+    file_size = osp.getsize(filepath)
+    
+    return werkzeug.Response(
+      open(filepath, 'rb'),
+      mimetype='application/octet-stream',
+      headers=[
+        ('Content-Length', str(file_size)),
+        ('Content-Disposition', "attachment; filename=\"%s\"" % req_path),
+      ],
+      direct_passthrough=True)
 
   @wrappers.Request.application
   def _serve_tags(self, request):
