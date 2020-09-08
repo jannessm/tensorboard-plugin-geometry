@@ -4,17 +4,17 @@
     <h3>Runs</h3>
 
     <md-field>
-      <md-input v-model="regex" placeholder="Write a regex to filter runs" @input="filterRuns"></md-input>
+      <md-input v-model="data.regex" placeholder="Write a regex to filter runs" @input="filterRuns"></md-input>
     </md-field>
 
     <div v-for="(run, i) in runs">
       <span v-if="display[i]">
-        <md-checkbox v-model="checked[i]" @change="exclusive = false"></md-checkbox>
-        <md-radio class="double_checkbox" v-model="exclusive" :value="run" @change="exclusify(run)">{{ run }}</md-radio>
+        <md-checkbox v-model="checked[i]" @change="data.exclusive = false"></md-checkbox>
+        <md-radio class="double_checkbox" v-model="data.exclusive" :value="run" @change="exclusify(run)">{{ run }}</md-radio>
       </span>
     </div>
 
     <md-button @click="toggleAll()" class="sidebar-button">TOGGLE ALL RUNS</md-button>
-    <span class="logdir">{{ logdir[0] }}</span>
+    <span class="logdir">{{ data.logdir }}</span>
   </div>
 </div>

@@ -16,19 +16,18 @@ export default class SidebarComponent extends Vue {
   colors: string[] = [];
   checked: boolean[] = [];
   display: boolean[] = [];
-  exclusive = false;
-  api: ApiService;
 
-  regex: string = '';
+  data = {
+    exclusive: false,
+    logdir: './',
+    regex: '',
+  }
 
   last_exclusive: string = '';
 
-  logdir: string[] = ['asdf'];
-
   constructor() {
     super();
-    this.api = new ApiService();
-    this.api.getTags().then((res) => {
+    ApiService.getTags().then((res) => {
       Object.keys(res.data).forEach(run => {
         this.runs.push(run);
         this.checked.push(true);
@@ -36,13 +35,13 @@ export default class SidebarComponent extends Vue {
       });
     });
 
-    this.api.getLogdir().then(res => {
-      this.logdir[0] = res.data.logdir;
+    ApiService.getLogdir().then(res => {
+      this.data.logdir = res.data.logdir;
     });
   }
 
   filterRuns() {
-    this.display = this.runs.map(val => !!val.match(RegExp(this.regex)));
+    this.display = this.runs.map(val => !!val.match(RegExp(this.data.regex)));
   }
 
   exclusify(run: string) {
@@ -56,6 +55,6 @@ export default class SidebarComponent extends Vue {
   toggleAll() {
     const checked = this.checked.reduce((allChecked, val) => val || allChecked, false);
     this.checked = this.runs.map(() => !checked);
-    this.exclusive = false;
+    this.data.exclusive = false;
   }
 }
