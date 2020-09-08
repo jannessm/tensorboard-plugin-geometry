@@ -23,7 +23,7 @@ export default class SidebarComponent extends Vue {
 
   last_exclusive: string = '';
 
-  logdir = '';
+  logdir: string[] = ['asdf'];
 
   constructor() {
     super();
@@ -37,8 +37,7 @@ export default class SidebarComponent extends Vue {
     });
 
     this.api.getLogdir().then(res => {
-      this.logdir += res.data.logdir;
-      console.log(this.logdir);
+      this.logdir[0] = res.data.logdir;
     });
   }
 

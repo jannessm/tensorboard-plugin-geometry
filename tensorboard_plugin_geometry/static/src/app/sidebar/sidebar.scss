@@ -5,6 +5,7 @@
   margin-right: 10px;
   overflow-x: hidden;
   padding: 5px 0;
+  font-size: 13px;
   text-overflow: ellipsis;
 
   .sidebar-section {
@@ -71,5 +72,13 @@
   .logdir {
     color: grey;
     width: 100%;
+  }
+
+  .sidebar-button {
+    color: #757575;
+    background: #e0e0e0;
+    font-size: 13px;
+    font-weight: normal;
+    border-radius: 3px;
   }
 }
