@@ -2,7 +2,7 @@
   {{tag}}<div class="header-run">{{run.name}}</div>
   <div class="slider">
     step: <b>{{data.step}}</b><br>
-    {{walltime}}
+    {{data.wall_time}}
     <slider :value="data.step" :max="data.total_steps" v-on:value="updateStep"  v-if="data.total_steps !== 0"></slider>
   </div>
 

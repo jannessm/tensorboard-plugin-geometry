@@ -46,11 +46,15 @@ export default class MainComponent extends Vue {
         isRegex: true,
       });
       
+      console.log(res.data);
+
       // iter over all runs
       Object.keys(res.data).forEach(run => {
         
         // iter over all tags in run
         Object.keys(res.data[run]).forEach(tag => {
+          
+          // add new tag if not exists yet
           if (this.data.tags.filter(val => val.name === tag).length === 0) {
             this.data.tags.push({
               name: tag,
@@ -59,12 +63,15 @@ export default class MainComponent extends Vue {
             });
           }
 
-          this.data.tags[this.data.tags.length - 1].runs.push({
+          const tag_index = this.data.tags.findIndex((val) => val.name === tag);
+
+          this.data.tags[tag_index].runs.push({
             name: run,
             samples: res.data[run][tag].samples
           });
         });
       });
+      console.log(this.data);
     });
   }
 
