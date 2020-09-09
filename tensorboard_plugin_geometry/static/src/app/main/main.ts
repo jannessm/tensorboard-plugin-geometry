@@ -17,6 +17,7 @@ interface Tags {
   name: string;
   runs: Tag[];
   display: boolean;
+  isRegex?: boolean;
 }
 
 @WithRender
@@ -37,6 +38,13 @@ export default class MainComponent extends Vue {
     super();
     ApiService.getTags().then((res) => {
       this.$set(this.data, 'tags', []);
+      
+      this.data.tags.push({
+        name: this.tag_regex,
+        runs: [],
+        display: !!this.tag_regex,
+        isRegex: true,
+      });
       
       // iter over all runs
       Object.keys(res.data).forEach(run => {
@@ -61,24 +69,8 @@ export default class MainComponent extends Vue {
   }
 
   filterTags() {
-    // remove last regex
-    if (!!this.last_regex) {
-      this.data.tags.shift();
-    }
-
     // add new regex if regex is not empty
-    if (!!this.tag_regex) {
-      this.data.tags.unshift(<Tags>{
-        name: this.tag_regex,
-        runs: [],
-        display: true
-      });
-    } 
-    
-    this.last_regex = this.tag_regex;
-
-    this.data.tags.forEach((tag) => {
-      tag.display = !!tag.name.match(this.tag_regex);
-    });
+    this.data.tags[0].name = this.tag_regex;
+    this.data.tags[0].display = !!this.tag_regex;
   }
 }

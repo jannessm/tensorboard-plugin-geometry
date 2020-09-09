@@ -1,8 +1,9 @@
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import {MdCard} from 'vue-material/dist/components';
 
-import {ApiService} from '../api';
-import WithRender from './data-card.html'
+import PlotComponent from '../plot/plot';
+import WithRender from './data-card.html';
 
 import './data-card.scss';
 
@@ -13,12 +14,19 @@ interface Tag {
 
 @WithRender
 @Component({
-  props: ['name', 'tag']
+  props: ['name', 'tag', 'isRegex'],
+  components: {
+    plot: PlotComponent
+  }
 })
 export default class DataCardComponent extends Vue {
   tag_regex = '';
+  data = {
+    expanded: true
+  }
 
   constructor() {
     super();
+    this.$nextTick(() => (<MdCard>this.$children[0]).MdCard.expand = this.data.expanded);
   }
 }

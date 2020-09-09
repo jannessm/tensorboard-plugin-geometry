@@ -7,7 +7,7 @@
       <md-input v-model="tag_regex" placeholder="Filter tags (regular expressions supported)" @input="filterTags"></md-input>
     </md-field>
     
-    <data-card v-for="tag in data.tags" :tag="tag.runs" :name="tag.name" v-if="tag.display"></data-card>
+    <data-card v-for="tag in data.tags" v-if="tag.display" :tag="tag.runs" :name="tag.name" :isRegex="tag.isRegex"></data-card>
   </div>
 
 </div>

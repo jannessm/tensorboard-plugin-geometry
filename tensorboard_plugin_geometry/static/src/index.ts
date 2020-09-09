@@ -4,6 +4,7 @@ import 'vue-material/dist/theme/default.css';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import {
   MdButton,
+  MdCard,
   MdCheckbox,
   MdField,
   MdIcon,
@@ -11,6 +12,7 @@ import {
 } from 'vue-material/dist/components';
 
 Vue.use(MdButton);
+Vue.use(MdCard);
 Vue.use(MdCheckbox);
 Vue.use(MdField);
 Vue.use(MdIcon);
