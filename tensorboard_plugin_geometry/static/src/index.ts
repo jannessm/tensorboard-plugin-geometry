@@ -6,16 +6,20 @@ import {
   MdButton,
   MdCard,
   MdCheckbox,
+  MdDivider,
   MdField,
   MdIcon,
+  MdProgress,
   MdRadio,
 } from 'vue-material/dist/components';
 
 Vue.use(MdButton);
 Vue.use(MdCard);
 Vue.use(MdCheckbox);
+Vue.use(MdDivider);
 Vue.use(MdField);
 Vue.use(MdIcon);
+Vue.use(MdProgress);
 Vue.use(MdRadio);
 
 import MainComponent from './app/main/main';

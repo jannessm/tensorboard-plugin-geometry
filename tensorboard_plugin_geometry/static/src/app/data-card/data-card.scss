@@ -1,3 +1,14 @@
+.md-card-header {
+  position: relative;
+  
+  .header-run {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: lightblue;
+  }
+}
+
 .md-card-expand-trigger {
   float: right;
   margin-top: -9px !important;

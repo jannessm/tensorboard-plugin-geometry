@@ -61,7 +61,7 @@ export default class MainComponent extends Vue {
 
           this.data.tags[this.data.tags.length - 1].runs.push({
             name: run,
-            samples: res.data[run][tag]
+            samples: res.data[run][tag].samples
           });
         });
       });

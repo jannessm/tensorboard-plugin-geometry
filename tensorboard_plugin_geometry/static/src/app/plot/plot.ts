@@ -5,6 +5,7 @@ import {ApiService} from '../api';
 import WithRender from './plot.html'
 
 import './plot.scss';
+import SliderComponent from '../slider/slider';
 
 
 interface Tag {
@@ -13,12 +14,21 @@ interface Tag {
 
 @WithRender
 @Component({
-  props: ['tag', 'run']
+  props: ['tag', 'run'],
+  components: {
+    slider: SliderComponent
+  }
 })
 export default class PlotComponent extends Vue {
   tag_regex = '';
+  step = 1;
+  walltime = Date();
 
   constructor() {
     super();
+  }
+
+  updateStep(new_value: number) {
+    this.step = new_value;
   }
 }

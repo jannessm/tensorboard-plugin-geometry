@@ -7,7 +7,7 @@ import torch
 os.sys.path.append('..')
 from tensorboard_plugin_geometry.summary import add_geometry
 
-log_dir = './logs/test_plugin'
+log_dir = '../logs/test_plugin_3'
 
 SummaryWriter.add_geometry = add_geometry
 writer = SummaryWriter(log_dir=log_dir)
@@ -21,6 +21,7 @@ wss = torch.rand((100, 3)) * 0.1
 
 for i in range(10):
   writer.add_geometry('test_geo', pos.reshape(1, 100, 3), features=wss.reshape(1, 100, 3), global_step=i)
+  writer.add_geometry('test_geo_2', 2*pos.reshape(1, 100, 3), features=wss.reshape(1, 100, 3), global_step=i)
 
 for i in range(10):
   writer.add_scalar('scalar_test', lin[i], global_step=i)

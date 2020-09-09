@@ -1,0 +1,4 @@
+<div class="md-slider">
+  <md-progress-bar md-mode="determinate" :md-value="data.progress"></md-progress-bar>
+  <input type="range" v-if="" v-model.number="data.input" @input="updateValue" :min="min" :max="max"></input>
+</div>
