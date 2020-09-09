@@ -1,8 +1,12 @@
 <div class="plot-component">
   {{tag}}<div class="header-run">{{run.name}}</div>
   <div class="slider">
-    step: <b>{{step}}</b><br>
+    step: <b>{{data.step}}</b><br>
     {{walltime}}
-    <slider :value="step" :max="run.samples" v-on:value="updateStep"></slider>
+    <slider :value="data.step" :max="data.total_steps" v-on:value="updateStep"  v-if="data.total_steps !== 0"></slider>
+  </div>
+
+  <div class="plot">
+
   </div>
 </div>

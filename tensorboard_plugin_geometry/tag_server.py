@@ -37,6 +37,30 @@ class TagServer():
     return response
 
 
+  def collect_tensor_events(self, request, step=None):
+    """Collects list of tensor events based on request."""
+    run = request.args.get("run")
+    tag = request.args.get("tag")
+
+    tensor_events = []  # List of tuples (meta, tensor) that contain tag.
+    for instance_tag in self._instance_tags(run, tag):
+        tensors = self._multiplexer.Tensors(run, instance_tag)
+        meta = self._instance_tag_metadata(run, instance_tag)
+        tensor_events += [(meta, tensor) for tensor in tensors]
+
+    if step is not None:
+        tensor_events = [
+            event for event in tensor_events if event[1].step == step
+        ]
+    else:
+        # Make sure tensors sorted by step in ascending order.
+        tensor_events = sorted(
+            tensor_events, key=lambda tensor_data: tensor_data[1].step
+        )
+
+    return tensor_events
+
+
 
 
 ########### private methods #############

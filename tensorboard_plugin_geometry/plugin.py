@@ -28,6 +28,7 @@ class GeoPlugin(base_plugin.TBPlugin):
       "/assets/*": self._serve_assets,
       "/tags": self._serve_tags,
       "/data": self._serve_data,
+      "/geometries": self._serve_metadata,
       "/logdir": self._serve_logdir
     }
 
@@ -125,3 +126,31 @@ class GeoPlugin(base_plugin.TBPlugin):
     return werkzeug.Response(
       json.dumps({ 'logdir': self._logdir}), content_type="application/javascript"
     )
+
+  @wrappers.Request.application
+  def _serve_metadata(self, request):
+      """A route that returns the mesh metadata associated with a tag.
+      Metadata consists of wall time, type of elements in tensor, scene
+      configuration and so on.
+      Args:
+        request: The werkzeug.Request object.
+      Returns:
+        A JSON list of mesh data associated with the run and tag
+        combination.
+      """
+      tensor_events = self._tag_server.collect_tensor_events(request)
+
+      # We convert the tensor data to text.
+      response = [{
+          "wall_time": event.wall_time,
+          "step": event.step,
+          "content_type": meta.content_type,
+          "components": meta.components,
+          "config": meta.json_config,
+          "data_shape": list(meta.shape),
+      } for meta, event in tensor_events]
+
+      res = werkzeug.Response(json.dumps(response), "application/json")
+      res.status_code = 200
+      return res
+

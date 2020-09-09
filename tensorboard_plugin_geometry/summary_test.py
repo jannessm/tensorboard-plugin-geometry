@@ -7,7 +7,7 @@ import torch
 os.sys.path.append('..')
 from tensorboard_plugin_geometry.summary import add_geometry
 
-log_dir = '../logs/test_plugin_3'
+log_dir = '../logs/test_plugin'
 
 SummaryWriter.add_geometry = add_geometry
 writer = SummaryWriter(log_dir=log_dir)
@@ -31,3 +31,4 @@ ea = EventAccumulator(log_dir)
 ea.Reload()
 
 print(ea.Tags())
+writer.close()

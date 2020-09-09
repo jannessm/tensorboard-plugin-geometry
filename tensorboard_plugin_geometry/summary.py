@@ -29,11 +29,11 @@ def add_geometry(writer, tag, vertices, faces=None, features=None, config_dict=N
         features: :math:`(B, N, 3)`. (batch, number_of_vertices, channels)
   '''
   torch._C._log_api_usage_once("tensorboard.logging.add_geometry")
-  writer._get_file_writer().add_summary(_geometry(tag, vertices, faces, features, global_step, config_dict))
+  writer._get_file_writer().add_summary(_geometry(tag, vertices, faces, features, config_dict), global_step=global_step)
 
 
 
-def _geometry(tag, vertices, faces, features, display_name='name', step=None, description=None, config_dict=None):
+def _geometry(tag, vertices, faces, features, display_name='name', description=None, config_dict=None):
   '''Outputs a merged `Summary` protocol buffer with a mesh/point cloud.
       Args:
         tag: A name for this summary operation.
