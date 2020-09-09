@@ -46,8 +46,6 @@ export default class MainComponent extends Vue {
         isRegex: true,
       });
       
-      console.log(res.data);
-
       // iter over all runs
       Object.keys(res.data).forEach(run => {
         
@@ -71,7 +69,6 @@ export default class MainComponent extends Vue {
           });
         });
       });
-      console.log(this.data);
     });
   }
 

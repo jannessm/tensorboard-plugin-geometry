@@ -35,7 +35,6 @@ export default class SliderComponent extends Vue {
       
       this.$nextTick(() => {
         this.data.input = this.$props.value;
-        console.log(this.data.input, this.$props.value, this.data.progress);
         this.data.progress = this.data.input / this.$props.max * 100;
         updated = true;
       });

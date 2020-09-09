@@ -37,8 +37,8 @@ class DataServer():
 
     np_type = {
       GeoPluginData.VERTICES: np.float32,
-      GeoPluginData.FACES: np.int32,
-      GeoPluginData.FEATURES: np.uint8,
+      GeoPluginData.FACES: np.uint32,
+      GeoPluginData.FEATURES: np.float32,
     }[content_type]
 
     response = np.array(response, dtype=np_type)

@@ -117,9 +117,13 @@ class GeoPlugin(base_plugin.TBPlugin):
       response = self._data_server.get_data_response(request, self.plugin_name)
     
     except ValueError:
-      return werkzeug.Response("Bad content_type", "text/plain", 400)
+      res = werkzeug.Response("Bad content_type", "text/plain")
+      res.status_code = 400
+      return res
 
-    return werkzeug.Response(response, "arraybuffer")
+    res = werkzeug.Response(response, "arraybuffer")
+    res.status_code = 200
+    return res
 
   @wrappers.Request.application
   def _serve_logdir(self, request):
