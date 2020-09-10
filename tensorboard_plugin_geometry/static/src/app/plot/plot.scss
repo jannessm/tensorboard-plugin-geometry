@@ -18,4 +18,17 @@
     color: white;
     border-radius: 0 0 5px 5px;
   }
+
+  .plot {
+    height: 20vw;
+    border: 1px solid lightgrey;
+  }
+
+  .actions {
+    float: right;
+
+    button {
+      margin-right: 0;
+    }
+  }
 }

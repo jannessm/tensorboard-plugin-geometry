@@ -1,12 +1,18 @@
 <div class="plot-component">
   {{tag}}<div class="header-run">{{run.name}}</div>
   <div class="slider">
-    step: <b>{{data.step}}</b><br>
-    {{data.wall_time}}
-    <slider :value="data.step" :max="data.total_steps" v-on:value="updateStep"  v-if="data.total_steps !== 0"></slider>
+    step: <b>{{data.current_step}}</b><br>
+    {{data.current_wall_time}}
+    <slider :value="data.current_step" :max="data.max_step" v-on:value="updateStep"  v-if="data.total_steps !== 0"></slider>
   </div>
 
-  <div class="plot">
+  <div class="plot" :style="'height: '+data.plot_height">
 
+  </div>
+  <div class="actions">
+    <md-button class="md-icon-button md-dense" @click="togglePlotSize">
+      <md-icon v-if="!data.fullscreen">fullscreen</md-icon>
+      <md-icon v-if="data.fullscreen">fullscreen_exit</md-icon>
+    </md-button>
   </div>
 </div>

@@ -15,7 +15,7 @@
     <md-card-expand-content>
       <md-card-content class="md-layout md-gutter">
         <!-- <plot v-for="run in tag" :run="run" :tag="name" class="md-layout-item md-size-33"></plot> -->
-        <plot :run="tag[0]" :tag="name" class="md-layout-item md-size-33"></plot>
+        <plot :run="tag[0]" :tag="name" :class="'md-layout-item md-size-' + data.plot_size"></plot>
       </md-card-content>
     </md-card-expand-content>
   </md-card-expand>
