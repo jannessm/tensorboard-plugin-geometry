@@ -2,21 +2,16 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {MdCard} from 'vue-material/dist/components';
 
-import PlotComponent from '../plot/plot';
+import DataRunComponent from '../data-run/data-run';
 import WithRender from './data-card.html';
 
 import './data-card.scss';
-
-
-interface Tag {
-  [run: string]: number // run: #(samples)
-}
 
 @WithRender
 @Component({
   props: ['name', 'tag', 'isRegex'],
   components: {
-    plot: PlotComponent
+    'data-run': DataRunComponent
   }
 })
 export default class DataCardComponent extends Vue {

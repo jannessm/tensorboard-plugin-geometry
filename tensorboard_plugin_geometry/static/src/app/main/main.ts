@@ -7,18 +7,7 @@ import SidebarComponent from '../sidebar/sidebar';
 
 import './main.scss';
 import DataCardComponent from '../data-card/data-card';
-
-interface Tag {
-  name: string;
-  samples: number;
-}
-
-interface Tags {
-  name: string;
-  runs: Tag[];
-  display: boolean;
-  isRegex?: boolean;
-}
+import {Tags} from '../models/tag';
 
 @WithRender
 @Component({

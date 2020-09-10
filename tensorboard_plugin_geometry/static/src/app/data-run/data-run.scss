@@ -1,0 +1,30 @@
+.data-run-component {
+  position: relative;
+  
+  .slider {
+    width: 100%;
+    position: relative;
+    font-size: 13px;
+  }
+
+  .header-run {
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 15px;
+    font-size: 10px;
+    background: grey;
+    padding: 0 4px;
+    color: white;
+    border-radius: 0 0 5px 5px;
+  }
+
+  .plot {
+    height: 20vw;
+    border: 1px solid lightgrey;
+  }
+
+  .actions {
+    float: right;
+  }
+}

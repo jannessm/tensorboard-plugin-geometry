@@ -1,0 +1,18 @@
+<div class="data-run-component">
+  {{tag}}<div class="header-run">{{run.name}}</div>
+  <div class="slider">
+    step: <b>{{data.current_step_label}}</b><br>
+    {{data.current_wall_time}}
+    <slider :value="data.current_step_id" :max="data.max_step()" v-on:value="updateStep"  v-if="data.max_step() !== 0"></slider>
+  </div>
+
+  <div class="plot" :style="'height: ' + data.plot_height()">
+
+  </div>
+  <div class="actions">
+    <md-button class="md-icon-button md-dense" @click="togglePlotSize">
+      <md-icon v-if="!data.fullscreen">fullscreen</md-icon>
+      <md-icon v-if="data.fullscreen">fullscreen_exit</md-icon>
+    </md-button>
+  </div>
+</div>
