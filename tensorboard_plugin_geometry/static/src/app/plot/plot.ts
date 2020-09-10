@@ -1,9 +1,27 @@
 import Vue from 'vue';
 import Component from "vue-class-component";
+import * as THREE from 'three';
 
-import {Scene, Camera, PerspectiveCamera, WebGLRenderer, SphereBufferGeometry, MeshBasicMaterial, Geometry, Mesh, Group, HemisphereLight, HemisphereLightHelper, AxesHelper, Color, ArrowHelper, Vector3} from 'three';
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  SphereBufferGeometry,
+  MeshBasicMaterial,
+  Mesh,
+  Group,
+  HemisphereLight,
+  AxesHelper,
+  Color,
+  ArrowHelper,
+  Vector3
+} from 'three';
+
+import {OrbitControls} from './orbit-controls';
 
 import WithRender from './plot.html';
+
+import './plot.scss';
 
 @WithRender
 @Component({
@@ -11,18 +29,30 @@ import WithRender from './plot.html';
 })
 export default class PlotComponent extends Vue {
   scene: Scene = new Scene();
-  camera: Camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera: PerspectiveCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
   renderer: WebGLRenderer = new WebGLRenderer();
+  controls: OrbitControls = new OrbitControls( this.camera, this.renderer.domElement );
   last_width = 0;
   meshes: Group[] = [];
   features: Group[] = [];
 
   mounted() {
-    this.update();
     this.$el.appendChild(this.renderer.domElement);
     this.$watch('width', this.update);
     this.$watch('data', this.updateData);
     window.addEventListener('resize', this.update);
+    
+    this.scene.background = new Color( 0xf0f0f0 );
+    const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
+    light.position.set( 0, 50, 0 );
+    const axesHelper = new AxesHelper( 5 );
+    this.scene.add( axesHelper );
+    this.scene.add( light );
+
+    console.log(this.camera instanceof THREE.PerspectiveCamera)
+    this.controls = new OrbitControls( this.camera, this.renderer.domElement );    
+    
+    this.controls.addEventListener('change', this.update);
   }
   
   update() {
@@ -31,15 +61,8 @@ export default class PlotComponent extends Vue {
     if (width !== this.last_width) {
       (this.camera as PerspectiveCamera).aspect = width / (this.$el as HTMLElement).offsetHeight;
       this.renderer.setSize(width, (this.$el as HTMLElement).offsetHeight);
-      this.renderer.render(this.scene, this.camera);
-      this.scene.background = new Color( 0xf0f0f0 );
-      const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
-      light.position.set( 0, 50, 0 );
-      const helper = new HemisphereLightHelper( light, 5 );
-      const axesHelper = new AxesHelper( 5 );
-      this.scene.add( axesHelper );
-      this.scene.add( helper );
     }
+    this.renderer.render( this.scene, this.camera );
   }
 
   updateData() {
