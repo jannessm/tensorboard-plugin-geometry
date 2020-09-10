@@ -3,12 +3,16 @@
   <div class="slider">
     step: <b>{{data.current_step_label}}</b><br>
     {{data.current_wall_time}}
-    <slider :value="data.current_step_id" :max="data.max_step()" v-on:value="updateStep"  v-if="data.max_step() !== 0"></slider>
+    <slider :value="data.current_step_id" :max="data.max_step()" v-on:value="update"  v-if="data.max_step() !== 0"></slider>
   </div>
 
-  <div class="plot" :style="'height: ' + data.plot_height()">
+  <plot class="plot"
+    :data="data.plot_data"
+    :config="dataProvider.getConfigById(data.current_step_id)"
+    :style="'height: ' + data.plot_height()"
+    :width="data.fullscreen"
+    ></plot>
 
-  </div>
   <div class="actions">
     <md-button class="md-icon-button md-dense" @click="togglePlotSize">
       <md-icon v-if="!data.fullscreen">fullscreen</md-icon>

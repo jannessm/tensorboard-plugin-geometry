@@ -5,13 +5,16 @@ import WithRender from './data-run.html'
 
 import './data-run.scss';
 import SliderComponent from '../slider/slider';
+import PlotComponent from '../plot/plot';
 import {DataProvider} from '../data-provider';
+import { StepData } from '../models/step-data';
 
 @WithRender
 @Component({
   props: ['tag', 'run'],
   components: {
-    slider: SliderComponent
+    slider: SliderComponent,
+    plot: PlotComponent
   }
 })
 export default class DataRunComponent extends Vue {
@@ -26,27 +29,37 @@ export default class DataRunComponent extends Vue {
       max_step: () => this.dataProvider?.steps_metadata.length - 1,
       plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
       fullscreen: false,
+      plot_data: {
+        vertices: [[[0]]],
+        faces: [[[0]]],
+        features: [[[0]]],
+      },
   };
 
+  created() {
+    this.dataProvider.init(this.$props.run.name, this.$props.tag)
+      .then(() => {
+        this.updateStep(this.dataProvider.steps.length - 1);
+        this.updatePlotData();
+      });
+  }
 
-
-  constructor() {
-    super();
-
-    this.$nextTick().then(() => {
-      this.dataProvider.init(this.$props.run.name, this.$props.tag)
-        .then(() => {
-          this.updateStep(this.dataProvider.steps.length - 1)
-        });
-    });
+  update(new_value: number) {
+    this.updateStep(new_value);
+    this.updatePlotData();
   }
 
   updateStep(new_value: number) {
     // update header
-    console.log(this.dataProvider.steps_metadata, new_value);
     this.data.current_step_id = new_value;
     this.data.current_step_label = this.dataProvider.steps_metadata[new_value].step;
-    this.data.current_wall_time = new Date(this.dataProvider.getWalltime(new_value) * 1000);
+    this.data.current_wall_time = new Date(this.dataProvider.getWalltimeById(new_value) * 1000);
+  }
+
+  async updatePlotData() {
+    if (!!this.data.current_step_id) {
+      this.data.plot_data = await this.dataProvider.getData(this.data.current_step_id) as StepData;
+    }
   }
 
   togglePlotSize() {
