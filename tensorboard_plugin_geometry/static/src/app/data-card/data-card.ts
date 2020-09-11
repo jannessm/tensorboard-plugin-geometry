@@ -9,28 +9,25 @@ import './data-card.scss';
 
 @WithRender
 @Component({
-  props: ['name', 'tag', 'isRegex'],
+  props: ['name', 'tag', 'isRegex', 'expanded'],
   components: {
     'data-run': DataRunComponent
   }
 })
 export default class DataCardComponent extends Vue {
   tag_regex = '';
+
   data = {
-    expanded: true,
-    plot_size: 100
+    expanded: false
   }
 
-  constructor() {
-    super();
-    this.$nextTick(() => {
-      (<MdCard>this.$children[0]).MdCard.expand = this.data.expanded;
-      this.data.plot_size = Math.floor(Math.max( 1 / this.$props.tag.length, 0.33) * 100);
-      console.log(this.data.plot_size);
-    });
+  mounted() {
+    this.data.expanded = this.$props.expanded;
+    (this.$children[0] as MdCard).MdCard.expand = this.$props.expanded;
   }
 
-  max(a: number, b: number) {
-    return a > b ? a : b;
+  update() {
+    console.log(this.data.expanded)
+    this.data.expanded = (this.$children[0] as MdCard).MdCard.expand;
   }
 }

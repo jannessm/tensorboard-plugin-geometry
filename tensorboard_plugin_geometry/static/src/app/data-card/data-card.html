@@ -2,11 +2,13 @@
 <md-card>
   <md-card-header>
     <span v-if="isRegex" class="regex-text">Tags matching /</span>{{ name }}<span v-if="isRegex" class="regex-text">/</span>    
-    <md-card-expand-trigger>
-      <md-button class="md-icon-button">
-        <md-icon>keyboard_arrow_down</md-icon>
-      </md-button>
-    </md-card-expand-trigger>
+    <span @click="update">
+      <md-card-expand-trigger>
+        <md-button class="md-icon-button">
+          <md-icon>keyboard_arrow_down</md-icon>
+        </md-button>
+      </md-card-expand-trigger>
+    </span>
   </md-card-header>
   
   <md-divider></md-divider>
@@ -14,8 +16,8 @@
   <md-card-expand>
     <md-card-expand-content>
       <md-card-content class="md-layout md-gutter">
-        <!-- <plot v-for="run in tag" :run="run" :tag="name" class="md-layout-item md-size-33"></plot> -->
-        <data-run :run="tag[0]" :tag="name" :class="'md-layout-item md-size-' + data.plot_size"></data-run>
+        <!-- <data-run v-if="data.expanded" v-for="run in tag" :run="run" :tag="name" class="md-layout-item md-size-33"></data-run> -->
+        <data-run v-if="data.expanded" :run="tag[1]" :tag="name" class="md-layout-item md-size-33"></data-run>
       </md-card-content>
     </md-card-expand-content>
   </md-card-expand>

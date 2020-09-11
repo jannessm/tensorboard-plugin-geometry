@@ -1,21 +1,26 @@
 import Vue from 'vue';
 import Component from "vue-class-component";
-import * as THREE from 'three';
 
 import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  SphereBufferGeometry,
   MeshBasicMaterial,
   Mesh,
   Group,
   HemisphereLight,
   AxesHelper,
   Color,
-  ArrowHelper,
-  Vector3
+  Vector3,
+  Points,
+  BufferGeometry,
+  PointsMaterial,
+  Float32BufferAttribute
 } from 'three';
+
+import {BufferGeometryUtils} from './buffer-geometry-utils';
+
+import {ArrowHelper} from './arrow';
 
 import {OrbitControls} from './orbit-controls';
 
@@ -29,18 +34,24 @@ import './plot.scss';
 })
 export default class PlotComponent extends Vue {
   scene: Scene = new Scene();
-  camera: PerspectiveCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera: PerspectiveCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
   renderer: WebGLRenderer = new WebGLRenderer();
   controls: OrbitControls = new OrbitControls( this.camera, this.renderer.domElement );
   last_width = 0;
-  meshes: Group[] = [];
+  meshes: Mesh[] = [];
+  points: Points[] = [];
   features: Group[] = [];
+
+  arrowHelper = new ArrowHelper();
 
   mounted() {
     this.$el.appendChild(this.renderer.domElement);
     this.$watch('width', this.update);
     this.$watch('data', this.updateData);
     window.addEventListener('resize', this.update);
+    
+    this.camera.position.set(5,5,5);
+    this.camera.lookAt(0,0,0);
     
     this.scene.background = new Color( 0xf0f0f0 );
     const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
@@ -49,9 +60,7 @@ export default class PlotComponent extends Vue {
     this.scene.add( axesHelper );
     this.scene.add( light );
 
-    console.log(this.camera instanceof THREE.PerspectiveCamera)
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );    
-    
     this.controls.addEventListener('change', this.update);
   }
   
@@ -69,23 +78,59 @@ export default class PlotComponent extends Vue {
     this.update();
 
     ////////// update mesh /////////
-    if (this.$props.data.vertices.length > 0 && this.$props.data.vertices[0].length > 0) {
+    if (this.$props.data.vertices.length > 0 && this.$props.data.vertices[0].length > 0 && !this.$props.data.faces) {
       this.scene.remove.apply(this.scene, this.meshes);
+      this.scene.remove.apply(this.scene, this.points);
 
-      const sphere_r = 0.1;
+      const point_size = 0.05;
 
-      // add mesh
-      const mesh = new Group();
+      // add points & mesh
+      const points_geo = new BufferGeometry();
+      
+      const vertices: number[] = [];
       for (let i = 0; i < this.$props.data.vertices[0].length; i++) {
-        const geo = new SphereBufferGeometry(sphere_r, 16, 16);
-        const mat = new MeshBasicMaterial({color: 0xf57000});
-        const sphere = new Mesh(geo, mat);
-        sphere.position.set(
+        vertices.push(
           this.$props.data.vertices[0][i][0],
           this.$props.data.vertices[0][i][1],
           this.$props.data.vertices[0][i][2]);
-        mesh.add(sphere);
       }
+
+      points_geo.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ));
+      const points_mat = new PointsMaterial( { color: 0xf57000 } );
+      points_mat.size = point_size;
+      const points = new Points(points_geo, points_mat);
+      this.points.push(points);
+      this.scene.add(points);
+
+    // if there are faces
+    } else if (this.$props.data.vertices.length > 0 && this.$props.data.vertices[0].length > 0 && this.$props.data.faces.length > 0 && this.$props.data.faces[0].length > 0) {
+      this.scene.remove.apply(this.scene, this.meshes);
+      this.scene.remove.apply(this.scene, this.points);
+
+      const point_size = 0.05;
+
+      // add points & mesh
+      const mesh_geo = new BufferGeometry();
+      const mesh_mat = new MeshBasicMaterial( { color: 0xf57000 } );
+      
+      const vertices: number[] = [];
+      for (let i = 0; i < this.$props.data.vertices[0].length; i++) {
+        vertices.push(
+          this.$props.data.vertices[0][i][0],
+          this.$props.data.vertices[0][i][1],
+          this.$props.data.vertices[0][i][2]);
+      }
+      mesh_geo.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ));
+
+      const faces: number[] = [];
+      for (let i = 0; i < this.$props.data.faces[0].length; i++) {
+        faces.push(
+          this.$props.data.faces[0][i][0],
+          this.$props.data.faces[0][i][1],
+          this.$props.data.faces[0][i][2]);
+      }
+      mesh_geo.setIndex(faces);
+      const mesh = new Mesh(mesh_geo, mesh_mat);
       this.meshes.push(mesh);
       this.scene.add(mesh);
     }
@@ -95,7 +140,6 @@ export default class PlotComponent extends Vue {
       this.scene.remove.apply(this.scene, this.features);
 
       // add arrows
-      const arrows = new Group();
       for (let i = 0; i < this.$props.data.features[0].length; i++) {
         const origin = new Vector3(
           this.$props.data.vertices[0][i][0],
@@ -108,15 +152,13 @@ export default class PlotComponent extends Vue {
           this.$props.data.features[0][i][2]
         );
 
-        const arrow = new ArrowHelper(direction, origin, 1, 0x000000);
-        arrows.add(arrow);
+        this.arrowHelper.addArrowToBuffer(origin, direction, [255, 0, 0]);
       }
+      
+      const arrows = this.arrowHelper.finalize();
       this.features.push(arrows);
       this.scene.add(arrows);
     }
-
-    this.camera.position.set(5,5,5);
-    this.camera.lookAt(0,0,0);
     this.renderer.render(this.scene, this.camera);
   }
 
