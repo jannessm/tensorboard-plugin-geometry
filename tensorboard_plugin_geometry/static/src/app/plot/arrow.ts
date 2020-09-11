@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, BufferAttribute, BufferGeometry, CylinderBufferGeometry, Group, Matrix4, Mesh, MeshBasicMaterial, Vector3 } from "three";
+import { BoxBufferGeometry, BufferAttribute, BufferGeometry, CylinderBufferGeometry, Group, Matrix4, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from "three";
 import { BufferGeometryUtils } from "./buffer-geometry-utils";
 
 export class ArrowHelper {
@@ -8,23 +8,28 @@ export class ArrowHelper {
 	cones_buffer: BufferGeometry[] = [];
 
 	addArrowToBuffer(origin: Vector3, direction: Vector3, color: number[]) {
-		const height = (new Vector3()).distanceTo(direction);
-		const line = new BoxBufferGeometry(0.01, height, 0.01);
-		
-		const cone = new CylinderBufferGeometry( 0, 0.025, 0.05, 5, 1 );        
+		const null_vec = new Vector3();
+		const height = (null_vec).distanceTo(direction);
 		const translation = new Matrix4();
-		translation.setPosition(new Vector3(0, height, 0));
+		
+		//create geometries
+		const line = new BoxBufferGeometry(0.01, height, 0.01);
+		const cone = new CylinderBufferGeometry( 0, 0.025, 0.05, 5, 1 );        
+		
+		// move cone to top
+		translation.setPosition(new Vector3(0, height / 2, 0));
 		cone.applyMatrix4(translation);
 
-		translation.setPosition(new Vector3(0, height / 2, 0))
-		line.applyMatrix4(translation);
+		// rotate in direction
+		const quaternation = new Quaternion().setFromUnitVectors(new Vector3(0,1,0), direction.clone().normalize());
+		translation.makeRotationFromQuaternion(quaternation);
 		
-		line.lookAt(direction);
-		cone.lookAt(direction);
+		// translate to origin
+		translation.setPosition(origin.add(direction.multiplyScalar(0.5)));
 		
-		translation.setPosition(origin);
 		line.applyMatrix4(translation);
 		cone.applyMatrix4(translation);
+		
 		this._setColor(line, color);
 		this._setColor(cone, color);
 

@@ -62,6 +62,20 @@ for logs in ['./logs/test_plugin', './logs/another_test', './logs/a_good_one']:
       faces=face_bunny.reshape(1, bunny_nface, 3),
       global_step=i)
 
+
+  pos2 = torch.randn((vertices, 3))
+  pos2 = (pos2.T / torch.norm(pos, dim=1)).T
+  wss2 = torch.randn((vertices, 3)) * 0.1
+
+  pos = torch.stack([pos, pos2])
+  # test arbitary and multiple steps
+  for i in np.random.randint(-5, 3, size=10):
+    # test geo without features
+    writer.add_geometry(
+      'test_multiple_samples',
+      i*pos.reshape(2, vertices, 3),
+      global_step=i)
+
   # add normal scalar for layout comparison
   for i in range(10):
     writer.add_scalar('scalar_test', pos[i][0], global_step=i)

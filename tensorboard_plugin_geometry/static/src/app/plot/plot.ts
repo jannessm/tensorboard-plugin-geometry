@@ -78,7 +78,7 @@ export default class PlotComponent extends Vue {
     this.update();
 
     ////////// update mesh /////////
-    if (this.$props.data.vertices.length > 0 && this.$props.data.vertices[0].length > 0 && !this.$props.data.faces) {
+    if (this.$props.data.vertices.length > 0 && this.$props.data.vertices[0].length > 0 && this.$props.data.faces.length === 0) {
       this.scene.remove.apply(this.scene, this.meshes);
       this.scene.remove.apply(this.scene, this.points);
 
