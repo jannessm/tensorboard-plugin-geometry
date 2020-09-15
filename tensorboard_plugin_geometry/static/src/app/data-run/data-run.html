@@ -1,22 +1,28 @@
 <div class="data-run-component">
+  <md-progress-bar class="loader" v-if="data.loading" :md-stroke="3" md-mode="indeterminate"></md-progress-bar>
+
   {{tag}}<div class="header-run">{{run.name}}</div>
-  <div class="slider">
-    step: <b>{{data.current_step_label}}</b><br>
-    {{data.current_wall_time}}
-    <slider :value="data.current_step_id" :max="data.max_step()" v-on:value="update"  v-if="data.max_step() !== 0"></slider>
-  </div>
 
-  <plot class="plot"
-    :data="data.plot_data"
-    :config="data.plot_config()"
-    :style="'height: ' + data.plot_height()"
-    :width="data.fullscreen"
-    ></plot>
-
-  <div class="actions">
-    <md-button class="md-icon-button md-dense" @click="togglePlotSize">
-      <md-icon v-if="!data.fullscreen">fullscreen</md-icon>
-      <md-icon v-if="data.fullscreen">fullscreen_exit</md-icon>
-    </md-button>
+  <div>
+    <div class="slider">
+      step: <b>{{data.current_step_label}}</b><br>
+      {{data.current_wall_time}}
+      <slider :value="data.current_step_id" :max="data.max_step()" v-on:value="update"  v-if="data.max_step() !== 0"></slider>
+    </div>
+  
+    <plot
+      class="plot"
+      :data="data.plot_data"
+      :config="data.plot_config()"
+      :style="'height: ' + data.plot_height()"
+      :width="data.fullscreen"
+      ></plot>
+  
+    <div class="actions">
+      <md-button class="md-icon-button md-dense" @click="togglePlotSize">
+        <md-icon v-if="!data.fullscreen">fullscreen</md-icon>
+        <md-icon v-if="data.fullscreen">fullscreen_exit</md-icon>
+      </md-button>
+    </div>
   </div>
 </div>

@@ -25,27 +25,28 @@ export default class DataRunComponent extends Vue {
   last_run = '';
   
   data = {
-      current_step_id: 0,
-      current_step_label: 0,
-      current_wall_time: new Date(),
-      max_step: () => {
-        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-        if (provider?.initialized.state() === 'resolved') {
-          return provider?.steps_metadata.length - 1
-        }
-
-        return 0;
-      },
-      plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
-      fullscreen: false,
-      plot_data: {},
-      plot_config: () => {
-        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-        if (provider) {
-          return provider.getConfigById(this.data.current_step_id)
-        }
-        return {};
+    loading: true,
+    current_step_id: 0,
+    current_step_label: 0,
+    current_wall_time: new Date(),
+    max_step: () => {
+      const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+      if (provider?.initialized.state() === 'resolved') {
+        return provider?.steps_metadata.length - 1
       }
+
+      return 0;
+    },
+    plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
+    fullscreen: false,
+    plot_data: {},
+    plot_config: () => {
+      const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+      if (provider) {
+        return provider.getConfigById(this.data.current_step_id)
+      }
+      return {};
+    }
   };
 
   created() {
@@ -67,6 +68,7 @@ export default class DataRunComponent extends Vue {
   }
 
   update(new_value: number) {
+    this.data.loading = true;
     this.data.current_step_id = new_value;
     this.updateStep(new_value);
     this.updatePlotData();
@@ -88,6 +90,7 @@ export default class DataRunComponent extends Vue {
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     if (!!this.data.current_step_id && !!provider) {
       this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
+      this.data.loading = false;
     }
   }
 

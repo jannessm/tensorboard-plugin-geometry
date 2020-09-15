@@ -1,5 +1,11 @@
 .data-run-component {
   position: relative;
+
+  .md-progress-bar.loader {
+    position: absolute;
+    top: 0;
+    width: calc(100% - 8px);
+  }
   
   .slider {
     width: 100%;
