@@ -18,6 +18,7 @@ import {OrbitControls} from './orbit-controls';
 import WithRender from './plot.html';
 
 import './plot.scss';
+import { Settings } from '../settings';
 
 @WithRender
 @Component({
@@ -41,6 +42,11 @@ export default class PlotComponent extends Vue {
     this.camera.position.set(5,5,5);
     this.camera.lookAt(0,0,0);
     
+    // empty scene
+    this.scene.background = new Color( 0xffffff );
+    this.renderer.render( this.scene, this.camera );
+    
+    
     this.scene.background = new Color( 0xf0f0f0 );
     const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
     light.position.set( 0, 50, 0 );
@@ -50,6 +56,8 @@ export default class PlotComponent extends Vue {
 
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );    
     this.controls.addEventListener('change', this.update);
+
+    Settings.point_size.subscribe(this.updatePointSize);
   }
   
   update() {
@@ -59,7 +67,6 @@ export default class PlotComponent extends Vue {
     if (width !== this.last_width) {
       (this.camera as PerspectiveCamera).aspect = width / height;
       this.renderer.setSize(width, height);
-      console.log(width, height, this.last_width);
       this.last_width = width;
       this.renderer.render( this.scene, this.camera );
     } else {
@@ -86,6 +93,18 @@ export default class PlotComponent extends Vue {
       this.features.push(this.$props.data.features);
       this.scene.add(this.$props.data.features);
     }
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  updatePointSize(new_point_size: number) {
+    this.geometries.forEach(val => {
+      val.traverse(obj => {
+        if (obj instanceof Points) {
+          obj.material.size = new_point_size;
+        }
+      })
+    });
+
     this.renderer.render(this.scene, this.camera);
   }
 }

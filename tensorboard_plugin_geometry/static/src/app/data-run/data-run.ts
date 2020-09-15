@@ -8,7 +8,8 @@ import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
 import { StepData } from '../models/step-data';
 import { DataManager } from '../data-manager';
-import { Settings, Subscriber } from '../settings';
+import { Settings } from '../settings';
+import { Subscriber } from '../models/observeable';
 
 @WithRender
 @Component({
@@ -58,9 +59,9 @@ export default class DataRunComponent extends Vue {
         this.update(provider.steps.length - 1);
       });
 
-    this.settingsSubscription = Settings.subscribe(() => {
+    this.settingsSubscription = Settings.filteredRuns.subscribe(() => {
       this.data.display = Settings.display(this.$props.run.name) ? '' : 'display: none;';
-      this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
+      this.data.plot_height = (this.$el?.getElementsByClassName('plot')[0] as HTMLElement)?.offsetWidth + 'px';
     });
   }
 

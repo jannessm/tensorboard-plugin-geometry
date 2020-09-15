@@ -1,6 +1,15 @@
 
 <div class="sidebar">
   <div class="sidebar-section">
+    <h3>Point size</h3>
+    <div class="point_size">
+      <slider :value="data.point_size" @changed="updatePointSize"></slider>
+      <md-field>
+        <md-input v-model="data.formatted_point_size" @input="updatePointSizeInput"></md-input>
+      </md-field>
+    </div>
+  </div>
+  <div class="sidebar-section">
     <h3>Runs</h3>
 
     <md-field>

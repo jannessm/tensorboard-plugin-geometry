@@ -16,6 +16,18 @@
     position: relative;
     overflow: hidden;
 
+    .point_size {
+      .md-slider {
+        width: calc(70% - 5px);
+        margin-right: 5px;
+        display: inline-block;
+      }
+      .md-field {
+        width: 20%;
+        display: inline-block;
+      }
+    }
+
     .md-input {
       font-size: 14px;
     }

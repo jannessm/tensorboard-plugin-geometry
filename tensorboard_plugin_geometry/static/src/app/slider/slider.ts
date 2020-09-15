@@ -25,24 +25,19 @@ export default class SliderComponent extends Vue {
     input: 50
   };
   
-  constructor() {
-    super();
-    let updated = false;
-    const inter = setInterval(() => {
-      if (updated) {
-        clearInterval(inter);
-      }
-      
-      this.$nextTick(() => {
-        this.data.input = this.$props.value;
-        this.data.progress = this.data.input / this.$props.max * 100;
-        updated = true;
-      });
-    }, 200);
+  mounted() {
+    this.data.input = this.$props.value;
+    this.data.progress = this.data.input / this.$props.max * 100;
+  }
+
+  updated() {
+    this.data.input = this.$props.value;
+    this.data.progress = this.data.input / this.$props.max * 100;
   }
 
   updateValue() {
     this.data.progress = this.data.input / this.$props.max * 100;
     this.$emit('value', this.data.input); 
+    this.$emit('changed', this.data.input);
   }
 }
