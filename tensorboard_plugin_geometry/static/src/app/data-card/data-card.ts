@@ -27,7 +27,6 @@ export default class DataCardComponent extends Vue {
   }
 
   update() {
-    console.log(this.data.expanded)
     this.data.expanded = (this.$children[0] as MdCard).MdCard.expand;
   }
 }

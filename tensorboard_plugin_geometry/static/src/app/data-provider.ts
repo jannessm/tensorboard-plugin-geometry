@@ -3,14 +3,44 @@ import { StepMetadata, ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
 import { StepData } from "./models/step-data";
 
+class PendingPromise<T> {
+  isPending = true;
+  isRejected = false;
+  internalPromise: Promise<T>;
+
+  constructor(callback) {
+    this.internalPromise = new Promise<T>(callback).then(val => {
+      this.isPending = false;
+      return val;
+    }, (err) => {
+      this.isRejected = true;
+      this.isPending = false
+      return err;
+    });
+  }
+
+  state() {
+    return this.isPending ? "pending" : this.isRejected ? "rejected" : "resolved";
+  }
+
+  then(func) {
+    return this.internalPromise.then(func);
+  }
+}
+
 export class DataProvider {
+  initialized: PendingPromise<void>;
+  _res = () => {};
+
   run = '';
   tag = '';
   steps: number[] = [];
   steps_metadata: StepMetadata[] = [];
   steps_data: (StepData | undefined)[] = [];
   
-  constructor() {}
+  constructor() {
+    this.initialized = new PendingPromise<void>(res => {this._res = res});
+  }
 
   async init(run: string, tag: string) {
     this.run = run;
@@ -30,6 +60,8 @@ export class DataProvider {
       this.steps_metadata[id].config = JSON.parse(val.config);
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
     });
+
+    this._res();
   }
 
   initStepMetadata(): StepMetadata {

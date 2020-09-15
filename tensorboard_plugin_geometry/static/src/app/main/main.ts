@@ -62,8 +62,11 @@ export default class MainComponent extends Vue {
   }
 
   filterTags() {
-    // add new regex if regex is not empty
     this.data.tags[0].name = this.tag_regex;
     this.data.tags[0].display = !!this.tag_regex;
+    this.data.tags[0].runs = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.runs : [])
+                                           .reduce((concated, val) => concated.concat(val), []);
+    this.data.tags[0].tag_names = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.name : '');
+    console.log(this.data.tags[0].runs);
   }
 }

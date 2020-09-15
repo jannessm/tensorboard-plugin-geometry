@@ -8,7 +8,7 @@
 
   <plot class="plot"
     :data="data.plot_data"
-    :config="dataProvider.getConfigById(data.current_step_id)"
+    :config="data.plot_config()"
     :style="'height: ' + data.plot_height()"
     :width="data.fullscreen"
     ></plot>

@@ -6,8 +6,9 @@ import WithRender from './data-run.html'
 import './data-run.scss';
 import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
-import {DataProvider} from '../data-provider';
 import { StepData } from '../models/step-data';
+import { DataManager } from '../../data-manager';
+import { DataProvider } from '../data-provider';
 
 @WithRender
 @Component({
@@ -20,13 +21,20 @@ import { StepData } from '../models/step-data';
 export default class DataRunComponent extends Vue {
   tag_regex = '';
   default_class = '';
-  dataProvider: DataProvider = new DataProvider();
+  dataManager = DataManager;
   
   data = {
       current_step_id: 0,
       current_step_label: 0,
       current_wall_time: new Date(),
-      max_step: () => this.dataProvider?.steps_metadata.length - 1,
+      max_step: () => {
+        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+        if (provider?.initialized.state() === 'resolved') {
+          return provider?.steps_metadata.length - 1
+        }
+
+        return 0;
+      },
       plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
       fullscreen: false,
       plot_data: {
@@ -34,12 +42,19 @@ export default class DataRunComponent extends Vue {
         faces: [[[0]]],
         features: [[[0]]],
       },
+      plot_config: () => {
+        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+        if (provider) {
+          return provider.getConfigById(this.data.current_step_id)
+        }
+        return {};
+      }
   };
 
   created() {
-    this.dataProvider.init(this.$props.run.name, this.$props.tag)
-      .then(() => {
-        this.updateStep(this.dataProvider.steps.length - 1);
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    provider?.initialized?.then(() => {
+        this.updateStep(provider.steps.length - 1);
         this.updatePlotData();
       });
   }
@@ -50,15 +65,20 @@ export default class DataRunComponent extends Vue {
   }
 
   updateStep(new_value: number) {
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    
     // update header
-    this.data.current_step_id = new_value;
-    this.data.current_step_label = this.dataProvider.steps_metadata[new_value].step;
-    this.data.current_wall_time = new Date(this.dataProvider.getWalltimeById(new_value) * 1000);
+    if (!!provider) {
+      this.data.current_step_id = new_value;
+      this.data.current_step_label = provider.steps_metadata[new_value].step;
+      this.data.current_wall_time = new Date(provider.getWalltimeById(new_value) * 1000);
+    }
   }
 
   async updatePlotData() {
-    if (!!this.data.current_step_id) {
-      this.data.plot_data = await this.dataProvider.getData(this.data.current_step_id) as StepData;
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    if (!!this.data.current_step_id && !!provider) {
+      this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
     }
   }
 
