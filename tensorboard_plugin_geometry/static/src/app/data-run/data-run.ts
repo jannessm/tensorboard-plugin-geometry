@@ -8,7 +8,6 @@ import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
 import { StepData } from '../models/step-data';
 import { DataManager } from '../data-manager';
-import { DataProvider } from '../data-provider';
 
 @WithRender
 @Component({
@@ -22,6 +21,8 @@ export default class DataRunComponent extends Vue {
   tag_regex = '';
   default_class = '';
   dataManager = DataManager;
+  last_tag = '';
+  last_run = '';
   
   data = {
       current_step_id: 0,
@@ -54,7 +55,19 @@ export default class DataRunComponent extends Vue {
       });
   }
 
+  updated() {
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+    if (provider && this.last_run !== this.$props.run || this.last_tag !== this.$props.tag) {
+      provider?.initialized?.then(() => {
+        this.update(provider.steps.length - 1);
+      });
+      this.last_run = this.$props.run;
+      this.last_tag = this.$props.tag;
+    }
+  }
+
   update(new_value: number) {
+    this.data.current_step_id = new_value;
     this.updateStep(new_value);
     this.updatePlotData();
   }
@@ -64,9 +77,10 @@ export default class DataRunComponent extends Vue {
     
     // update header
     if (!!provider) {
-      this.data.current_step_id = new_value;
-      this.data.current_step_label = provider.steps_metadata[new_value].step;
-      this.data.current_wall_time = new Date(provider.getWalltimeById(new_value) * 1000);
+      provider.initialized.then(() => {
+        this.data.current_step_label = provider.steps_metadata[new_value].step;
+        this.data.current_wall_time = new Date(provider.getWalltimeById(new_value) * 1000);
+      });
     }
   }
 

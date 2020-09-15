@@ -64,10 +64,13 @@ export default class PlotComponent extends Vue {
 
   updateData() {
     this.update();
+    this.scene.remove.apply(this.scene, this.features);
+    this.scene.remove.apply(this.scene, this.geometries);
+    this.features = [];
+    this.geometries = [];
 
     ////////// update mesh /////////
     if (!!this.$props.data.geometry) {
-      this.scene.remove.apply(this.scene, this.geometries);
 
       this.geometries.push(this.$props.data.geometry);
       this.scene.add(this.$props.data.geometry);
@@ -75,7 +78,6 @@ export default class PlotComponent extends Vue {
     } 
     ///////// update features ////////
     if (!!this.$props.data.features) {
-      this.scene.remove.apply(this.scene, this.features);
       this.features.push(this.$props.data.features);
       this.scene.add(this.$props.data.features);
     }
