@@ -1,4 +1,4 @@
-<div class="data-run-component">
+<div class="data-run-component" :style="data.display">
   <md-progress-bar class="loader" v-if="data.loading" :md-stroke="3" md-mode="indeterminate"></md-progress-bar>
 
   {{tag}}<div class="header-run">{{run.name}}</div>
@@ -14,7 +14,7 @@
       class="plot"
       :data="data.plot_data"
       :config="data.plot_config()"
-      :style="'height: ' + data.plot_height()"
+      :style="'height: ' + data.plot_height"
       :width="data.fullscreen"
       ></plot>
   

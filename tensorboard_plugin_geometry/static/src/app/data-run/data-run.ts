@@ -8,6 +8,7 @@ import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
 import { StepData } from '../models/step-data';
 import { DataManager } from '../data-manager';
+import { Settings, Subscriber } from '../settings';
 
 @WithRender
 @Component({
@@ -23,9 +24,11 @@ export default class DataRunComponent extends Vue {
   dataManager = DataManager;
   last_tag = '';
   last_run = '';
+  settingsSubscription: Subscriber | undefined;
   
   data = {
     loading: true,
+    display: '',
     current_step_id: 0,
     current_step_label: 0,
     current_wall_time: new Date(),
@@ -37,7 +40,7 @@ export default class DataRunComponent extends Vue {
 
       return 0;
     },
-    plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
+    plot_height: (this.$el as HTMLElement)?.offsetWidth + 'px',
     fullscreen: false,
     plot_data: {},
     plot_config: () => {
@@ -54,6 +57,11 @@ export default class DataRunComponent extends Vue {
     provider?.initialized?.then(() => {
         this.update(provider.steps.length - 1);
       });
+
+    this.settingsSubscription = Settings.subscribe(() => {
+      this.data.display = Settings.display(this.$props.run.name) ? '' : 'display: none;';
+      this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
+    });
   }
 
   updated() {
@@ -65,6 +73,11 @@ export default class DataRunComponent extends Vue {
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
     }
+    this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
+  }
+
+  destroyed() {
+    this.settingsSubscription?.unsubscribe();
   }
 
   update(new_value: number) {
@@ -96,18 +109,20 @@ export default class DataRunComponent extends Vue {
 
   togglePlotSize() {
     this.data.fullscreen = !this.data.fullscreen;
-
+    
     const this_html_el = this.$el;
-
+    
     if (!this.default_class) {
       this.default_class = (this_html_el.className.match(/md-size-\d+/) as string[])[0];
     }
-
+    
     if (this.data.fullscreen) {
       this_html_el.classList.replace(this.default_class, 'md-size-100');
     } else {
       this_html_el.classList.replace('md-size-100', this.default_class);
     }
+
+    this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
   }
 
 }

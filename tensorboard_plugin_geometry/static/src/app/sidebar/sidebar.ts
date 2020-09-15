@@ -2,20 +2,20 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import {ApiService} from '../api';
+import { Settings } from '../settings';
 import WithRender from './sidebar.html';
 
 import './sidebar.scss';
 
-// The @Component decorator indicates the class is a Vue component
 @WithRender
 @Component({
-  // All component options are allowed in here
 })
 export default class SidebarComponent extends Vue {
   runs: string[] = [];
   colors: string[] = [];
   checked: boolean[] = [];
   display: boolean[] = [];
+  settings = Settings;
 
   data = {
     exclusive: false,
@@ -25,8 +25,7 @@ export default class SidebarComponent extends Vue {
 
   last_exclusive: string = '';
 
-  constructor() {
-    super();
+  mounted() {
     ApiService.getTags().then((res) => {
       Object.keys(res.data).forEach(run => {
         this.runs.push(run);
@@ -38,6 +37,10 @@ export default class SidebarComponent extends Vue {
     ApiService.getLogdir().then(res => {
       this.data.logdir = res.data.logdir;
     });
+  }
+
+  updated() {
+    this.settings.filteredRuns = this.runs.filter((val, id) => this.display[id] && this.checked[id]);
   }
 
   filterRuns() {

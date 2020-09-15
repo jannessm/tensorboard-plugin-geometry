@@ -54,12 +54,17 @@ export default class PlotComponent extends Vue {
   
   update() {
     const width = (this.$el as HTMLElement).offsetWidth;
-    
+    const height = (this.$el as HTMLElement).offsetHeight;
+
     if (width !== this.last_width) {
-      (this.camera as PerspectiveCamera).aspect = width / (this.$el as HTMLElement).offsetHeight;
-      this.renderer.setSize(width, (this.$el as HTMLElement).offsetHeight);
+      (this.camera as PerspectiveCamera).aspect = width / height;
+      this.renderer.setSize(width, height);
+      console.log(width, height, this.last_width);
+      this.last_width = width;
+      this.renderer.render( this.scene, this.camera );
+    } else {
+      this.renderer.render( this.scene, this.camera );
     }
-    this.renderer.render( this.scene, this.camera );
   }
 
   updateData() {
@@ -82,20 +87,5 @@ export default class PlotComponent extends Vue {
       this.scene.add(this.$props.data.features);
     }
     this.renderer.render(this.scene, this.camera);
-  }
-
-  _calc_min_distance() {
-    let min_distance = Infinity;
-    const vertex1 = this.$props.data.vertices[0][0];
-    
-    for (let i = 1; i < this.$props.data.vertices[0].length; i++) {
-      let dist = 0;
-      for (let j = 0; j < 3; j++) {
-        dist += Math.pow(vertex1[j] - this.$props.data.vertices[0][i][j], 2)
-      }
-      min_distance = Math.min(Math.sqrt(dist), min_distance);
-    }
-
-    return min_distance;
   }
 }
