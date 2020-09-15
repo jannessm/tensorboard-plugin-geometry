@@ -15,9 +15,16 @@
 
   <md-card-expand>
     <md-card-expand-content>
-      <md-card-content class="md-layout md-gutter">
-        <!-- <data-run v-if="data.expanded" v-for="run in tag" :run="run" :tag="name" class="md-layout-item md-size-33"></data-run> -->
-        <data-run v-if="data.expanded" :run="tag[1]" :tag="name" class="md-layout-item md-size-33"></data-run>
+      <md-card-content>
+        <div class="md-layout md-gutter">
+          <data-run v-if="data.expanded" v-for="run in getPage()" :run="run" :tag="run.tag" class="md-layout-item md-size-33"></data-run>
+        </div>
+
+        <div class="md-layout md-gutter md-alignment-top-center paginator">  
+          <md-button @click="prevPage" :disabled="data.current_page === 1" class="md-layout-item md-size-33">Prev</md-button>
+          <span class="md-layout-item md-size-33 page_label">{{data.current_page}} / {{data.max_pages}}</span>
+          <md-button @click="nextPage" :disabled="data.current_page === data.max_pages" class="md-layout-item md-size-33">Next</md-button>
+        </div>
       </md-card-content>
     </md-card-expand-content>
   </md-card-expand>

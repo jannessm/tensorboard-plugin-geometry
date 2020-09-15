@@ -21,3 +21,15 @@
 .plot-component:not(:nth-last-child(3)):not(:nth-last-child(2)):not(:nth-last-child(1)) {
   margin-bottom: 24px;
 }
+
+.paginator {
+  button {
+    margin: 0;
+  }
+
+  .page_label {
+    text-align: center;
+    font-size: 14px;
+    padding-top: 8px;
+  }
+}

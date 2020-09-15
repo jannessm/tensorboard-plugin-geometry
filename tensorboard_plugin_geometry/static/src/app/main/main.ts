@@ -54,6 +54,7 @@ export default class MainComponent extends Vue {
 
           this.data.tags[tag_index].runs.push({
             name: run,
+            tag,
             samples: res.data[run][tag].samples
           });
         });
@@ -67,6 +68,5 @@ export default class MainComponent extends Vue {
     this.data.tags[0].runs = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.runs : [])
                                            .reduce((concated, val) => concated.concat(val), []);
     this.data.tags[0].tag_names = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.name : '');
-    console.log(this.data.tags[0].runs);
   }
 }
