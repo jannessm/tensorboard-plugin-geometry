@@ -97,7 +97,7 @@ export default class DataRunComponent extends Vue {
   togglePlotSize() {
     this.data.fullscreen = !this.data.fullscreen;
 
-    const this_html_el = this.$parent.$children[0].$el;
+    const this_html_el = this.$el;
 
     if (!this.default_class) {
       this.default_class = (this_html_el.className.match(/md-size-\d+/) as string[])[0];

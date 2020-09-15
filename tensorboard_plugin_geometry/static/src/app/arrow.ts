@@ -1,5 +1,5 @@
 import { BoxBufferGeometry, BufferAttribute, BufferGeometry, CylinderBufferGeometry, Group, Matrix4, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from "three";
-import { BufferGeometryUtils } from "./plot/buffer-geometry-utils";
+import { BufferGeometryUtils } from "./buffer-geometry-utils";
 
 export class ArrowHelper {
 	mat = new MeshBasicMaterial({ vertexColors: true });
