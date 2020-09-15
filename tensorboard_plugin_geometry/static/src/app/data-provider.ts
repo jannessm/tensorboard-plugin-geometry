@@ -2,6 +2,7 @@ import { ApiService } from "./api";
 import { StepMetadata, ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
 import { StepData } from "./models/step-data";
+import { ThreeFactory } from "./three-factory";
 
 class PendingPromise<T> {
   isPending = true;
@@ -80,9 +81,15 @@ export class DataProvider {
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.getWalltimeById(id));
 
       this.steps_data[id] = {
-        vertices: this.reshape3D(data.vertices, this.steps_metadata[id].VERTICES.shape),
-        faces: this.reshape3D(data.faces, this.steps_metadata[id].FACES.shape),
-        features: this.reshape3D(data.features, this.steps_metadata[id].FEATURES.shape)
+        geometry: ThreeFactory.createGeometry(
+          this.steps_metadata[id].VERTICES.shape[1],
+          data.vertices,
+          this.steps_metadata[id].FACES.shape[1],
+          data.faces),
+        features: ThreeFactory.createFeatureArrows(
+          this.steps_metadata[id].VERTICES.shape[1],
+          data.vertices,
+          data.features)
       }
     }
 
@@ -95,28 +102,5 @@ export class DataProvider {
 
   getWalltimeById(id: number): number {
     return this.steps_metadata[id].wall_time;
-  }
-
-  reshape3D(data: Float32Array | Uint32Array, shape: number[]): number[][][] {
-    if (shape.length !== 3 && data.length > 0) {
-      throw Error('only can reshape 3D arrays!');
-    }
-
-    // const iter = data.entries();
-    const arr: number[][][] = [];
-
-    for (let i = 0; i < shape[0] ; i++) {
-      const arr1: number[][] = [];
-      for (let j = 0; j < shape[1]; j++) {
-        const arr2: number[] = [];
-        for (let k = 0; k < shape[2]; k++) {
-          arr2.push(data[i * shape[1] + j * shape[2] + k]);
-        }
-        arr1.push(arr2);
-      }
-      arr.push(arr1);
-    }
-
-    return arr;
   }
 }

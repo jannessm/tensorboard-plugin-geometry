@@ -1,5 +1,6 @@
+import { Group, Mesh, Points } from "three";
+
 export interface StepData {
-  vertices: number[][][];
-  features: number[][][];
-  faces: number[][][];
+  geometry?: Mesh | Points;
+  features?: Group;
 }

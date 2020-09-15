@@ -7,7 +7,7 @@ import './data-run.scss';
 import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
 import { StepData } from '../models/step-data';
-import { DataManager } from '../../data-manager';
+import { DataManager } from '../data-manager';
 import { DataProvider } from '../data-provider';
 
 @WithRender
@@ -28,7 +28,7 @@ export default class DataRunComponent extends Vue {
       current_step_label: 0,
       current_wall_time: new Date(),
       max_step: () => {
-        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
         if (provider?.initialized.state() === 'resolved') {
           return provider?.steps_metadata.length - 1
         }
@@ -37,13 +37,9 @@ export default class DataRunComponent extends Vue {
       },
       plot_height: () => (this.$children[0]?.$parent.$el as HTMLElement)?.offsetWidth + 'px',
       fullscreen: false,
-      plot_data: {
-        vertices: [[[0]]],
-        faces: [[[0]]],
-        features: [[[0]]],
-      },
+      plot_data: {},
       plot_config: () => {
-        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+        const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
         if (provider) {
           return provider.getConfigById(this.data.current_step_id)
         }
@@ -52,10 +48,9 @@ export default class DataRunComponent extends Vue {
   };
 
   created() {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     provider?.initialized?.then(() => {
-        this.updateStep(provider.steps.length - 1);
-        this.updatePlotData();
+        this.update(provider.steps.length - 1);
       });
   }
 
@@ -65,7 +60,7 @@ export default class DataRunComponent extends Vue {
   }
 
   updateStep(new_value: number) {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     
     // update header
     if (!!provider) {
@@ -76,7 +71,7 @@ export default class DataRunComponent extends Vue {
   }
 
   async updatePlotData() {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.tag);
+    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     if (!!this.data.current_step_id && !!provider) {
       this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
     }
