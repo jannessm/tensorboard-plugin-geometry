@@ -9,14 +9,18 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     faces?: number,
     faces_arr?: Uint32Array,
-    colors?: Uint8Array
+    vert_colors?: Uint8Array
   ): Mesh | Points {
     if (!vertices || vertices_arr.length <= 0) {
       throw new Error('no vertices provided');
     }
 
+    if (!!vert_colors && vert_colors.length > 0 && vert_colors.length / 3 !== vertices) {
+      throw new Error('there must be a color for each vertex');
+    }
+
     if (!faces || !faces_arr) {
-      return ThreeFactory.createPointCloud(vertices, vertices_arr, colors);
+      return ThreeFactory.createPointCloud(vertices, vertices_arr, vert_colors);
     }
 
     return ThreeFactory.createMesh(
@@ -30,18 +34,16 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     colors?: Uint8Array
   ): Points {
-    const point_size = 0.1;
+    const point_size = 1.5;
 
     // add points & mesh
     const points_geo = new BufferGeometry();
     points_geo.setAttribute( 'position', new Float32BufferAttribute( vertices_arr, 3 ));
-
-    let points_mat = new PointsMaterial( { size: point_size, color: 0xf57000 } );
+    
+    let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
     
     const color_arr = ThreeFactory._getColors(vertices, colors);
-
     points_geo.setAttribute( 'color', new Float32BufferAttribute(color_arr, 3));
-    points_mat.vertexColors = true;
     
     return new Points(points_geo, points_mat);
   }
@@ -68,7 +70,7 @@ export class ThreeFactory {
     vertices: number,
     vertices_arr: Float32Array,
     features_arr: Float32Array,
-    colors?: Uint8Array
+    feat_colors?: Uint8Array
   ): Group | undefined {
     if (!features_arr || features_arr.length == 0) {
       return;
@@ -78,7 +80,7 @@ export class ThreeFactory {
       throw new Error('features and vertices do not have the same shape');
     }
 
-    if (!!colors && colors.length !== vertices) {
+    if (!!feat_colors && feat_colors.length / 3 !== vertices) {
       throw new Error('there must be a color for each vertex');
     }
 
@@ -117,11 +119,11 @@ export class ThreeFactory {
       );
 
       let color = [255, 0, 0];
-      if (colors) {
+      if (feat_colors) {
         color = [
-          colors[i * 3],
-          colors[i * 3 + 1],
-          colors[i * 3 + 2]
+          feat_colors[i * 3],
+          feat_colors[i * 3 + 1],
+          feat_colors[i * 3 + 2]
         ];
       } else {
         const len = zero_vec.distanceTo(direction);

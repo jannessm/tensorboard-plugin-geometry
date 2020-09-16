@@ -38,7 +38,6 @@ export class DataProvider {
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
       this.steps_metadata[id].description = val.description;
     });
-    console.log(this.steps_metadata.map(val => val.description));
 
     this._res();
   }
@@ -60,17 +59,19 @@ export class DataProvider {
   async getData(id: number): Promise<StepData | undefined> {
     if (!this.steps_data[id] && !!id) {
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.getWalltimeById(id));
-
+      console.log()
       this.steps_data[id] = {
         geometry: ThreeFactory.createGeometry(
           this.steps_metadata[id].VERTICES.shape[1],
           data.vertices,
           this.steps_metadata[id].FACES.shape[1],
-          data.faces),
+          data.faces,
+          data.vert_colors),
         features: ThreeFactory.createFeatureArrows(
           this.steps_metadata[id].VERTICES.shape[1],
           data.vertices,
-          data.features)
+          data.features,
+          data.feat_colors)
       }
     }
 
