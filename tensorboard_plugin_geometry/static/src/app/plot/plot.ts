@@ -28,10 +28,10 @@ import { Settings } from '../settings';
   props: ['data', 'config', 'width'],
 })
 export default class PlotComponent extends Vue {
-  scene: Scene = new Scene();
-  camera: PerspectiveCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  renderer: WebGLRenderer = new WebGLRenderer();
-  controls: OrbitControls = new OrbitControls( this.camera, this.renderer.domElement );
+  scene = new Scene();
+  camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  renderer = new WebGLRenderer();
+  controls = new OrbitControls( this.camera, this.renderer.domElement );
   last_width = 0;
   geometries: (Mesh | Points)[] = [];
   features: Group[] = [];
@@ -115,7 +115,10 @@ export default class PlotComponent extends Vue {
     this.renderer.render(this.scene, this.camera);
   }
 
-  setCameraPosition() {
+  setCameraPosition(camera?: PerspectiveCamera) {
+    if (!camera) {
+      camera = this.camera;
+    }
     this.scene.updateWorldMatrix(false, true);
     const bounds = new Box3();
     
@@ -131,10 +134,27 @@ export default class PlotComponent extends Vue {
     
     let r = bounding_sphere.radius;
     r += r * offset;
-    const distance = r / Math.sin(this.camera.getEffectiveFOV() / 2 * Math.PI / 180);
+    const distance = r / Math.sin(camera.getEffectiveFOV() / 2 * Math.PI / 180);
     const new_position = bounding_sphere.center.add(new Vector3(0, 0, distance));
     
-    this.camera.position.set(new_position.x, new_position.y, new_position.z);
-    this.camera.lookAt(bounding_sphere.center);
+    camera.position.set(new_position.x, new_position.y, new_position.z);
+    camera.lookAt(bounding_sphere.center);
+  }
+
+  screenshot() {    
+    this.renderer.render(this.scene, this.camera);
+    const link = document.createElement('a');
+    link.href = this.renderer.domElement.toDataURL();
+    link.download = 'plot.png';
+    
+    //Firefox requires the link to be in the body
+    document.body.appendChild(link);
+    
+    //simulate click
+    link.click();
+
+    //remove the link when done
+    document.body.removeChild(link);
+
   }
 }

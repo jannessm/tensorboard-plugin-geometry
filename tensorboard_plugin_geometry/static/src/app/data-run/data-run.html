@@ -21,6 +21,9 @@
       ></plot>
   
     <div class="actions">
+      <md-button class="md-icon-button md-dense" @click="getScreenshot">
+        <md-icon>save_alt</md-icon>
+      </md-button>
       <md-button class="md-icon-button md-dense" @click="togglePlotSize">
         <md-icon v-if="!data.fullscreen">fullscreen</md-icon>
         <md-icon v-if="data.fullscreen">fullscreen_exit</md-icon>

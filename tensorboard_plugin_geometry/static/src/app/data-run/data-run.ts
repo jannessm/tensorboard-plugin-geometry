@@ -126,4 +126,9 @@ export default class DataRunComponent extends Vue {
     this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
   }
 
+  getScreenshot() {
+    const plot = this.$children.filter(val => val.$el.className.indexOf('plot') >= 0)[0];
+    (plot as PlotComponent).screenshot();
+  }
+
 }
