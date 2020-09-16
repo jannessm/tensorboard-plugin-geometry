@@ -27,10 +27,9 @@ class DataServer():
     content_type = GeoPluginData.ContentType.Value(content_type)
     
     tensor_events = self._collect_tensor_events(request, step)
-    sample = int(request.args.get("sample", 0))
 
     response = [
-      self._get_tensor_data(tensor, sample)
+      self._get_tensor_data(tensor)
       for meta, tensor in tensor_events
       if meta.content_type == content_type
     ]
@@ -76,7 +75,7 @@ class DataServer():
 
     return tensor_events
 
-  def _get_tensor_data(self, event, sample):
+  def _get_tensor_data(self, event):
     """Convert a TensorEvent into a JSON-compatible response."""
     data = tensor_util.make_ndarray(event.tensor_proto)
-    return data[sample].tolist()  
+    return data.tolist()  

@@ -55,7 +55,7 @@ def test_multiple_point_clouds(writer):
   colors = torch.linspace(0, 255, steps=100)
   colors = torch.stack([colors, colors, colors], dim=1)
 
-  pos = torch.stack([pos, pos + 2, pos - 2], dim=0)
+  pos = torch.stack([pos, pos.add(5), pos.add(-5)], dim=0)
   colors = torch.stack([colors, colors, colors], dim=0)
 
   for i in range(10):

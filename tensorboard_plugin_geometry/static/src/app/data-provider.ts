@@ -59,16 +59,15 @@ export class DataProvider {
   async getData(id: number): Promise<StepData | undefined> {
     if (!this.steps_data[id] && !!id) {
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.getWalltimeById(id));
-      console.log()
       this.steps_data[id] = {
         geometry: ThreeFactory.createGeometry(
-          this.steps_metadata[id].VERTICES.shape[1],
+          this.steps_metadata[id].VERTICES.shape,
           data.vertices,
-          this.steps_metadata[id].FACES.shape[1],
+          this.steps_metadata[id].FACES.shape,
           data.faces,
           data.vert_colors),
         features: ThreeFactory.createFeatureArrows(
-          this.steps_metadata[id].VERTICES.shape[1],
+          this.steps_metadata[id].VERTICES.shape,
           data.vertices,
           data.features,
           data.feat_colors)

@@ -37,6 +37,7 @@ def test_mesh(writer):
     writer.add_geometry(
       'test_geo',
       i * pos_bunny.reshape(1, bunny_nvert, 3),
+      faces=face_bunny.reshape(1, bunny_nface, 3),
       global_step=i)
 
 def test_mesh_with_features(writer):
@@ -44,6 +45,7 @@ def test_mesh_with_features(writer):
     writer.add_geometry(
       'test_geo_with_features',
       pos_bunny.reshape(1, bunny_nvert, 3),
+      faces=face_bunny.reshape(1, bunny_nface, 3),
       features=wss_bunny.reshape(1, bunny_nvert, 3),
       global_step=i)
 
@@ -55,15 +57,18 @@ def test_mesh_with_colored_features(writer):
     writer.add_geometry(
       'test_colored_geo',
       pos_bunny.reshape(1, bunny_nvert, 3),
+      faces=face_bunny.reshape(1, bunny_nface, 3),
       features=wss_bunny.reshape(1, bunny_nvert, 3),
       feat_colors=colors.reshape(1, bunny_nvert, 3),
       global_step=i)
 
 def test_multiple_meshes(writer):
+  face = torch.stack([face_bunny, face_bunny, face_bunny], dim=0)
   pos = torch.stack([pos_bunny, pos_bunny + 2, pos_bunny - 2], dim=0)
 
   for i in range(10):
     writer.add_geometry(
       'test_batches',
       pos.reshape(3, bunny_nvert, 3),
+      faces=face.reshape(3, bunny_nface, 3),
       global_step=i)
