@@ -11,6 +11,9 @@ import {
   AxesHelper,
   Color,
   Points,
+  Sphere,
+  Box3,
+  Vector3, SphereBufferGeometry, MeshBasicMaterial
 } from 'three';
 
 import {OrbitControls} from './orbit-controls';
@@ -39,7 +42,7 @@ export default class PlotComponent extends Vue {
     this.$watch('data', this.updateData);
     window.addEventListener('resize', this.update);
     
-    this.camera.position.set(5,5,5);
+    this.camera.position.set(0,0,-5);
     this.camera.lookAt(0,0,0);
     
     // empty scene
@@ -50,7 +53,7 @@ export default class PlotComponent extends Vue {
     this.scene.background = new Color( 0xf0f0f0 );
     const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
     light.position.set( 0, 50, 0 );
-    const axesHelper = new AxesHelper( 5 );
+    const axesHelper = new AxesHelper( 1000 );
     this.scene.add( axesHelper );
     this.scene.add( light );
 
@@ -93,6 +96,10 @@ export default class PlotComponent extends Vue {
       this.features.push(this.$props.data.features);
       this.scene.add(this.$props.data.features);
     }
+
+    //////// update camera position ////////
+    this.setCameraPosition();
+
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -106,5 +113,28 @@ export default class PlotComponent extends Vue {
     });
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  setCameraPosition() {
+    this.scene.updateWorldMatrix(false, true);
+    const bounds = new Box3();
+    
+    this.scene.traverse(obj => {
+      if (obj instanceof Points || obj instanceof Mesh) {
+        bounds.expandByObject(obj);
+      }
+    });
+    
+    const offset = 0.1;
+    const bounding_sphere = new Sphere();
+    bounds.getBoundingSphere(bounding_sphere);
+    
+    let r = bounding_sphere.radius;
+    r += r * offset;
+    const distance = r / Math.sin(this.camera.getEffectiveFOV() / 2 * Math.PI / 180);
+    const new_position = bounding_sphere.center.add(new Vector3(0, 0, distance));
+    
+    this.camera.position.set(new_position.x, new_position.y, new_position.z);
+    this.camera.lookAt(bounding_sphere.center);
   }
 }
