@@ -1,6 +1,8 @@
 export enum CONTENT_TYPES {
   UNDEFINED = 0,
   VERTICES = 1,
-  FACES = 2,  // Triangle face.
-  FEATURES = 3
+  FACES = 2,
+  FEATURES = 3,
+  VERT_COLORS = 4,
+  FEAT_COLORS = 5
 }

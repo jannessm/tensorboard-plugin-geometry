@@ -45,8 +45,8 @@ class TagServer():
     tensor_events = []  # List of tuples (meta, tensor) that contain tag.
     for instance_tag in self._instance_tags(run, tag):
         tensors = self._multiplexer.Tensors(run, instance_tag)
-        meta = self._instance_tag_metadata(run, instance_tag)
-        tensor_events += [(meta, tensor) for tensor in tensors]
+        meta, description = self._instance_tag_metadata(run, instance_tag)
+        tensor_events += [(meta, tensor, description) for tensor in tensors]
 
     if step is not None:
         tensor_events = [
@@ -68,7 +68,9 @@ class TagServer():
     """Gets the `GeoPluginData` proto for an instance tag."""
     summary_metadata = self._multiplexer.SummaryMetadata(run, instance_tag)
     content = summary_metadata.plugin_data.content
-    return parse_plugin_metadata(content)
+    metadata = parse_plugin_metadata(content)
+
+    return metadata, summary_metadata.summary_description
 
   def _tag(self, run, instance_tag):
     """Gets the user-facing tag name for an instance tag."""

@@ -8,7 +8,7 @@ from tensorboard.util import tensor_util
 import werkzeug
 from werkzeug import wrappers
 
-from .metadata import PLUGIN_NAME, parse_plugin_metadata
+from .metadata import PLUGIN_NAME
 from .tag_server import TagServer
 from .data_server import DataServer
 
@@ -152,7 +152,8 @@ class GeoPlugin(base_plugin.TBPlugin):
           "components": meta.components,
           "config": meta.json_config,
           "data_shape": list(meta.shape),
-      } for meta, event in tensor_events]
+          "description": description,
+      } for meta, event, description in tensor_events]
 
       res = werkzeug.Response(json.dumps(response), "application/json")
       res.status_code = 200

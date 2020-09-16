@@ -2,32 +2,8 @@ import { ApiService } from "./api";
 import { StepMetadata, ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
 import { StepData } from "./models/step-data";
+import { PendingPromise } from "./models/pending-promise";
 import { ThreeFactory } from "./three-factory";
-
-class PendingPromise<T> {
-  isPending = true;
-  isRejected = false;
-  internalPromise: Promise<T>;
-
-  constructor(callback) {
-    this.internalPromise = new Promise<T>(callback).then(val => {
-      this.isPending = false;
-      return val;
-    }, (err) => {
-      this.isRejected = true;
-      this.isPending = false
-      return err;
-    });
-  }
-
-  state() {
-    return this.isPending ? "pending" : this.isRejected ? "rejected" : "resolved";
-  }
-
-  then(func) {
-    return this.internalPromise.then(func);
-  }
-}
 
 export class DataProvider {
   initialized: PendingPromise<void>;
@@ -60,7 +36,9 @@ export class DataProvider {
       this.steps_metadata[id].wall_time = val.wall_time;
       this.steps_metadata[id].config = JSON.parse(val.config);
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
+      this.steps_metadata[id].description = val.description;
     });
+    console.log(this.steps_metadata.map(val => val.description));
 
     this._res();
   }
@@ -69,10 +47,13 @@ export class DataProvider {
     return {
       wall_time: 0,
       step: 1,
+      description: '',
       config: {},
       VERTICES: {shape: []},
-      FEATURES: {shape: []},
+      VERT_COLORS: {shape: []},
       FACES: {shape: []},
+      FEATURES: {shape: []},
+      FEAT_COLORS: {shape: []},
     };
   }
 
