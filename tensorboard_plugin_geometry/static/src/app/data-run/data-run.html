@@ -2,8 +2,10 @@
   <md-progress-bar class="loader" v-if="data.loading" :md-stroke="3" md-mode="indeterminate"></md-progress-bar>
 
   {{tag}}<div class="header-run">{{run.name}}</div>
-
+  
   <div>
+    <div class="description" v-html="run.description"></div>
+
     <div class="slider">
       step: <b>{{data.current_step_label}}</b><br>
       {{data.current_wall_time}}

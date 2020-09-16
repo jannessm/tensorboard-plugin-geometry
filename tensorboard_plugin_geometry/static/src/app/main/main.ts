@@ -9,6 +9,8 @@ import './main.scss';
 import DataCardComponent from '../data-card/data-card';
 import {Tags} from '../models/tag';
 
+import {markdown} from 'markdown';
+
 @WithRender
 @Component({
   components: {
@@ -54,11 +56,16 @@ export default class MainComponent extends Vue {
           this.data.tags[tag_index].runs.push({
             name: run,
             tag,
-            samples: res.data[run][tag].samples
+            samples: res.data[run][tag].samples,
+            description: this.parseMarkdown(res.data[run][tag].description)
           });
         });
       });
     });
+  }
+
+  parseMarkdown(str) {
+    return markdown.toHTML(str.replace(/<\/?[^>]+(>|$)/g, ""));
   }
 
   filterTags() {

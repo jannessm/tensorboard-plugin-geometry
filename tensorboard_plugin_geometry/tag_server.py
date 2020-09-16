@@ -28,11 +28,11 @@ class TagServer():
         
         # Make sure we only operate on user-defined tags here.
         tag = self._tag(run, instance_tag)
-        meta, _ = self._instance_tag_metadata(run, instance_tag)
+        meta, description = self._instance_tag_metadata(run, instance_tag)
         
         # Batch size must be defined, otherwise we don't know how many
         # samples were there.
-        response[run][tag] = {"samples": meta.shape[0]}
+        response[run][tag] = {"samples": meta.shape[0], "description": description}
     
     return response
 

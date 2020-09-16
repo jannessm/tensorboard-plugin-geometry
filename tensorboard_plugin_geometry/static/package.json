@@ -16,6 +16,7 @@
     "@types/three": "^0.103.2",
     "axios": "^0.20.0",
     "colormap": "^2.3.1",
+    "markdown": "^0.5.0",
     "material-design-icons-iconfont": "^6.1.0",
     "sass": "^1.26.10",
     "sass-loader": "^10.0.2",
