@@ -8,113 +8,192 @@ import json
 from . import metadata
 from .plugin_data_pb2 import GeoPluginData
 
-def add_geometry(writer, tag, vertices, faces=None, features=None, config_dict=None, global_step=None, walltime=None):
+def add_geometry(
+  writer,
+  tag,
+  vertices,
+  vert_colors=None,
+  faces=None,
+  features=None,
+  feat_colors=None,
+  config_dict=None,
+  global_step=None,
+  walltime=None,
+  description=None):
   '''Add meshes or 3D point clouds to TensorBoard. The visualization is based on Three.js,
     so it allows users to interact with the rendered object. Besides the basic definitions
     such as vertices, faces, users can further provide camera parameter, lighting condition, etc.
     Please check https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene for
     advanced usage.
+    
     Args:
         tag (string): Data identifier
         vertices (torch.Tensor): List of the 3D coordinates of vertices.
+        vert_colors (torch.Tensor): List of colors from 0 to 255 for each vertex.
         faces (torch.Tensor): Indices of vertices within each triangle. (Optional)
         features (torch.Tensor): feature vectors for each vertex
-        config_dict: Dictionary with ThreeJS classes names and configuration.
+        feat_colors (torch.Tensor): List of colors from 0 to 255 for each feature.
+        config_dict: Dictionary with ThreeJS configuration.
         global_step (int): Global step value to record
         walltime (float): Optional override default walltime (time.time())
           seconds after epoch of event
+        description (string): A longform readable description of the summary data. Markdown is
+          supported.
     Shape:
         vertices: :math:`(B, N, 3)`. (batch, number_of_vertices, channels)
-        faces: :math:`(B, N, 3)`. The values should lie in [0, number_of_vertices] for type `uint8`.
-        features: :math:`(B, N, 3)`. (batch, number_of_vertices, channels)
+        vert_colors: :math:`(B, N, 3)`. (batch, number_of_vertices, 3) with type `uint8`
+        faces: :math:`(B, N, 3)`. The values should lie in [0, number_of_vertices] for type `uint32`.
+        features: :math:`(B, N, 3)`. (batch, number_of_features, channels)
+        feat_colors: :math:`(B, N, 3)`. (batch, number_of_features, 3) with type `uint8`
   '''
   torch._C._log_api_usage_once("tensorboard.logging.add_geometry")
-  writer._get_file_writer().add_summary(_geometry(tag, vertices, faces, features, config_dict), global_step=global_step)
+
+  n_vert = vertices.shape[1]
+
+  # check vertices
+  if vertices.shape[2] != 3:
+    raise ValueError("Vertices must be of shape [B, N, 3], but got %s" % str(vertices.shape))
+
+  # check vert_colors
+  if vert_colors is not None and vert_colors.shape[2] != 3:
+    raise ValueError("Colors for vertices must be of shape [B, N, 3], but got %s" % str(vert_colors.shape))
+  if vert_colors is not None and vert_colors.shape[1] != n_vert:
+    raise ValueError("Number of vertices and colors for vertices must match, but got %s and %s" % (str(vertices.shape), str(vert_colors.shape)))
+
+  # check faces
+  if faces is not None and faces.shape[2] != 3:
+    raise ValueError("Faces must be of shape [B, N, 3] but got %s" % str(faces.shape))
+
+  # check features
+  if features is not None and features.shape[2] != 3:
+    raise ValueError("Features for vertices must be of shape [B, N, 3], but got %s" % str(features.shape))
+  if features is not None and features.shape[1] != n_vert:
+    raise ValueError("Number of vertices and features for vertices must match, but got %s and %s" % (str(vertices.shape), str(features.shape)))
+
+  # check feat_colors
+  if feat_colors is not None and feat_colors.shape[2] != 3:
+    raise ValueError("Features for vertices must be of shape [B, N, 3], but got %s" % str(feat_colors.shape))
+  if feat_colors is not None and feat_colors.shape[1] != n_vert:
+    raise ValueError("Number of features and colors for features must match, but got %s and %s" % (str(features.shape), str(feat_colors.shape)))
+
+
+  writer._get_file_writer()  \
+        .add_summary(
+          _geometry(
+            tag,
+            vertices,
+            vert_colors,
+            faces,
+            features,
+            feat_colors,
+            description,
+            config_dict
+          ),
+          global_step=global_step
+        )
 
 
 
-def _geometry(tag, vertices, faces, features, display_name='name', description=None, config_dict=None):
-  '''Outputs a merged `Summary` protocol buffer with a mesh/point cloud.
-      Args:
-        tag: A name for this summary operation.
-        vertices: Tensor of shape `[dim_1, ..., dim_n, 3]` representing the 3D
-          coordinates of vertices.
-        faces: Tensor of shape `[dim_1, ..., dim_n, 3]` containing indices of
-          vertices within each triangle.
-        features: Tensor of shape `[dim_1, ..., dim_n, 3]` containing 3D features for each
-          vertex.
-        display_name: If set, will be used as the display name in TensorBoard.
-          Defaults to `name`.
-        description: A longform readable description of the summary data. Markdown
-          is supported.
-        config_dict: Dictionary with ThreeJS classes names and configuration.
-      Returns:
-        Merged summary for mesh/point cloud representation.'''
+def _geometry(
+  tag,
+  vertices,
+  vert_colors,
+  faces,
+  features,
+  feat_colors,
+  description=None,
+  config_dict=None):
+  '''Outputs a merged `Summary` protocol buffer with meshes/point clouds.
+    Args:
+      tag: A name for this summary operation.
+      vertices: Tensor of shape `[B, number_of_vertices, 3]` representing the 3D
+        coordinates of vertices.
+      vert_colors: Tensor of shape `[B, number_of_vertices, 3]` representing colors for each
+        vertex. Must be in range [0, 255] for type `uint8`.
+      faces: Tensor of shape `[B, number_of_faces, 3]` containing indices of
+        vertices within each triangle.
+      features: Tensor of shape `[B, number_of_vertices, 3]` containing 3D features for each
+        vertex.
+      feat_colors: Tensor of shape `[B, number_of_vertices, 3]` representing colors for each
+        feature vector. Must be in range [0, 255] for type `uint8`.
+      description: A longform readable description of the summary data. Markdown is
+        supported.
+      config_dict: Dictionary with ThreeJS classes names and configuration.
+    Returns:
+      Merged summary for mesh/point cloud representation.'''
   json_config = _get_json_config(config_dict)
 
-  summaries = []
   tensors = [
       (vertices, GeoPluginData.VERTICES),
+      (vert_colors, GeoPluginData.VERT_COLORS),
       (faces, GeoPluginData.FACES),
-      (features, GeoPluginData.FEATURES)
+      (features, GeoPluginData.FEATURES),
+      (feat_colors, GeoPluginData.FEAT_COLORS)
   ]
   tensors = [tensor for tensor in tensors if tensor[0] is not None]
-  components = metadata.get_components_bitmask([
-        content_type for (tensor, content_type) in tensors])
+  
+  components = metadata.get_components_bitmask(
+      [content_type for (tensor, content_type) in tensors]
+    )
 
+  summaries = []
   for tensor, content_type in tensors:
-      summaries.append(
-          _get_tensor_summary(tag, display_name, description, tensor,
-                              content_type, components, json_config))
+    summaries.append(
+      _get_tensor_summary(
+        tag,
+        description,
+        tensor,
+        content_type,
+        components,
+        json_config
+      )
+    )
 
   return Summary(value=summaries)
 
-def _get_tensor_summary(name, display_name, description, tensor, content_type, components, json_config):
-    """Creates a tensor summary with summary metadata.
-    Args:
-      name: Uniquely identifiable name of the summary op. Could be replaced by
-        combination of name and type to make it unique even outside of this
-        summary.
-      display_name: Will be used as the display name in TensorBoard.
-        Defaults to `name`.
-      description: A longform readable description of the summary data. Markdown
-        is supported.
-      tensor: Tensor to display in summary.
-      content_type: Type of content inside the Tensor.
-      components: Bitmask representing present parts (vertices, colors, etc.) that
-        belong to the summary.
-      json_config: A string, JSON-serialized dictionary of ThreeJS classes
-        configuration.
-    Returns:
-      Tensor summary with metadata.
-    """
+def _get_tensor_summary(name, description, tensor, content_type, components, json_config):
+  """Creates a tensor summary with summary metadata.
+  Args:
+    name: Uniquely identifiable name of the summary op. Could be replaced by
+      combination of name and type to make it unique even outside of this
+      summary.
+    description: A longform readable description of the summary data. Markdown is
+      supported.
+    tensor: Tensor to display in summary.
+    content_type: Type of content inside the Tensor.
+    components: Bitmask representing present parts (vertices, colors, etc.) that
+      belong to the summary.
+    json_config: A string, JSON-serialized dictionary of ThreeJS classes
+      configuration.
+  Returns:
+    Tensor summary with metadata.
+  """
 
-    tensor = torch.as_tensor(tensor)
+  tensor = torch.as_tensor(tensor)
 
-    tensor_metadata = metadata.create_summary_metadata(
-        name,
-        display_name,
-        content_type,
-        components,
-        tensor.shape,
-        description,
-        json_config=json_config)
+  tensor_metadata = metadata.create_summary_metadata(
+      name,
+      description,
+      content_type,
+      components,
+      tensor.shape,
+      json_config)
 
-    tensor = TensorProto(dtype='DT_FLOAT',
-                         float_val=tensor.reshape(-1).tolist(),
-                         tensor_shape=TensorShapeProto(dim=[
-                             TensorShapeProto.Dim(size=tensor.shape[0]),
-                             TensorShapeProto.Dim(size=tensor.shape[1]),
-                             TensorShapeProto.Dim(size=tensor.shape[2]),
-                         ]))
+  tensor = TensorProto(dtype='DT_FLOAT',
+                        float_val=tensor.reshape(-1).tolist(),
+                        tensor_shape=TensorShapeProto(dim=[
+                            TensorShapeProto.Dim(size=tensor.shape[0]),
+                            TensorShapeProto.Dim(size=tensor.shape[1]),
+                            TensorShapeProto.Dim(size=tensor.shape[2]),
+                        ]))
 
-    tensor_summary = Summary.Value(
-        tag=metadata.get_instance_name(name, content_type),
-        tensor=tensor,
-        metadata=tensor_metadata,
-    )
+  tensor_summary = Summary.Value(
+      tag=metadata.get_instance_name(name, content_type),
+      tensor=tensor,
+      metadata=tensor_metadata,
+  )
 
-    return tensor_summary
+  return tensor_summary
 
 
 def _get_json_config(config_dict):

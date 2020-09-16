@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11plugin_data.proto\x12\x16tensorboard_plugin_geo\"\xf4\x01\n\rGeoPluginData\x12\x0f\n\x07version\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12G\n\x0c\x63ontent_type\x18\x03 \x01(\x0e\x32\x31.tensorboard_plugin_geo.GeoPluginData.ContentType\x12\x13\n\x0bjson_config\x18\x05 \x01(\t\x12\r\n\x05shape\x18\x06 \x03(\x05\x12\x12\n\ncomponents\x18\x07 \x01(\r\"C\n\x0b\x43ontentType\x12\r\n\tUNDEFINED\x10\x00\x12\x0c\n\x08VERTICES\x10\x01\x12\t\n\x05\x46\x41\x43\x45S\x10\x02\x12\x0c\n\x08\x46\x45\x41TURES\x10\x03\x62\x06proto3'
+  serialized_pb=b'\n\x11plugin_data.proto\x12\x16tensorboard_plugin_geo\"\x96\x02\n\rGeoPluginData\x12\x0f\n\x07version\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12G\n\x0c\x63ontent_type\x18\x03 \x01(\x0e\x32\x31.tensorboard_plugin_geo.GeoPluginData.ContentType\x12\x13\n\x0bjson_config\x18\x05 \x01(\t\x12\r\n\x05shape\x18\x06 \x03(\x05\x12\x12\n\ncomponents\x18\x07 \x01(\r\"e\n\x0b\x43ontentType\x12\r\n\tUNDEFINED\x10\x00\x12\x0c\n\x08VERTICES\x10\x01\x12\t\n\x05\x46\x41\x43\x45S\x10\x02\x12\x0c\n\x08\x46\x45\x41TURES\x10\x03\x12\x0f\n\x0bVERT_COLORS\x10\x04\x12\x0f\n\x0b\x46\x45\x41T_COLORS\x10\x05\x62\x06proto3'
 )
 
 
@@ -51,11 +51,21 @@ _GEOPLUGINDATA_CONTENTTYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='VERT_COLORS', index=4, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='FEAT_COLORS', index=5, number=5,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=223,
-  serialized_end=290,
+  serialized_end=324,
 )
 _sym_db.RegisterEnumDescriptor(_GEOPLUGINDATA_CONTENTTYPE)
 
@@ -124,7 +134,7 @@ _GEOPLUGINDATA = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=46,
-  serialized_end=290,
+  serialized_end=324,
 )
 
 _GEOPLUGINDATA.fields_by_name['content_type'].enum_type = _GEOPLUGINDATA_CONTENTTYPE

@@ -37,8 +37,10 @@ class DataServer():
 
     np_type = {
       GeoPluginData.VERTICES: np.float32,
+      GeoPluginData.VERT_COLORS: np.uint8,
       GeoPluginData.FACES: np.uint32,
       GeoPluginData.FEATURES: np.float32,
+      GeoPluginData.FEAT_COLORS: np.uint8,
     }[content_type]
 
     response = np.array(response, dtype=np_type)
@@ -77,28 +79,4 @@ class DataServer():
   def _get_tensor_data(self, event, sample):
     """Convert a TensorEvent into a JSON-compatible response."""
     data = tensor_util.make_ndarray(event.tensor_proto)
-    return data[sample].tolist()
-
-  # def _get_tensor_metadata(self, event, content_type, components, data_shape, config):
-  #   """Converts a TensorEvent into a JSON-compatible response.
-  #   Args:
-  #     event: TensorEvent object containing data in proto format.
-  #     content_type: enum plugin_data_pb2.MeshPluginData.ContentType value,
-  #       representing content type in TensorEvent.
-  #     components: Bitmask representing all parts (vertices, colors, etc.) that
-  #       belong to the summary.
-  #     data_shape: list of dimensions sizes of the tensor.
-  #     config: rendering scene configuration as dictionary.
-  #   Returns:
-  #     Dictionary of transformed metadata.
-  #   """
-  #   return {
-  #       "wall_time": event.wall_time,
-  #       "step": event.step,
-  #       "content_type": content_type,
-  #       "components": components,
-  #       "config": config,
-  #       "data_shape": list(data_shape),
-  #   }
-
-  
+    return data[sample].tolist()  

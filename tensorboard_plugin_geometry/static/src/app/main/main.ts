@@ -23,8 +23,7 @@ export default class MainComponent extends Vue {
     tags: new Array<Tags>() // {tag: string, runs: Tag[]}[]
   }
 
-  constructor() {
-    super();
+  created() {
     ApiService.getTags().then((res) => {
       this.$set(this.data, 'tags', []);
       

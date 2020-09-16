@@ -10,6 +10,8 @@ message GeoPluginData {
     VERTICES = 1;
     FACES = 2;  // Triangle face.
     FEATURES = 3;
+    VERT_COLORS= 4;
+    FEAT_COLORS= 5;
   }
 
   // Version `0` is the only supported version.

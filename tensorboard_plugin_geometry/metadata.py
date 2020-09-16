@@ -21,27 +21,28 @@ def get_components_bitmask(content_types):
     components = components | (1 << content_type)
   return components
 
-def create_summary_metadata(name, display_name, content_type, components, shape, description=None, json_config=None):
+def create_summary_metadata(name, description, content_type, components, shape, json_config):
   """Creates summary metadata which defined at GeoPluginData proto.
     Arguments:
       name: Original merged (summaries of different types) summary name.
-      display_name: The display name used in TensorBoard.
+      description: Description displayed by TensorboardUI
       content_type: Value from GeoPluginData enum describing data.
       components: mask representing present parts (vertices, features, etc.) that
         belong to the summary.
       shape: list of dimensions sizes of the tensor.
-      description: The description to show in TensorBoard.
       json_config: A string, JSON-serialized dictionary of ThreeJS classes
         configuration.
     Returns:
       A `summary_pb2.SummaryMetadata` protobuf object.
   """
+  
   # Shape should be at least BxNx3 where B represents the batch dimensions
   # and N - the number of points, each with x,y,z coordinates.
   if len(shape) != 3:
     raise ValueError(
       "Tensor shape should be of shape BxNx3, but got %s." % str(shape)
     )
+  
   geo_plugin_data = GeoPluginData(
     version=get_current_version(),
     name=name,
@@ -55,8 +56,6 @@ def create_summary_metadata(name, display_name, content_type, components, shape,
     plugin_name=PLUGIN_NAME, content=content
   )
 
-  if display_name is None:
-    display_name = name
 
   return SummaryMetadata(
     display_name=name,  # Will not be used in TensorBoard UI.
@@ -84,15 +83,6 @@ def parse_plugin_metadata(content):
         "available?" % (result.version, get_current_version())
     )
   
-  # Add components field to older version of the proto.
-  if result.components == 0:
-    result.components = get_components_bitmask(
-      [
-        GeoPluginData.VERTICES,
-        GeoPluginData.FACES,
-        GeoPluginData.FEATURES,
-      ]
-    )
   return result
 
 def get_instance_name(tag, content_type):
