@@ -116,7 +116,8 @@ class GeoPlugin(base_plugin.TBPlugin):
     try:
       response = self._data_server.get_data_response(request, self.plugin_name)
     
-    except ValueError:
+    except ValueError as err:
+      raise err
       res = werkzeug.Response("Bad content_type", "text/plain")
       res.status_code = 400
       return res

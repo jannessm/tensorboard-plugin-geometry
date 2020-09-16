@@ -28,7 +28,7 @@ class TagServer():
         
         # Make sure we only operate on user-defined tags here.
         tag = self._tag(run, instance_tag)
-        meta = self._instance_tag_metadata(run, instance_tag)
+        meta, _ = self._instance_tag_metadata(run, instance_tag)
         
         # Batch size must be defined, otherwise we don't know how many
         # samples were there.
@@ -74,7 +74,8 @@ class TagServer():
 
   def _tag(self, run, instance_tag):
     """Gets the user-facing tag name for an instance tag."""
-    return self._instance_tag_metadata(run, instance_tag).name
+    meta, _ = self._instance_tag_metadata(run, instance_tag)
+    return meta.name
 
   def _instance_tags(self, run, tag):
     """Gets the instance tag names for a user-facing tag."""

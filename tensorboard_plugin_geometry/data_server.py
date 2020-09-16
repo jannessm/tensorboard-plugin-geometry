@@ -61,7 +61,7 @@ class DataServer():
     tensor_events = []  # List of tuples (meta, tensor) that contain tag.
     for instance_tag in self._tag_server._instance_tags(run, tag):
       tensors = self._multiplexer.Tensors(run, instance_tag)
-      meta = self._tag_server._instance_tag_metadata(run, instance_tag)
+      meta, _ = self._tag_server._instance_tag_metadata(run, instance_tag)
       tensor_events += [(meta, tensor) for tensor in tensors]
 
     if step is not None:
