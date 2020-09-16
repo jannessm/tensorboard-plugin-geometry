@@ -27,8 +27,8 @@ export class ThreeFactory {
     }
 
     // check colors
-    if (!!vert_colors && vert_colors.length > 0 && vert_colors.length / 3 !== vertices_shape[1] * vertices_shape[2]) {
-      throw new Error('there must be a color for each vertex');
+    if (!!vert_colors && vert_colors.length > 0 && vert_colors.length / 3 !== vertices_shape[0] * vertices_shape[1]) {
+      throw new Error(`there must be a color for each vertex, but got ${vert_colors.length / 3} instead of ${vertices_shape[0] * vertices_shape[1]}`);
     }
 
     if (!face_shape || !faces_arr || face_shape.length === 0 || faces_arr.length === 0) {
@@ -106,8 +106,8 @@ export class ThreeFactory {
       throw new Error('features and vertices do not have the same shape');
     }
 
-    if (!!feat_colors && feat_colors.length / 3 !== vertices[0] * vertices[1]) {
-      throw new Error('there must be a color for each vertex');
+    if (!!feat_colors && feat_colors.length > 0 && feat_colors.length / 3 !== vertices[0] * vertices[1]) {
+      throw new Error('there must be a color for each feature');
     }
 
     const cmap = colormap({
@@ -180,23 +180,23 @@ export class ThreeFactory {
           colors[i*3 + 2] / 255);
         color_arr.push(new_col.r, new_col.g, new_col.b);
       }
-
+        
     // else apply colormap
     } else {
       const cmap = colormap({
-          colormap: 'jet',
-          nshades: vertices,
-          format: 'hex'
-        }).map((val: string) => 
-          parseInt(val.substr(1), 16)
-        );
-
+        colormap: 'jet',
+        nshades: vertices,
+        format: 'hex'
+      }).map((val: string) => 
+      parseInt(val.substr(1), 16)
+      );
+      
       for (let i = 0; i < vertices; i++) {
         const new_col = new Color(cmap[i]);
         color_arr.push(new_col.r, new_col.g, new_col.b);
       }
     }
-
+      
     return color_arr;
   }
 }

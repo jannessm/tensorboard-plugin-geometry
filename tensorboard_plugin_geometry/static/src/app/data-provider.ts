@@ -58,6 +58,7 @@ export class DataProvider {
 
   async getData(id: number): Promise<StepData | undefined> {
     if (!this.steps_data[id] && !!id) {
+      console.log(this.run, this.tag);
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.getWalltimeById(id));
       this.steps_data[id] = {
         geometry: ThreeFactory.createGeometry(

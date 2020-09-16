@@ -56,6 +56,7 @@ def test_arbitrary_steps(writer):
     writer.add_geometry(
       'test_geo_with_features',
       pos.reshape(1, vertices, 3),
+      description="no features, no colors",
       global_step=i)
 
 def test_description(writer):
