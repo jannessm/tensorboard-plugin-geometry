@@ -30,7 +30,7 @@ export default class DataRunComponent extends Vue {
   data = {
     loading: true,
     display: '',
-    current_step_id: 0,
+    current_step_id: -1,
     current_step_label: 0,
     current_wall_time: new Date(),
     max_step: () => {
@@ -102,8 +102,12 @@ export default class DataRunComponent extends Vue {
 
   async updatePlotData() {
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-    if (!!this.data.current_step_id && !!provider) {
-      this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
+    if (this.data.current_step_id >= 0 && !!provider) {
+      try {
+        this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
+      } catch(err) {
+        console.log(err);
+      }
       this.data.loading = false;
     }
   }

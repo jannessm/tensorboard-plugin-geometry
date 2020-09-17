@@ -85,14 +85,14 @@ export default class PlotComponent extends Vue {
     this.geometries = [];
 
     ////////// update mesh /////////
-    if (!!this.$props.data.geometry) {
+    if (!!this.$props.data && !!this.$props.data.geometry) {
 
       this.geometries.push(this.$props.data.geometry);
       this.scene.add(this.$props.data.geometry);
 
     } 
     ///////// update features ////////
-    if (!!this.$props.data.features) {
+    if (!!this.$props.data && !!this.$props.data.features) {
       this.features.push(this.$props.data.features);
       this.scene.add(this.$props.data.features);
     }

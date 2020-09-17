@@ -8,6 +8,8 @@ import json
 from . import metadata
 from .plugin_data_pb2 import GeoPluginData
 
+tag_history = {}
+
 def add_geometry(
   writer,
   tag,
@@ -82,7 +84,6 @@ def add_geometry(
     raise ValueError("Features for vertices must be of shape [B, N, 3], but got %s" % str(feat_colors.shape))
   if feat_colors is not None and feat_colors.shape[1] != n_vert:
     raise ValueError("Number of features and colors for features must match, but got %s and %s" % (str(features.shape), str(feat_colors.shape)))
-
 
   writer._get_file_writer()  \
         .add_summary(

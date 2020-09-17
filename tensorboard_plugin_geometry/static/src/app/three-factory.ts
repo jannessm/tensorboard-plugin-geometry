@@ -35,6 +35,9 @@ export class ThreeFactory {
     if (!!vert_colors && vert_colors.length > 0 && vert_colors.length / 3 !== vertices_shape[0] * vertices_shape[1]) {
       throw new Error(`there must be a color for each vertex, but got ${vert_colors.length / 3} instead of ${vertices_shape[0] * vertices_shape[1]}`);
     }
+    if (!!face_shape && !!face_colors && !!face_colors_arr && face_colors_arr.length > 0 && face_colors_arr.length / 3 !== face_shape[0]) {
+      throw new Error(`there must be a color for each sample, but got ${face_colors_arr.length / 3} instead of ${face_shape[0]}`);
+    }
 
     if (!face_shape || !faces_arr || face_shape.length === 0 || faces_arr.length === 0) {
       return ThreeFactory.createPointCloud(
@@ -49,7 +52,9 @@ export class ThreeFactory {
       vertices_shape,
       face_shape,
       vertices_arr,
-      faces_arr // no config required, since colors are not supported
+      faces_arr,
+      face_colors,
+      face_colors_arr // no config required, since colors are not supported
     );
   }
 
@@ -76,7 +81,9 @@ export class ThreeFactory {
     vertices_shape: number[],
     faces_shape: number[],
     vertices_arr: Float32Array,
-    faces_arr: Uint32Array
+    faces_arr: Uint32Array,
+    face_colors?: number[],
+    face_colors_arr?: Uint8Array
   ): Group {
     const geometries = new Group();
     for (let i = 0; i < vertices_shape[0]; i++) {
@@ -84,6 +91,18 @@ export class ThreeFactory {
       let mesh_geo = new BufferGeometry();
       const mesh_mat = new MeshBasicMaterial( { color: 0xf57000 } );
       
+      if (!!face_colors && !!face_colors_arr && face_colors_arr.length > 0) {
+        console.log(face_colors_arr[i * 3],
+          face_colors_arr[i * 3 + 1],
+          face_colors_arr[i * 3 + 2]);
+        mesh_mat.color = new Color(ThreeFactory._toHex([
+          face_colors_arr[i * 3],
+          face_colors_arr[i * 3 + 1],
+          face_colors_arr[i * 3 + 2]
+        ]));
+        console.log(mesh_mat.color);
+      }
+
       const pos_offset = vertices_shape[1] * 3;
       const pos_attr = new Float32BufferAttribute(vertices_arr.slice(i * pos_offset, (i+1) * pos_offset), 3);
       mesh_geo.setAttribute( 'position', pos_attr);
@@ -111,7 +130,7 @@ export class ThreeFactory {
     if (!features_arr || features_arr.length == 0) {
       return;
     }
-    console.log(vertices, vertices_arr.length, features_arr.length);
+
     if (
       vertices[0] * vertices[1] !== features_arr.length / 3 || 
       vertices[0] * vertices[1] !== vertices_arr.length / 3
@@ -211,5 +230,9 @@ export class ThreeFactory {
     }
 
     return color_arr;
+  }
+
+  static _toHex(color: number[]): number {
+    return parseInt(color.reduce((str, val) => str + parseInt(`${val}`, 10).toString(16).padStart(2, '0'), ''), 16);
   }
 }

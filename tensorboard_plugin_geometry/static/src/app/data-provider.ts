@@ -25,7 +25,6 @@ export class DataProvider {
     const res = await ApiService.getMetadata(this.run, this.tag);
 
     this.steps = res.data.map(val => val.step).filter((val, id, arr) => arr.indexOf(val) === id);
-    console.log(res.data.map(val => val.content_type).filter((val, id, arr) => arr.indexOf(val) === id));
     for (let i = 0; i < this.steps.length; i++) {
       this.steps_metadata.push(this.initStepMetadata());
       this.steps_data.push(undefined);
@@ -39,10 +38,8 @@ export class DataProvider {
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].wall_time = val.wall_time;
       this.steps_metadata[id].description = val.description;
-      if (val.content_type == CONTENT_TYPES.FACE_COLORS) console.log(this.steps_metadata[id].FACE_COLORS.wall_time, val.wall_time);
     });
     
-    console.log(this.steps_metadata[this.steps.length - 1].FACE_COLORS.wall_time);
     this._res();
   }
 
@@ -69,8 +66,8 @@ export class DataProvider {
   }
 
   async getData(id: number): Promise<StepData | undefined> {
-    if (!this.steps_data[id] && !!id) {
-      console.log(this.run, this.tag, this.steps_metadata[id].FACE_COLORS);
+    console.log('get step', id, this.steps_data[id]);
+    if (!this.steps_data[id] && id >= 0) {
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.steps_metadata[id]);
 
       this.steps_data[id] = {

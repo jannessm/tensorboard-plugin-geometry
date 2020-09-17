@@ -21,6 +21,7 @@ def tests(writer):
   suite.run_test('scene configs', test_threejs_config)
   suite.run_test('normal orthografic camera', test_camera_config)
   suite.run_test('orthografic configs', test_orthografic_config)
+  suite.run_test('override steps', save_multi_geo_for_sample_step)
 
   return suite
 
@@ -125,3 +126,18 @@ def test_orthografic_config(writer):
       }
     },
     global_step=1)
+
+# save multiple times for same step with different shapes
+def save_multi_geo_for_sample_step(writer):
+  pos, wss = get_rand_vecs(vertices)
+  # use presets for orthografic
+  writer.add_geometry(
+    'test_multi_for_same_step',
+    pos.reshape(1, vertices, 3),
+    global_step=0)
+  
+  pos, wss = get_rand_vecs(vertices * 2)
+  writer.add_geometry(
+    'test_multi_for_same_step',
+    pos.reshape(1, vertices * 2, 3),
+    global_step=0)
