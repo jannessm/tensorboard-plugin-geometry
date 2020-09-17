@@ -8,7 +8,6 @@ import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
 import { StepData } from '../models/step-data';
 import { DataManager } from '../data-manager';
-import { Settings } from '../settings';
 import { Subscriber } from '../models/observeable';
 import { loader } from '../loader';
 
@@ -26,7 +25,6 @@ export default class DataRunComponent extends Vue {
   dataManager = DataManager;
   last_tag = '';
   last_run = '';
-  settingsSubscription: Subscriber | undefined;
   
   data = {
     loading: true,
@@ -61,10 +59,10 @@ export default class DataRunComponent extends Vue {
       });
 
     loader.runs.subscribe(runs => {
+      // get display status from sidebar
       const run = runs.find(val => val.name === this.$props.run.name)
       const display = run.display && run.checked;
       this.data.display = display ? '' : 'display: none;';
-      this.data.plot_height = (this.$el?.getElementsByClassName('plot')[0] as HTMLElement)?.offsetWidth + 'px';
     });
   }
 
@@ -77,11 +75,6 @@ export default class DataRunComponent extends Vue {
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
     }
-    this.data.plot_height = (this.$el.getElementsByClassName('plot')[0] as HTMLElement).offsetWidth + 'px';
-  }
-
-  destroyed() {
-    this.settingsSubscription?.unsubscribe();
   }
 
   update(new_value: number) {

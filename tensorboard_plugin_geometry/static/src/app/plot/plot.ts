@@ -68,7 +68,7 @@ export default class PlotComponent extends Vue {
   
   update() {
     const width = (this.$el as HTMLElement).offsetWidth;
-    const height = (this.$el as HTMLElement).offsetHeight;
+    const height = (this.$el as HTMLElement).offsetWidth;
 
     if (width !== this.last_width) {
       (this.camera as PerspectiveCamera).aspect = width / height;
@@ -163,7 +163,7 @@ export default class PlotComponent extends Vue {
     bounds.getBoundingSphere(bounding_sphere);
 
     const width = (this.$el as HTMLElement).offsetWidth;
-    const height = (this.$el as HTMLElement).offsetHeight;
+    const height = (this.$el as HTMLElement).offsetWidth;
     const aspect = width / height;
 
     let max_side = Math.max(bounds.max.sub(bounds.min).x, bounds.max.sub(bounds.min).y);
@@ -192,7 +192,7 @@ export default class PlotComponent extends Vue {
       // change camera type
       if (!!config.camera.type && config.camera.type === CAMERA_TYPE.PERSPECTIVE && !(this.camera instanceof PerspectiveCamera)) {
         const width = (this.$el as HTMLElement).offsetWidth;
-        const height = (this.$el as HTMLElement).offsetHeight;
+        const height = (this.$el as HTMLElement).offsetWidth;
         this.camera = new PerspectiveCamera(50, width / height, 0.1, 1000);
       } else if (!!config.camera.type && config.camera.type === CAMERA_TYPE.ORTHOGRAFIC && !(this.camera instanceof OrthographicCamera)) {
         this.camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
