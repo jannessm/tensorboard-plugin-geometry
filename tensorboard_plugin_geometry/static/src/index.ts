@@ -7,6 +7,7 @@ import {
   MdCard,
   MdCheckbox,
   MdDivider,
+  MdEmptyState,
   MdField,
   MdIcon,
   MdProgress,
@@ -17,6 +18,7 @@ Vue.use(MdButton);
 Vue.use(MdCard);
 Vue.use(MdCheckbox);
 Vue.use(MdDivider);
+Vue.use(MdEmptyState);
 Vue.use(MdField);
 Vue.use(MdIcon);
 Vue.use(MdProgress);

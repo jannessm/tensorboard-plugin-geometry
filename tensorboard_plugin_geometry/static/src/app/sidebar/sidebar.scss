@@ -10,7 +10,6 @@
 
   .sidebar-section {
     font-size: 13px;
-    border-top: solid 1px rgba(0, 0, 0, 0.12);
     margin-right: 10px;
     padding: 15px 0 15px 30px;
     position: relative;
@@ -32,10 +31,18 @@
       font-size: 14px;
     }
 
-    .md-button {
+    .md-button.toggle {
       width: 100%;
     }
+
+    .md-button.loading {
+      animation: spin 2s linear infinite;
+    }
     
+    @keyframes spin {
+      100% {transform: rotate(360deg)}
+    }
+
     .md-checkbox {
       margin: 0 8px;
       

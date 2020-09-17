@@ -1,6 +1,21 @@
 
 <div class="sidebar">
   <div class="sidebar-section">
+    <h3>Reload</h3>
+    <div class="reload">
+      <md-checkbox v-model="data.auto_load">Reload Data</md-checkbox>
+      <md-field>
+        <label>Reload Period</label>
+        <md-input type="number" :disabled="!data.auto_load"></md-input>
+      </md-field>
+      <md-button class="md-icon-button" :class="{'loading': data.loading}" @click="updateData">
+        <md-icon>refresh</md-icon>
+      </md-button>
+    </div>
+  </div>
+
+  <md-divider></md-divider>
+  <div class="sidebar-section">
     <h3>Point size</h3>
     <div class="point_size">
       <slider :value="data.point_size" @changed="updatePointSize"></slider>
@@ -9,6 +24,9 @@
       </md-field>
     </div>
   </div>
+  
+  <md-divider></md-divider>
+  
   <div class="sidebar-section">
     <h3>Runs</h3>
 
@@ -16,14 +34,14 @@
       <md-input v-model="data.regex" placeholder="Write a regex to filter runs" @input="filterRuns"></md-input>
     </md-field>
 
-    <div v-for="(run, i) in runs">
-      <span v-if="display[i]">
-        <md-checkbox v-model="checked[i]" @change="data.exclusive = false"></md-checkbox>
-        <md-radio class="double_checkbox" v-model="data.exclusive" :value="run" @change="exclusify(run)">{{ run }}</md-radio>
+    <div v-for="run in runs">
+      <span v-if="run.display">
+        <md-checkbox v-model="run.checked" @change="data.exclusive = false"></md-checkbox>
+        <md-radio class="double_checkbox" v-model="data.exclusive" :value="run" @change="exclusify(run)">{{ run.name }}</md-radio>
       </span>
     </div>
 
-    <md-button @click="toggleAll()" class="sidebar-button">TOGGLE ALL RUNS</md-button>
+    <md-button @click="toggleAll()" class="sidebar-button toggle">TOGGLE ALL RUNS</md-button>
     <span class="logdir">{{ data.logdir }}</span>
   </div>
 </div>

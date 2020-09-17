@@ -1,8 +1,12 @@
-export interface Run {
-  name: string;
-  tag: string;
-  samples: number;
-  description: string;
+import { Run } from "./run";
+
+export interface RawTags {
+  [run: string]: {
+    [tag: string]: {
+      samples: number;
+      description: string;
+    }
+  }
 }
 
 export interface Tags {

@@ -10,6 +10,7 @@ import { StepData } from '../models/step-data';
 import { DataManager } from '../data-manager';
 import { Settings } from '../settings';
 import { Subscriber } from '../models/observeable';
+import { loader } from '../loader';
 
 @WithRender
 @Component({
@@ -59,8 +60,9 @@ export default class DataRunComponent extends Vue {
         this.update(provider.steps.length - 1);
       });
 
-    this.settingsSubscription = Settings.filteredRuns.subscribe(() => {
-      this.data.display = Settings.display(this.$props.run.name) ? '' : 'display: none;';
+    loader.runs.subscribe(runs => {
+      const display = runs.find(val => val.name === this.$props.run.name).display;
+      this.data.display = display ? '' : 'display: none;';
       this.data.plot_height = (this.$el?.getElementsByClassName('plot')[0] as HTMLElement)?.offsetWidth + 'px';
     });
   }

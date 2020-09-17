@@ -1,7 +1,7 @@
 <div class="md-layout md-gutter">
   <sidebar class="md-layout-item md-size-25"></sidebar>
   
-  <div id="main" class="md-layout-item">
+  <div id="main" class="md-layout-item" v-if="data.tags.length > 1">
     <md-field>
       <md-icon class="md-prefix">search</md-icon>
       <md-input v-model="tag_regex" placeholder="Filter tags (regular expressions supported)" @input="filterTags"></md-input>
@@ -17,5 +17,16 @@
       :expanded="tag === data.tags[1]"
     ></data-card>
   </div>
+
+  <md-empty-state
+    md-icon="warning"
+    md-label="No geometry data was found."
+    md-description="Probable causes:"
+    v-if="data.tags.length === 1">
+    <ul style="text-align:left;">
+      <li>You haven’t written any scalar data to your event files.</li>
+      <li>TensorBoard can’t find your event files.</li>
+    </ul>
+  </md-empty-state>
 
 </div>

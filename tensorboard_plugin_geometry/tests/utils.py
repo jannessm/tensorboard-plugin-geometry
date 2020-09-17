@@ -1,4 +1,11 @@
 import sys
+import torch
+
+def get_rand_vecs(vertices):
+  pos = torch.randn((vertices, 3))
+  pos = (pos.T / torch.norm(pos, dim=1)).T
+  wss = torch.randn((vertices, 3)) * 0.1
+  return pos, wss
 
 class Suite:
 

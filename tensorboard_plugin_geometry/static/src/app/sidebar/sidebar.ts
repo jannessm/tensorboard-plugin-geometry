@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import { loader } from '../loader';
+import { RunSidebar } from '../models/run';
 
-import {ApiService} from '../api';
 import { Settings } from '../settings';
 import SliderComponent from '../slider/slider';
 import WithRender from './sidebar.html';
@@ -15,13 +16,13 @@ import './sidebar.scss';
   }
 })
 export default class SidebarComponent extends Vue {
-  runs: string[] = [];
+  runs: RunSidebar[] = [];
   colors: string[] = [];
-  checked: boolean[] = [];
-  display: boolean[] = [];
   settings = Settings;
 
   data = {
+    auto_load: false,
+    loading: false,
     point_size: 50,
     formatted_point_size: 5,
     exclusive: false,
@@ -29,27 +30,18 @@ export default class SidebarComponent extends Vue {
     regex: '',
   }
 
-  last_exclusive: string = '';
-
   mounted() {
-    ApiService.getTags().then((res) => {
-      Object.keys(res.data).forEach(run => {
-        this.runs.push(run);
-        this.checked.push(true);
-        this.display.push(true);
-      });
+    loader.runs.subscribe(runs => {
+      this.runs = runs;
     });
 
-    ApiService.getLogdir().then(res => {
-      this.data.logdir = res.data.logdir;
+    loader.logdir.subscribe(logdir => {
+      this.data.logdir = logdir
     });
-
-    this.settings.filteredRuns.next(this.runs.filter((val, id) => this.display[id] && this.checked[id]));
-    console.log(this.settings.filteredRuns.value);
   }
 
   updated() {
-    this.settings.filteredRuns.next(this.runs.filter((val, id) => this.display[id] && this.checked[id]));
+    loader.runs.next(this.runs);
   }
 
   updatePointSize(new_value) {
@@ -74,20 +66,18 @@ export default class SidebarComponent extends Vue {
   }
 
   filterRuns() {
-    this.display = this.runs.map(val => !!val.match(RegExp(this.data.regex)));
+    this.runs.forEach(val => val.display = !!val.name.match(RegExp(this.data.regex)));
   }
 
-  exclusify(run: string) {
-    if (run && this.last_exclusive !== run) {
-      this.last_exclusive = run;
-      
-      this.checked = this.runs.map(r => run == r);
-    } 
+  exclusify(run: RunSidebar) {
+    this.runs.forEach(r => {
+      r.checked = (run.name == r.name);
+    });
   }
 
   toggleAll() {
-    const checked = this.checked.reduce((allChecked, val) => val || allChecked, false);
-    this.checked = this.runs.map(() => !checked);
+    const checked = this.runs.reduce((allChecked, val) => val.checked || allChecked, false);
+    this.runs.forEach(val => val.checked = !checked);
     this.data.exclusive = false;
   }
 
@@ -97,5 +87,11 @@ export default class SidebarComponent extends Vue {
 
   getFormattedSize(value) {
     return parseFloat(value.toLocaleString('en', {maximumFractionDigits: 4}));
+  }
+
+  async updateData() {
+    this.data.loading = true;
+    await loader.reload();
+    this.data.loading = false;
   }
 } 
