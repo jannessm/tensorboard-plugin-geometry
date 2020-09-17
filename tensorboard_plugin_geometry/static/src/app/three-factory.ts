@@ -1,6 +1,7 @@
 import { BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, Points, PointsMaterial, Uint32BufferAttribute, Vector3 } from "three";
 import { ArrowHelper } from "./arrow";
 import * as colormap from 'colormap';
+import { Settings } from "./settings";
 
 export class ThreeFactory {
 
@@ -48,9 +49,11 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     colors?: Uint8Array
   ): Points {
-    const point_size = 1.5;
+    console.log(vertices_shape, vertices_arr.length, colors);
+    const point_size = Settings.point_size.value;
+
     const points_geo = new BufferGeometry();
-    points_geo.setAttribute( 'position', new Float32BufferAttribute( vertices_arr, 3 ));
+    points_geo.setAttribute( 'position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
     
     let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
     
@@ -137,29 +140,29 @@ export class ThreeFactory {
     for (let i = 0; i < vertices[0]; i++) {
       for (let j = 0; j < vertices[1]; j++) {
         const origin = new Vector3(
-          vertices_arr[i * vertices[1] + j * 3],
-          vertices_arr[i * vertices[1] + j * 3 + 1],
-          vertices_arr[i * vertices[1] + j * 3 + 2]
+          vertices_arr[i * vertices[1] * 3 + j * 3],
+          vertices_arr[i * vertices[1] * 3 + j * 3 + 1],
+          vertices_arr[i * vertices[1] * 3 + j * 3 + 2]
         );
         const direction = new Vector3(
-          features_arr[i * vertices[1] + j * 3],
-          features_arr[i * vertices[1] + j * 3 + 1],
-          features_arr[i * vertices[1] + j * 3 + 2]
+          features_arr[i * vertices[1] * 3 + j * 3],
+          features_arr[i * vertices[1] * 3 + j * 3 + 1],
+          features_arr[i * vertices[1] * 3 + j * 3 + 2]
         );
 
         let color = [255, 0, 0];
-        if (feat_colors) {
+        if (!!feat_colors && feat_colors?.length > 0) {
           color = [
-            feat_colors[i * vertices[1] + j * 3],
-            feat_colors[i * vertices[1] + j * 3 + 1],
-            feat_colors[i * vertices[1] + j * 3 + 2]
+            feat_colors[i * vertices[1] * 3 + j * 3],
+            feat_colors[i * vertices[1] * 3 + j * 3 + 1],
+            feat_colors[i * vertices[1] * 3 + j * 3 + 2]
           ];
         } else {
           const len = zero_vec.distanceTo(direction);
           const c = new Color(cmap[Math.floor(len/max_len * 100)]);
           color = [c.r, c.g, c.b].map(val => Math.floor(val * 255));
         }
-
+        
         arrowHelper.addArrowToBuffer(origin, direction, color);
       }
     }
@@ -171,7 +174,7 @@ export class ThreeFactory {
     const color_arr: number[] = [];
     
     // if colors are given
-    if (colors && colors.length > 0) {
+    if (!!colors && colors.length > 0) {
       for (let i = 0; i < vertices; i++) {
         const new_col = new Color();
         new_col.setRGB(
@@ -196,7 +199,7 @@ export class ThreeFactory {
         color_arr.push(new_col.r, new_col.g, new_col.b);
       }
     }
-      
+
     return color_arr;
   }
 }

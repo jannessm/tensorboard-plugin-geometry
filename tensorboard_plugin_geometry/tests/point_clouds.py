@@ -1,5 +1,7 @@
 import torch
 
+from .utils import Suite
+
 def get_rand_vecs(vertices):
   pos = torch.randn((vertices, 3))
   pos = (pos.T / torch.norm(pos, dim=1)).T
@@ -7,19 +9,12 @@ def get_rand_vecs(vertices):
   return pos, wss
 
 def tests(writer):
-  print('------------------------------')
-  print('simple point cloud', end=' ')
-  test_point_cloud(writer)
-  print('✓')
-  print('point cloud with features', end=' ')
-  test_point_cloud_with_features(writer)
-  print('✓')
-  print('colored point cloud', end=' ')
-  test_colored_point_cloud(writer)
-  print('✓')
-  print('multiple point clouds', end=' ')
-  test_multiple_point_clouds(writer)
-  print('✓')
+  suite = Suite('point cloud tests', writer)
+  suite.run_test('simple point cloud', test_point_cloud)
+  suite.run_test('point cloud with features', test_point_cloud_with_features)
+  suite.run_test('colored point cloud', test_colored_point_cloud)
+  suite.run_test('multiple point clouds', test_multiple_point_clouds)
+  return suite
 
 ######### tests #################
 def test_point_cloud(writer):

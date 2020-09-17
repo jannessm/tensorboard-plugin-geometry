@@ -2,6 +2,8 @@ import torch
 import openmesh
 import os
 
+from .utils import Suite
+
 def read_ply(path):
   mesh = openmesh.read_trimesh(path)
   pos = torch.from_numpy(mesh.points()).to(torch.float)
@@ -17,19 +19,12 @@ bunny_nface = face_bunny.shape[0]
 wss_bunny = torch.randn((pos_bunny.shape[0], 3)) * 0.1
 
 def tests(writer):
-  print('------------------------------')
-  print('simple mesh', end=' ')
-  test_mesh(writer)
-  print('✓')
-  print('mesh with features', end=' ')
-  test_mesh_with_features(writer)
-  print('✓')
-  print('mesh with colored features', end=' ')
-  test_mesh_with_colored_features(writer)
-  print('✓')
-  print('multiple meshes', end=' ')
-  test_multiple_meshes(writer)
-  print('✓')
+  suite = Suite('meshes tests', writer)
+  suite.run_test('simple mesh', test_mesh)
+  suite.run_test('mesh with features', test_mesh_with_features)
+  suite.run_test('mesh with colored features', test_mesh_with_colored_features)
+  suite.run_test('multiple meshes', test_multiple_meshes)
+  return suite
 
 ######### tests #################
 def test_mesh(writer):

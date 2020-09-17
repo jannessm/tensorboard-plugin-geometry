@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 
+from .utils import Suite
+
 vertices = 10
 
 def get_rand_vecs(vertices):
@@ -10,35 +12,15 @@ def get_rand_vecs(vertices):
   return pos, wss
 
 def tests(writer):
-  print('------------------------------')
-  
-  print('negative steps', end=' ')
-  test_negative_steps(writer)
-  print('✓')
-  
-  print('arbitrary and multiple steps', end=' ')
-  test_arbitrary_steps(writer)
-  print('✓')
-  
-  print('description', end=' ')
-  test_description(writer)
-  print('✓')
+  suite = Suite('parameter tests', writer)
+  suite.run_test('negative steps', test_negative_steps)
+  suite.run_test('arbitrary and multiple steps', test_arbitrary_steps)
+  suite.run_test('description', test_description)
+  suite.run_test('cmap configs', test_cmap_config)
+  suite.run_test('scene configs', test_threejs_config)
+  suite.run_test('camera configs', test_camera_config)
 
-  # print('background color', end=' ')
-  # test_description(writer)
-  # print('✓')
-
-  # print('camera position', end=' ')
-  # test_description(writer)
-  # print('✓')
-
-  # print('camera fov, far, near', end=' ')
-  # test_description(writer)
-  # print('✓')
-
-  # print('cmaps', end=' ')
-  # test_description(writer)
-  # print('✓')
+  return suite
 
 ######### tests #################
 def test_negative_steps(writer):
@@ -67,3 +49,76 @@ def test_description(writer):
       pos.reshape(1, vertices, 3),
       description='# this is a markdown description\nwith a lot of `text`',
       global_step=i)
+
+def test_cmap_config(writer):
+  pos, wss = get_rand_vecs(vertices)
+  for i in range(5):
+    writer.add_geometry(
+      'test_cmap',
+      pos.reshape(1, vertices, 3),
+      features=wss.reshape(1, vertices, 3),
+      config_dict={
+        "vertices_cmap": 'summer',
+      },
+      global_step=i)
+  
+  for i in range(5, 10):
+    writer.add_geometry(
+      'test_cmap',
+      pos.reshape(1, vertices, 3),
+      features=wss.reshape(1, vertices, 3),
+      config_dict={
+        "features_cmap": 'cool',
+      },
+      global_step=i)
+
+def test_threejs_config(writer):
+  pos, wss = get_rand_vecs(vertices)
+  writer.add_geometry(
+    'test_scene',
+    pos.reshape(1, vertices, 3),
+    features=wss.reshape(1, vertices, 3),
+    config_dict={
+      "camera": {
+        "position": [0, 0, 0],
+        "fov": 90,
+        "far": 5,
+        "near": 1
+      },
+      "scene": {
+        "background_color": [255, 0, 0]
+      }
+    },
+    global_step=0)
+
+def test_camera_config(writer):
+  pos, wss = get_rand_vecs(vertices)
+  # use default for orthografic
+  writer.add_geometry(
+    'test_camera',
+    pos.reshape(1, vertices, 3),
+    features=wss.reshape(1, vertices, 3),
+    config_dict={
+      "camera": {
+        "type": "orthografic"
+      }
+    },
+    global_step=0)
+  # use presets for orthografic
+  writer.add_geometry(
+    'test_camera',
+    pos.reshape(1, vertices, 3),
+    features=wss.reshape(1, vertices, 3),
+    config_dict={
+      "camera": {
+        "type": "orthografic",
+        "left": -0.5,
+        "right": 10,
+        "top": 10,
+        "bottom": -0.5,
+        "position": [0,0,5],
+        "far": 5,
+        "near": 1
+      }
+    },
+    global_step=1)
