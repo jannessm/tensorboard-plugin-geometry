@@ -68,7 +68,7 @@ def test_mesh_with_colored_features(writer):
   
   for i in range(10):
     writer.add_geometry(
-      'test_colored_geo',
+      'test_colored_geo_with_feat',
       pos_bunny.reshape(1, bunny_nvert, 3),
       faces=face_bunny.reshape(1, bunny_nface, 3),
       features=wss_bunny.reshape(1, bunny_nvert, 3),

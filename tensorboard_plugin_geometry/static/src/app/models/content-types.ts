@@ -4,5 +4,6 @@ export enum CONTENT_TYPES {
   FACES = 2,
   FEATURES = 3,
   VERT_COLORS = 4,
-  FEAT_COLORS = 5
+  FACE_COLORS = 5,
+  FEAT_COLORS = 6
 }

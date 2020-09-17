@@ -1,5 +1,5 @@
 import { ApiService } from "./api";
-import { StepMetadata, ThreeConfig } from "./models/metadata";
+import { Metadata, StepMetadata, ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
 import { StepData } from "./models/step-data";
 import { PendingPromise } from "./models/pending-promise";
@@ -25,6 +25,7 @@ export class DataProvider {
     const res = await ApiService.getMetadata(this.run, this.tag);
 
     this.steps = res.data.map(val => val.step).filter((val, id, arr) => arr.indexOf(val) === id);
+    console.log(res.data.map(val => val.content_type).filter((val, id, arr) => arr.indexOf(val) === id));
     for (let i = 0; i < this.steps.length; i++) {
       this.steps_metadata.push(this.initStepMetadata());
       this.steps_data.push(undefined);
@@ -33,12 +34,15 @@ export class DataProvider {
     res.data.forEach(val => {
       const id = this.steps.findIndex(step => val.step === step);
       this.steps_metadata[id].step = val.step;
-      this.steps_metadata[id].wall_time = val.wall_time;
+      this.steps_metadata[id].wall_time = Math.min(val.wall_time, this.steps_metadata[id].wall_time);
       this.steps_metadata[id].config = JSON.parse(val.config);
       this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
+      this.steps_metadata[id][CONTENT_TYPES[val.content_type]].wall_time = val.wall_time;
       this.steps_metadata[id].description = val.description;
+      if (val.content_type == CONTENT_TYPES.FACE_COLORS) console.log(this.steps_metadata[id].FACE_COLORS.wall_time, val.wall_time);
     });
-
+    
+    console.log(this.steps_metadata[this.steps.length - 1].FACE_COLORS.wall_time);
     this._res();
   }
 
@@ -48,17 +52,26 @@ export class DataProvider {
       step: 1,
       description: '',
       config: {},
-      VERTICES: {shape: []},
-      VERT_COLORS: {shape: []},
-      FACES: {shape: []},
-      FEATURES: {shape: []},
-      FEAT_COLORS: {shape: []},
+      VERTICES: this.initMetaData(),
+      VERT_COLORS: this.initMetaData(),
+      FACES: this.initMetaData(),
+      FACE_COLORS: this.initMetaData(),
+      FEATURES: this.initMetaData(),
+      FEAT_COLORS: this.initMetaData(),
     };
+  }
+
+  initMetaData(): Metadata {
+    return {
+      shape: [],
+      wall_time: 0
+    }
   }
 
   async getData(id: number): Promise<StepData | undefined> {
     if (!this.steps_data[id] && !!id) {
-      const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.getWalltimeById(id));
+      console.log(this.run, this.tag, this.steps_metadata[id].FACE_COLORS);
+      const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.steps_metadata[id]);
 
       this.steps_data[id] = {
         geometry: ThreeFactory.createGeometry(
@@ -66,8 +79,11 @@ export class DataProvider {
           data.vertices,
           this.steps_metadata[id].FACES.shape,
           data.faces,
+          this.steps_metadata[id].FACE_COLORS.shape,
+          data.face_colors,
           data.vert_colors,
           this.steps_metadata[id].config),
+      
         features: ThreeFactory.createFeatureArrows(
           this.steps_metadata[id].VERTICES.shape,
           data.vertices,

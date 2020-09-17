@@ -11,6 +11,8 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     face_shape?: number[],
     faces_arr?: Uint32Array,
+    face_colors?: number[],
+    face_colors_arr?: Uint8Array,
     vert_colors?: Uint8Array,
     config?: ThreeConfig
   ): Group | Points {
@@ -109,7 +111,7 @@ export class ThreeFactory {
     if (!features_arr || features_arr.length == 0) {
       return;
     }
-
+    console.log(vertices, vertices_arr.length, features_arr.length);
     if (
       vertices[0] * vertices[1] !== features_arr.length / 3 || 
       vertices[0] * vertices[1] !== vertices_arr.length / 3

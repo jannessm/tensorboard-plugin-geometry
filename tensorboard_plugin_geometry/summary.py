@@ -229,7 +229,6 @@ def _get_tensor_summary(name, description, tensor, content_type, components, jso
                               TensorShapeProto.Dim(size=tensor.shape[2]),
                           ]))
 
-
   tensor_summary = Summary.Value(
       tag=metadata.get_instance_name(name, content_type),
       tensor=tensor,

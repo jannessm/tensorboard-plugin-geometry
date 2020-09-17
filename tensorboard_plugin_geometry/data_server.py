@@ -36,14 +36,15 @@ class DataServer():
 
     np_type = {
       GeoPluginData.VERTICES: np.float32,
-      GeoPluginData.VERT_COLORS: np.uint8,
-      GeoPluginData.FACES: np.uint32,
+      GeoPluginData.FACES: np.int32,
       GeoPluginData.FEATURES: np.float32,
+      GeoPluginData.VERT_COLORS: np.uint8,
+      GeoPluginData.FACE_COLORS: np.uint8,
       GeoPluginData.FEAT_COLORS: np.uint8,
-    }[content_type]
+    }
 
-    response = np.array(response, dtype=np_type)
-    
+    response = np.array(response, dtype=np_type[content_type])
+    print('got array for %s - %s - %s - %d of shape %s' % (request.args.get("run"), request.args.get("tag"), request.args.get("step"), content_type, response.shape))
     # Looks like reshape can take around 160ms, so why not store it reshaped.
     return response.reshape(-1).tobytes()
 

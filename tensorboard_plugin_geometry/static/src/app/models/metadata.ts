@@ -6,12 +6,14 @@ export interface StepMetadata {
   VERTICES: Metadata;
   VERT_COLORS: Metadata;
   FACES: Metadata;
+  FACE_COLORS: Metadata;
   FEATURES: Metadata;
   FEAT_COLORS: Metadata;
 }
 
-interface Metadata {
+export interface Metadata {
   shape: number[];
+  wall_time: number;
 }
 
 export interface ThreeConfig {

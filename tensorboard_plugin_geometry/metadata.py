@@ -39,13 +39,11 @@ def create_summary_metadata(name, description, content_type, components, shape, 
   # Shape should be at least BxNx3 where B represents the batch dimensions
   # and N - the number of points, each with x,y,z coordinates.
   if len(shape) != 3 and content_type != GeoPluginData.FACE_COLORS:
-    raise ValueError(
-      "Tensor shape should be of shape BxNx3, but got %s." % str(shape)
-    )
+    raise ValueError("Tensor shape should be of shape BxNx3, but got %s." % str(shape))
 
   if len(shape) != 2 and content_type == GeoPluginData.FACE_COLORS:
     raise ValueError("Face color tensor must be of shape Bx3, but got %s." % str(shape))
-  
+
   geo_plugin_data = GeoPluginData(
     version=get_current_version(),
     name=name,
