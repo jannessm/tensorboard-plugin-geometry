@@ -67,18 +67,21 @@ export default class SidebarComponent extends Vue {
 
   filterRuns() {
     this.runs.forEach(val => val.display = !!val.name.match(RegExp(this.data.regex)));
+    loader.runs.next(this.runs);
   }
 
   exclusify(run: RunSidebar) {
     this.runs.forEach(r => {
       r.checked = (run.name == r.name);
     });
+    loader.runs.next(this.runs);
   }
 
   toggleAll() {
     const checked = this.runs.reduce((allChecked, val) => val.checked || allChecked, false);
     this.runs.forEach(val => val.checked = !checked);
     this.data.exclusive = false;
+    loader.runs.next(this.runs);
   }
 
   getPointSize(size: number) {

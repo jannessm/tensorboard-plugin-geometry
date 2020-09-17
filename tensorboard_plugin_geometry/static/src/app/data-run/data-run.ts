@@ -61,7 +61,8 @@ export default class DataRunComponent extends Vue {
       });
 
     loader.runs.subscribe(runs => {
-      const display = runs.find(val => val.name === this.$props.run.name).display;
+      const run = runs.find(val => val.name === this.$props.run.name)
+      const display = run.display && run.checked;
       this.data.display = display ? '' : 'display: none;';
       this.data.plot_height = (this.$el?.getElementsByClassName('plot')[0] as HTMLElement)?.offsetWidth + 'px';
     });
