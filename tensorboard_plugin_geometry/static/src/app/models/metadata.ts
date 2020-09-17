@@ -1,16 +1,3 @@
-export interface StepMetadata {
-  step: number;
-  wall_time: number;
-  description: string;
-  config: ThreeConfig;
-  VERTICES: Metadata;
-  VERT_COLORS: Metadata;
-  FACES: Metadata;
-  FACE_COLORS: Metadata;
-  FEATURES: Metadata;
-  FEAT_COLORS: Metadata;
-}
-
 export interface Metadata {
   shape: number[];
   wall_time: number;

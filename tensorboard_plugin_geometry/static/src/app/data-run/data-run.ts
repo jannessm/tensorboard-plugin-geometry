@@ -6,9 +6,8 @@ import WithRender from './data-run.html'
 import './data-run.scss';
 import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
-import { StepData } from '../models/step-data';
+import { StepData } from '../models/step';
 import { DataManager } from '../data-manager';
-import { Subscriber } from '../models/observeable';
 import { loader } from '../loader';
 
 @WithRender

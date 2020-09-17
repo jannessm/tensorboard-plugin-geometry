@@ -1,49 +1,46 @@
 import { ApiService } from "./api";
-import { Metadata, StepMetadata, ThreeConfig } from "./models/metadata";
+import { Metadata, ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
-import { StepData } from "./models/step-data";
-import { PendingPromise } from "./models/pending-promise";
+import { StepData, StepMetadata, Steps } from "./models/step";
 import { ThreeFactory } from "./three-factory";
+import { Observeable } from "./models/observeable";
 
 export class DataProvider {
-  initialized: PendingPromise<void>;
-  _res = () => {};
 
   run = '';
   tag = '';
-  steps: number[] = [];
-  steps_metadata: StepMetadata[] = [];
+  steps: Steps = {};
+  steps_metadata = new Observeable<StepMetadata[]>([]);
   steps_data: (StepData | undefined)[] = [];
   
-  constructor() {
-    this.initialized = new PendingPromise<void>(res => {this._res = res});
-  }
+  constructor() {}
 
   async init(run: string, tag: string) {
     this.run = run;
     this.tag = tag;
-    const res = await ApiService.getMetadata(this.run, this.tag);
-
-    this.steps = res.data.map(val => val.step).filter((val, id, arr) => arr.indexOf(val) === id);
-    for (let i = 0; i < this.steps.length; i++) {
-      this.steps_metadata.push(this.initStepMetadata());
-      this.steps_data.push(undefined);
-    }
-    
-    res.data.forEach(val => {
-      const id = this.steps.findIndex(step => val.step === step);
-      this.steps_metadata[id].step = val.step;
-      this.steps_metadata[id].wall_time = Math.min(val.wall_time, this.steps_metadata[id].wall_time);
-      this.steps_metadata[id].config = JSON.parse(val.config);
-      this.steps_metadata[id][CONTENT_TYPES[val.content_type]].shape = val.data_shape;
-      this.steps_metadata[id][CONTENT_TYPES[val.content_type]].wall_time = val.wall_time;
-      this.steps_metadata[id].description = val.description;
-    });
-    
-    this._res();
+    this._updateMetaData();
   }
 
-  initStepMetadata(): StepMetadata {
+  private async _updateMetaData() {
+    const res = await ApiService.getMetadata(this.run, this.tag);
+
+    // save rawSteps
+    res.data.forEach(step => {
+      this.steps.config = this.steps.config || JSON.parse(step.config);
+      this.steps.description = this.steps.description || JSON.parse(step.config);
+      this.steps.steps[step.step].first_wall_time = Math.min(
+        step.wall_time,
+        this.steps.steps[step.step].first_wall_time);
+      this.steps.steps[step.step][CONTENT_TYPES[step.content_type]].shape = step.data_shape;
+      this.steps.steps[step.step][CONTENT_TYPES[step.content_type]].wall_time = step.wall_time;
+    });
+  }
+
+  private _addStep(): {
+
+  }
+
+  private _initStepMetadata(): StepMetadata {
     return {
       wall_time: 0,
       step: 1,

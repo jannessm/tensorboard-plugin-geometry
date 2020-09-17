@@ -1,7 +1,7 @@
 import 'axios';
 import Axios from 'axios';
-import { StepMetadata } from './models/metadata';
-import { TagsResponse } from './models/responses';
+import { StepMetadata } from './models/step';
+import { MetadataResponse, TagsResponse } from './models/responses';
 
 export class ApiService {
   static base_path = '/data/plugin/geometries/';
@@ -14,7 +14,7 @@ export class ApiService {
     return await Axios.get('./logdir');
   }
 
-  static async getMetadata(run: string, tag: string) {
+  static async getMetadata(run: string, tag: string): Promise<MetadataResponse> {
     return await Axios.get(`./geometries?tag=${tag}&run=${run}`);
   }
 
