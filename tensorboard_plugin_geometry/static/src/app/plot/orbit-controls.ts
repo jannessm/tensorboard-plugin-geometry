@@ -317,7 +317,7 @@ export class OrbitControls extends EventDispatcher{
 			this.zoomChanged = false;
 
 			return true;
-
+			
 		}
 
 		return false;
@@ -434,7 +434,6 @@ export class OrbitControls extends EventDispatcher{
 			this.scale /= dollyScale;
 
 		} else if ( this.object instanceof OrthographicCamera ) {
-
 			this.object.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom * dollyScale ) );
 			this.object.updateProjectionMatrix();
 			this.zoomChanged = true;
@@ -492,7 +491,6 @@ export class OrbitControls extends EventDispatcher{
 	}
 	
 	handleMouseMoveRotate( event ) {
-
 		this.rotateEnd.set( event.clientX, event.clientY );
 
 		this.rotateDelta.subVectors( this.rotateEnd, this.rotateStart ).multiplyScalar( this.rotateSpeed );

@@ -142,13 +142,26 @@ export class ThreeFactory {
       throw new Error('there must be a color for each feature');
     }
 
-    const cmap = colormap({
-      colormap: 'jet',
-      nshades: 101,
-      format: 'hex'
-    }).map((val: string) => 
-      parseInt(val.substr(1), 16)
-    );
+    let cmap;
+    try {
+      cmap = colormap({
+        colormap: config?.features_cmap || 'jet',
+        nshades: 101,
+        format: 'hex'
+      }).map((val: string) => 
+        parseInt(val.substr(1), 16)
+      );
+    } catch(err) {
+      cmap = colormap({
+        colormap: 'jet',
+        nshades: 101,
+        format: 'hex'
+      }).map((val: string) => 
+        parseInt(val.substr(1), 16)
+      );
+    }
+
+    
     const arrowHelper = new ArrowHelper();
     const zero_vec = new Vector3();
 

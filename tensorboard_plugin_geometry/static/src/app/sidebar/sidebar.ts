@@ -20,12 +20,10 @@ export default class SidebarComponent extends Vue {
   checked: boolean[] = [];
   display: boolean[] = [];
   settings = Settings;
-  min_point_size = 0;
-  max_point_size = 3;
 
   data = {
     point_size: 50,
-    formatted_point_size: 1.5,
+    formatted_point_size: 5,
     exclusive: false,
     logdir: './',
     regex: '',
@@ -61,14 +59,14 @@ export default class SidebarComponent extends Vue {
   }
 
   updatePointSizeInput(new_value) {
-    if (new_value > this.max_point_size) {
-      new_value = this.max_point_size;
+    if (new_value > this.settings.max_point_size) {
+      new_value = this.settings.max_point_size;
     }
-    if (new_value < this.min_point_size) {
-      new_value = this.min_point_size;
+    if (new_value < this.settings.min_point_size) {
+      new_value = this.settings.min_point_size;
     }
 
-    this.data.point_size = new_value / (this.max_point_size - this.min_point_size) * 100 - this.min_point_size;
+    this.data.point_size = new_value / (this.settings.max_point_size - this.settings.min_point_size) * 100 - this.settings.min_point_size;
     
     this.data.formatted_point_size = this.getFormattedSize(new_value);
 
@@ -94,7 +92,7 @@ export default class SidebarComponent extends Vue {
   }
 
   getPointSize(size: number) {
-    return size / 100 * (this.max_point_size - this.min_point_size) + this.min_point_size;
+    return size / 100 * (this.settings.max_point_size - this.settings.min_point_size) + this.settings.min_point_size;
   }
 
   getFormattedSize(value) {

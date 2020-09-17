@@ -13,7 +13,8 @@ import {
   Points,
   Sphere,
   Box3,
-  Vector3, SphereBufferGeometry, MeshBasicMaterial
+  Vector3,
+  OrthographicCamera
 } from 'three';
 
 import {OrbitControls} from './orbit-controls';
@@ -22,6 +23,8 @@ import WithRender from './plot.html';
 
 import './plot.scss';
 import { Settings } from '../settings';
+import { ThreeFactory } from '../three-factory';
+import { CAMERA_TYPE, OrthograficCameraConfig, PerspectiveCameraConfig, ThreeConfig } from '../models/metadata';
 
 @WithRender
 @Component({
@@ -29,7 +32,7 @@ import { Settings } from '../settings';
 })
 export default class PlotComponent extends Vue {
   scene = new Scene();
-  camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
   renderer = new WebGLRenderer();
   controls = new OrbitControls( this.camera, this.renderer.domElement );
   last_width = 0;
@@ -57,7 +60,7 @@ export default class PlotComponent extends Vue {
     this.scene.add( axesHelper );
     this.scene.add( light );
 
-    this.controls = new OrbitControls( this.camera, this.renderer.domElement );    
+    this.controls = new OrbitControls( this.camera, this.renderer.domElement );
     this.controls.addEventListener('change', this.update);
 
     Settings.point_size.subscribe(this.updatePointSize);
@@ -97,8 +100,17 @@ export default class PlotComponent extends Vue {
       this.scene.add(this.$props.data.features);
     }
 
+    /////// update config ////////
+    this.updateConfig();
+
     //////// update camera position ////////
-    this.setCameraPosition();
+    if (this.camera instanceof PerspectiveCamera) {
+      this.setPerspCameraPosition();
+    }
+    if (this.camera instanceof OrthographicCamera) {
+      this.setOrthoCameraPosition();
+    }
+
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -115,18 +127,14 @@ export default class PlotComponent extends Vue {
     this.renderer.render(this.scene, this.camera);
   }
 
-  setCameraPosition(camera?: PerspectiveCamera) {
-    if (!camera) {
-      camera = this.camera;
+  setPerspCameraPosition() {
+    const config = this.$props.config as ThreeConfig;
+    if (!!config.camera && !!config.camera.position) {
+      return
     }
-    this.scene.updateWorldMatrix(false, true);
-    const bounds = new Box3();
-    
-    this.scene.traverse(obj => {
-      if (obj instanceof Points || obj instanceof Mesh) {
-        bounds.expandByObject(obj);
-      }
-    });
+
+    const camera = this.camera as PerspectiveCamera;
+    const bounds = this._getBoundingBox();
     
     const offset = 0.1;
     const bounding_sphere = new Sphere();
@@ -139,6 +147,94 @@ export default class PlotComponent extends Vue {
     
     camera.position.set(new_position.x, new_position.y, new_position.z);
     camera.lookAt(bounding_sphere.center);
+  }
+
+  setOrthoCameraPosition() {
+    const config = this.$props.config as ThreeConfig;
+    if (!!config.camera && !!config.camera.position) {
+      return
+    }
+
+    const camera = this.camera as OrthographicCamera;
+    const bounds = this._getBoundingBox();
+    
+    const offset = 0.1;
+    const bounding_sphere = new Sphere();
+    bounds.getBoundingSphere(bounding_sphere);
+
+    const width = (this.$el as HTMLElement).offsetWidth;
+    const height = (this.$el as HTMLElement).offsetHeight;
+    const aspect = width / height;
+
+    let max_side = Math.max(bounds.max.sub(bounds.min).x, bounds.max.sub(bounds.min).y);
+    max_side += max_side * offset;
+
+    camera.left = max_side * aspect / -2;
+    camera.right = max_side * aspect / 2;
+    camera.top = max_side / 2;
+    camera.bottom = max_side / -2;
+
+    const new_position = bounding_sphere.center.add(new Vector3(0,0, max_side));
+    camera.position.set(new_position.x, new_position.y, new_position.z);
+    camera.lookAt(bounding_sphere.center);
+  }
+
+  updateConfig() {
+    const config = this.$props.config as ThreeConfig;
+
+    //// update scene ////
+    if (!!config.scene && !!config.scene.background_color && config.scene.background_color.length === 3) {
+      this.scene.background = new Color(ThreeFactory._toHex(config.scene.background_color));
+    }
+
+    //// update camera ////
+    if (!!config.camera) {
+      // change camera type
+      if (!!config.camera.type && config.camera.type === CAMERA_TYPE.PERSPECTIVE && !(this.camera instanceof PerspectiveCamera)) {
+        const width = (this.$el as HTMLElement).offsetWidth;
+        const height = (this.$el as HTMLElement).offsetHeight;
+        this.camera = new PerspectiveCamera(50, width / height, 0.1, 1000);
+      } else if (!!config.camera.type && config.camera.type === CAMERA_TYPE.ORTHOGRAFIC && !(this.camera instanceof OrthographicCamera)) {
+        this.camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
+        this.camera.position.set(0,0,10);
+        this.camera.lookAt(0,0,0);
+        this.controls.dispose();
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.addEventListener('change', this.update);
+      }
+  
+      // change position
+      if (!!config.camera.position) {
+        this.camera.position.set(config.camera.position[0], config.camera.position[1], config.camera.position[2]);
+        this.camera.lookAt(0,0,0);
+      }
+
+      // change fov arguments
+      if (!!config.camera.far && // must be greater than 0
+        ((config.camera.near && config.camera.near < config.camera.far) || // near is set and smaller
+        (!config.camera.near && this.camera.near < config.camera.far)) // or camera as smaller near value
+      ) {
+        this.camera.far = config.camera.far;
+      }
+      if (!!config.camera.near && // must be greater than 0
+        ((config.camera.far && config.camera.near < config.camera.far) || // far is set and greater
+        (!config.camera.far && config.camera.near < this.camera.far)) // or camera as smaller near value) { // must be greater than 0
+      ){
+        this.camera.near = config.camera.near;
+      }
+      // perspective specific args
+      if (this.camera instanceof PerspectiveCamera) {
+        this.camera.fov = (config.camera as PerspectiveCameraConfig).fov || 50;
+      }
+      // orthografic specific args
+      if (this.camera instanceof OrthographicCamera) {
+        this.camera.left = (config.camera as OrthograficCameraConfig).left || -1;
+        this.camera.right = (config.camera as OrthograficCameraConfig).right || 1;
+        this.camera.top = (config.camera as OrthograficCameraConfig).top || 1;
+        this.camera.bottom = (config.camera as OrthograficCameraConfig).bottom || -1;
+      }
+
+    }
   }
 
   screenshot() {    
@@ -155,6 +251,17 @@ export default class PlotComponent extends Vue {
 
     //remove the link when done
     document.body.removeChild(link);
+  }
 
+  _getBoundingBox() {
+    const bounds = new Box3();
+    this.scene.updateWorldMatrix(false, true);
+    
+    this.scene.traverse(obj => {
+      if (obj instanceof Points || obj instanceof Mesh) {
+        bounds.expandByObject(obj);
+      }
+    });
+    return bounds;
   }
 }

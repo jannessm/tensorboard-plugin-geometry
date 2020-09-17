@@ -40,7 +40,6 @@ export interface CameraConfig {
 
 export interface PerspectiveCameraConfig extends CameraConfig {
   fov?: number;
-  aspect?: number;
 }
 
 export interface OrthograficCameraConfig extends CameraConfig {

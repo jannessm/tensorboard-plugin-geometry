@@ -66,7 +66,6 @@ export class DataProvider {
   }
 
   async getData(id: number): Promise<StepData | undefined> {
-    console.log('get step', id, this.steps_data[id]);
     if (!this.steps_data[id] && id >= 0) {
       const data = await ApiService.getData(this.run, this.tag, this.steps[id], this.steps_metadata[id]);
 
