@@ -16,9 +16,11 @@ def tests(writer):
   suite.run_test('negative steps', test_negative_steps)
   suite.run_test('arbitrary and multiple steps', test_arbitrary_steps)
   suite.run_test('description', test_description)
-  suite.run_test('cmap configs', test_cmap_config)
+  suite.run_test('vert cmap configs', test_cmap_vertices_config)
+  suite.run_test('feat cmap configs', test_cmap_features_config)
   suite.run_test('scene configs', test_threejs_config)
-  suite.run_test('camera configs', test_camera_config)
+  suite.run_test('normal orthografic camera', test_camera_config)
+  suite.run_test('orthografic configs', test_orthografic_config)
 
   return suite
 
@@ -50,27 +52,25 @@ def test_description(writer):
       description='# this is a markdown description\nwith a lot of `text`',
       global_step=i)
 
-def test_cmap_config(writer):
+def test_cmap_vertices_config(writer):
   pos, wss = get_rand_vecs(vertices)
-  for i in range(5):
-    writer.add_geometry(
-      'test_cmap',
-      pos.reshape(1, vertices, 3),
-      features=wss.reshape(1, vertices, 3),
-      config_dict={
-        "vertices_cmap": 'summer',
-      },
-      global_step=i)
-  
-  for i in range(5, 10):
-    writer.add_geometry(
-      'test_cmap',
-      pos.reshape(1, vertices, 3),
-      features=wss.reshape(1, vertices, 3),
-      config_dict={
-        "features_cmap": 'cool',
-      },
-      global_step=i)
+  writer.add_geometry(
+    'test_cmap_vert',
+    pos.reshape(1, vertices, 3),
+    features=wss.reshape(1, vertices, 3),
+    config_dict={
+      "vertices_cmap": 'summer',
+    })
+
+def test_cmap_features_config(writer):
+  pos, wss = get_rand_vecs(vertices)
+  writer.add_geometry(
+    'test_cmap_feat',
+    pos.reshape(1, vertices, 3),
+    features=wss.reshape(1, vertices, 3),
+    config_dict={
+      "features_cmap": 'cool',
+    })
 
 def test_threejs_config(writer):
   pos, wss = get_rand_vecs(vertices)
@@ -104,9 +104,12 @@ def test_camera_config(writer):
       }
     },
     global_step=0)
+
+def test_orthografic_config(writer):
+  pos, wss = get_rand_vecs(vertices)
   # use presets for orthografic
   writer.add_geometry(
-    'test_camera',
+    'test_orthografic',
     pos.reshape(1, vertices, 3),
     features=wss.reshape(1, vertices, 3),
     config_dict={

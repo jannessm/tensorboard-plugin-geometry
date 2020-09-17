@@ -1,3 +1,5 @@
+import sys
+
 class Suite:
 
   divider = '------------------%s------------------'
@@ -14,7 +16,8 @@ class Suite:
       callback(self.writer)
       self.succeeded += 1
       print('✓')
-    except:
+    except Exception as err:
       self.failed += 1
       print('❌')
+      raise err
 

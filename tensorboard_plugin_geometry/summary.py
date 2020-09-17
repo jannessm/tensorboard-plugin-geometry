@@ -14,6 +14,7 @@ def add_geometry(
   vertices,
   vert_colors=None,
   faces=None,
+  face_colors=None,
   features=None,
   feat_colors=None,
   config_dict=None,
@@ -31,18 +32,20 @@ def add_geometry(
         vertices (torch.Tensor): List of the 3D coordinates of vertices.
         vert_colors (torch.Tensor): List of colors from 0 to 255 for each vertex.
         faces (torch.Tensor): Indices of vertices within each triangle. (Optional)
-        features (torch.Tensor): feature vectors for each vertex
-        feat_colors (torch.Tensor): List of colors from 0 to 255 for each feature.
-        config_dict: Dictionary with ThreeJS configuration.
-        global_step (int): Global step value to record
+        face_color (torch.Tensor): List of colors for each sample in range [0,255]. (Optional)
+        features (torch.Tensor): feature vectors for each vertex (Optional)
+        feat_colors (torch.Tensor): List of colors from 0 to 255 for each feature. (Optional)
+        config_dict: Dictionary with ThreeJS configuration. (Optional)
+        global_step (int): Global step value to record (Optional)
         walltime (float): Optional override default walltime (time.time())
-          seconds after epoch of event
+          seconds after epoch of event (Optional)
         description (string): A longform readable description of the summary data. Markdown is
-          supported.
+          supported. (Optional)
     Shape:
         vertices: :math:`(B, N, 3)`. (batch, number_of_vertices, channels)
         vert_colors: :math:`(B, N, 3)`. (batch, number_of_vertices, 3) with type `uint8`
         faces: :math:`(B, N, 3)`. The values should lie in [0, number_of_vertices] for type `uint32`.
+        face_colors: :math:`(B, 3)`. The values should lie in [0, 255] for type `uint8`.
         features: :math:`(B, N, 3)`. (batch, number_of_features, channels)
         feat_colors: :math:`(B, N, 3)`. (batch, number_of_features, 3) with type `uint8`
   '''
@@ -64,6 +67,10 @@ def add_geometry(
   if faces is not None and faces.shape[2] != 3:
     raise ValueError("Faces must be of shape [B, N, 3] but got %s" % str(faces.shape))
 
+  # check face colors
+  if face_colors is not None and vertices.shape[0] != face_colors.shape[0]:
+    raise ValueError("Numbers of samples and colors for each sample must match, but got %s and %s" % (str(vertices.shape), str(face_colors)))
+
   # check features
   if features is not None and features.shape[2] != 3:
     raise ValueError("Features for vertices must be of shape [B, N, 3], but got %s" % str(features.shape))
@@ -84,6 +91,7 @@ def add_geometry(
             vertices,
             vert_colors,
             faces,
+            face_colors,
             features,
             feat_colors,
             description,
@@ -97,10 +105,11 @@ def add_geometry(
 def _geometry(
   tag,
   vertices,
-  vert_colors,
-  faces,
-  features,
-  feat_colors,
+  vert_colors=None,
+  faces=None,
+  face_colors=None,
+  features=None,
+  feat_colors=None,
   description=None,
   config_dict=None):
   '''Outputs a merged `Summary` protocol buffer with meshes/point clouds.
@@ -112,6 +121,8 @@ def _geometry(
         vertex. Must be in range [0, 255] for type `uint8`.
       faces: Tensor of shape `[B, number_of_faces, 3]` containing indices of
         vertices within each triangle.
+      feat_colors: Tensor of shape `[B, 3]` representing colors for each
+        sample. Must be in range [0, 255] for type `uint8`.
       features: Tensor of shape `[B, number_of_vertices, 3]` containing 3D features for each
         vertex.
       feat_colors: Tensor of shape `[B, number_of_vertices, 3]` representing colors for each
@@ -127,6 +138,7 @@ def _geometry(
       (vertices, GeoPluginData.VERTICES),
       (vert_colors, GeoPluginData.VERT_COLORS),
       (faces, GeoPluginData.FACES),
+      (face_colors, GeoPluginData.FACE_COLORS),
       (features, GeoPluginData.FEATURES),
       (feat_colors, GeoPluginData.FEAT_COLORS)
   ]
@@ -179,13 +191,44 @@ def _get_tensor_summary(name, description, tensor, content_type, components, jso
       tensor.shape,
       json_config)
 
-  tensor = TensorProto(dtype='DT_FLOAT',
-                        float_val=tensor.reshape(-1).tolist(),
-                        tensor_shape=TensorShapeProto(dim=[
-                            TensorShapeProto.Dim(size=tensor.shape[0]),
-                            TensorShapeProto.Dim(size=tensor.shape[1]),
-                            TensorShapeProto.Dim(size=tensor.shape[2]),
-                        ]))
+  if (
+    content_type == GeoPluginData.VERTICES or
+    content_type == GeoPluginData.FEATURES  
+  ):
+    tensor = TensorProto(dtype='DT_FLOAT',
+                          float_val=tensor.reshape(-1).float().tolist(),
+                          tensor_shape=TensorShapeProto(dim=[
+                              TensorShapeProto.Dim(size=tensor.shape[0]),
+                              TensorShapeProto.Dim(size=tensor.shape[1]),
+                              TensorShapeProto.Dim(size=tensor.shape[2]),
+                          ]))
+  elif (
+    content_type == GeoPluginData.VERT_COLORS or
+    content_type == GeoPluginData.FEAT_COLORS
+  ):
+    tensor = TensorProto(dtype='DT_UINT8',
+                          int_val=tensor.reshape(-1).type(torch.uint8).tolist(),
+                          tensor_shape=TensorShapeProto(dim=[
+                              TensorShapeProto.Dim(size=tensor.shape[0]),
+                              TensorShapeProto.Dim(size=tensor.shape[1]),
+                              TensorShapeProto.Dim(size=tensor.shape[2]),
+                          ]))
+  elif content_type == GeoPluginData.FACE_COLORS:
+    tensor = TensorProto(dtype='DT_UINT8',
+                          int_val=tensor.reshape(-1).type(torch.uint8).tolist(),
+                          tensor_shape=TensorShapeProto(dim=[
+                              TensorShapeProto.Dim(size=tensor.shape[0]),
+                              TensorShapeProto.Dim(size=tensor.shape[1])
+                          ]))
+  elif content_type == GeoPluginData.FACES:
+    tensor = TensorProto(dtype='DT_INT32',
+                          int_val=tensor.reshape(-1).int().tolist(),
+                          tensor_shape=TensorShapeProto(dim=[
+                              TensorShapeProto.Dim(size=tensor.shape[0]),
+                              TensorShapeProto.Dim(size=tensor.shape[1]),
+                              TensorShapeProto.Dim(size=tensor.shape[2]),
+                          ]))
+
 
   tensor_summary = Summary.Value(
       tag=metadata.get_instance_name(name, content_type),

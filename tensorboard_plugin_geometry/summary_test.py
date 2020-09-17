@@ -30,6 +30,7 @@ def accumulate_results(suites):
   return succeeded, failed
 
 print(' ')
+print('start testing')
 s1 = test('./logs/parameters', ParameterTests)
 s2 = test('./logs/point_clouds', PointCloudTests)
 s3 = test('./logs/meshes', MeshTests)
@@ -38,3 +39,4 @@ succeeded, failed = accumulate_results([s1, s2, s3])
 print('')
 print(s1.divider % '')
 print('succeeded: %d     failed: %d' % (succeeded, failed))
+print('')

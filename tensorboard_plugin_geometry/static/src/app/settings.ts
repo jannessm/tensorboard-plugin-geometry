@@ -1,7 +1,7 @@
 import { Observeable } from "./models/observeable";
 
 class SettingsClass {
-  point_size = new Observeable<number>(0.1);
+  point_size = new Observeable<number>(1.5);
   filteredRuns = new Observeable<string[]>([]);
 
   display(run: string): boolean {

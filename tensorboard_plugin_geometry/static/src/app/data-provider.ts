@@ -66,12 +66,14 @@ export class DataProvider {
           data.vertices,
           this.steps_metadata[id].FACES.shape,
           data.faces,
-          data.vert_colors),
+          data.vert_colors,
+          this.steps_metadata[id].config),
         features: ThreeFactory.createFeatureArrows(
           this.steps_metadata[id].VERTICES.shape,
           data.vertices,
           data.features,
-          data.feat_colors)
+          data.feat_colors,
+          this.steps_metadata[id].config)
       }
     }
 

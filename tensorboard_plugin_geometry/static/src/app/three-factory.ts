@@ -2,6 +2,7 @@ import { BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshBasicMa
 import { ArrowHelper } from "./arrow";
 import * as colormap from 'colormap';
 import { Settings } from "./settings";
+import { ThreeConfig } from "./models/metadata";
 
 export class ThreeFactory {
 
@@ -10,7 +11,8 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     face_shape?: number[],
     faces_arr?: Uint32Array,
-    vert_colors?: Uint8Array
+    vert_colors?: Uint8Array,
+    config?: ThreeConfig
   ): Group | Points {
     if (!vertices_shape || !vertices_arr || vertices_arr.length <= 0 || vertices_shape[1] <= 0) {
       throw new Error('no vertices provided');
@@ -33,32 +35,37 @@ export class ThreeFactory {
     }
 
     if (!face_shape || !faces_arr || face_shape.length === 0 || faces_arr.length === 0) {
-      return ThreeFactory.createPointCloud(vertices_shape, vertices_arr, vert_colors);
+      return ThreeFactory.createPointCloud(
+        vertices_shape,
+        vertices_arr,
+        vert_colors,
+        config?.vertices_cmap
+      );
     }
 
     return ThreeFactory.createMesh(
       vertices_shape,
       face_shape,
       vertices_arr,
-      faces_arr
+      faces_arr // no config required, since colors are not supported
     );
   }
 
   static createPointCloud(
     vertices_shape: number[],
     vertices_arr: Float32Array,
-    colors?: Uint8Array
+    colors?: Uint8Array,
+    vertices_cmap?: string
   ): Points {
-    console.log(vertices_shape, vertices_arr.length, colors);
     const point_size = Settings.point_size.value;
 
     const points_geo = new BufferGeometry();
-    points_geo.setAttribute( 'position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
+    points_geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
     
     let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
     
-    const color_arr = ThreeFactory._getColors(vertices_shape[0] * vertices_shape[1], colors);
-    points_geo.setAttribute( 'color', new Float32BufferAttribute(color_arr, 3));
+    const color_arr = ThreeFactory._getColors(vertices_shape[0] * vertices_shape[1], colors, vertices_cmap);
+    points_geo.setAttribute('color', new Float32BufferAttribute(color_arr, 3));
     
     return new Points(points_geo, points_mat);
   }
@@ -96,7 +103,8 @@ export class ThreeFactory {
     vertices: number[],
     vertices_arr: Float32Array,
     features_arr: Float32Array,
-    feat_colors?: Uint8Array
+    feat_colors?: Uint8Array,
+    config?: ThreeConfig
   ): Group | undefined {
     if (!features_arr || features_arr.length == 0) {
       return;
@@ -150,7 +158,7 @@ export class ThreeFactory {
           features_arr[i * vertices[1] * 3 + j * 3 + 2]
         );
 
-        let color = [255, 0, 0];
+        let color;
         if (!!feat_colors && feat_colors?.length > 0) {
           color = [
             feat_colors[i * vertices[1] * 3 + j * 3],
@@ -170,7 +178,7 @@ export class ThreeFactory {
     return arrowHelper.finalize();
   }
 
-  static _getColors(vertices: number, colors?: Uint8Array): number[] {
+  static _getColors(vertices: number, colors?: Uint8Array, cmap?: string): number[] {
     const color_arr: number[] = [];
     
     // if colors are given
@@ -186,8 +194,8 @@ export class ThreeFactory {
         
     // else apply colormap
     } else {
-      const cmap = colormap({
-        colormap: 'jet',
+      const colors = colormap({
+        colormap: cmap || 'jet',
         nshades: vertices,
         format: 'hex'
       }).map((val: string) => 
@@ -195,7 +203,7 @@ export class ThreeFactory {
       );
       
       for (let i = 0; i < vertices; i++) {
-        const new_col = new Color(cmap[i]);
+        const new_col = new Color(colors[i]);
         color_arr.push(new_col.r, new_col.g, new_col.b);
       }
     }
