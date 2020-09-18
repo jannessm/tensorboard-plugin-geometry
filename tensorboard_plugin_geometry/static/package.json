@@ -4,7 +4,7 @@
   "description": "display geometries in tensorboard",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "rm -rf ./bundle/assets && rm -rf ./bundle/index.js && webpack -p --config webpack.prod.config.js",
     "start": "webpack -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
