@@ -1,5 +1,12 @@
 @import '~vue-material/dist/theme/engine';
 
+@include md-register-theme("default", (
+  primary: #f57c00, // The primary color of your brand
+  accent: #f57c00 // The secondary color of your brand
+));
+
+@import "~vue-material/dist/theme/all"; // Apply the theme
+
 h3 {
   font-size: 14px;
   font-weight: normal;

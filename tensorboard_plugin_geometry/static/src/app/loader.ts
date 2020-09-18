@@ -4,6 +4,7 @@ import { TagsResponse } from "./models/responses";
 import { RunSidebar } from "./models/run";
 import { RawTags, Tags } from "./models/tag";
 import {markdown} from 'markdown';
+import { colorScale } from "./color-scale";
 
 export class LoaderClass {
   logdir = new Observeable<string>('./');
@@ -17,6 +18,7 @@ export class LoaderClass {
   }
 
   async reload() {
+    console.log('reload_data');
     const tags: TagsResponse = await ApiService.getTags();
 
     if(this._tags_data !== tags.data){
@@ -30,13 +32,15 @@ export class LoaderClass {
   // sidebar.ts
   private async _updateRunData(data: RawTags) {
     this._tags_data = data;
+    colorScale.setDomain(Object.keys(data));
     
     const runs: RunSidebar[] = [];
     Object.keys(data).forEach(run => {
       runs.push({
         name: run,
         display: true,
-        checked: true
+        checked: true,
+        color: colorScale.getColor(run)
       });
     });
     this.runs.next(runs);

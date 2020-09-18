@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import { DataManager } from '../data-manager';
 import { loader } from '../loader';
 import { RunSidebar } from '../models/run';
 
@@ -19,9 +20,13 @@ export default class SidebarComponent extends Vue {
   runs: RunSidebar[] = [];
   colors: string[] = [];
   settings = Settings;
+  load_interval:any = undefined;
+  apply_changes:any = undefined;
+  showSnackbar = false;
 
   data = {
     auto_load: false,
+    load_interval: '30',
     loading: false,
     point_size: 50,
     formatted_point_size: 5,
@@ -92,9 +97,33 @@ export default class SidebarComponent extends Vue {
     return parseFloat(value.toLocaleString('en', {maximumFractionDigits: 4}));
   }
 
+  toggleReload() {
+    if (this.data.auto_load) {
+      this.changeInterval();
+    } else {
+      clearInterval(this.load_interval);
+      this.load_interval = undefined;
+    }
+  }
+  
+  changeInterval() {
+    clearTimeout(this.apply_changes);
+    let secs = parseInt(this.data.load_interval);
+    if (secs < 15) {
+      secs = 15;
+      this.data.load_interval = (15).toString();
+      this.showSnackbar = true;
+    }
+    this.apply_changes = setTimeout(() => {
+      clearInterval(this.load_interval);
+      this.load_interval = setInterval(this.updateData, secs * 1000);
+    }, 1000);
+  }
+
   async updateData() {
     this.data.loading = true;
     await loader.reload();
+    await DataManager.updateProviders();
     this.data.loading = false;
   }
 } 

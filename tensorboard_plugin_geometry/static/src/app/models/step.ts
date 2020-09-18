@@ -2,16 +2,13 @@ import { Group, Points } from "three";
 import { Metadata, ThreeConfig } from "./metadata";
 
 export interface StepMetadata {
-  step: number;
-  wall_time: number;
-  description: string;
-  config: ThreeConfig;
-  VERTICES: Metadata;
-  VERT_COLORS: Metadata;
-  FACES: Metadata;
-  FACE_COLORS: Metadata;
-  FEATURES: Metadata;
-  FEAT_COLORS: Metadata;
+  first_wall_time: number;
+  VERTICES?: Metadata;
+  VERT_COLORS?: Metadata;
+  FACES?: Metadata;
+  FACE_COLORS?: Metadata;
+  FEATURES?: Metadata;
+  FEAT_COLORS?: Metadata;
 }
 
 export interface StepData {
@@ -31,16 +28,9 @@ export interface RawStep {
 
 export interface Steps {
   steps: {
-    [step_id: number]: {
-      first_wall_time: number;
-      VERTICES: Metadata;
-      VERT_COLORS: Metadata;
-      FACES: Metadata;
-      FACE_COLORS: Metadata;
-      FEATURES: Metadata;
-      FEAT_COLORS: Metadata;
-    }
+    [step_id: number]: StepMetadata;
   }
   config?: ThreeConfig; // are always the same for all steps
   description?: string; // same here
+  step_ids: number[];
 }

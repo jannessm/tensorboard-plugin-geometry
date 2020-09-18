@@ -9,4 +9,5 @@ export interface RunSidebar {
   name: string;
   display: boolean;
   checked: boolean;
+  color: string;
 }

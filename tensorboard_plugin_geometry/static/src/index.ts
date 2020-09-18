@@ -12,6 +12,7 @@ import {
   MdIcon,
   MdProgress,
   MdRadio,
+  MdSnackbar,
 } from 'vue-material/dist/components';
 
 Vue.use(MdButton);
@@ -23,6 +24,7 @@ Vue.use(MdField);
 Vue.use(MdIcon);
 Vue.use(MdProgress);
 Vue.use(MdRadio);
+Vue.use(MdSnackbar);
 
 import MainComponent from './app/main/main';
 import './typings';

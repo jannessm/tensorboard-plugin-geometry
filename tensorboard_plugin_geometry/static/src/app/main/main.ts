@@ -21,6 +21,7 @@ import { loader } from '../loader';
 export default class MainComponent extends Vue {
   tag_regex = '';
   last_regex = '';
+  loading = true;
   data = {
     tags: new Array<Tags>()
   }
@@ -35,6 +36,7 @@ export default class MainComponent extends Vue {
       });
 
       this.data.tags = tags;
+      this.loading = false;
     });
   }
 

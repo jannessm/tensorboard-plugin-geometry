@@ -1,0 +1,31 @@
+
+$primary-color: #f57c00;
+
+.primary-color-bg {
+  background-color: $primary-color;
+}
+
+$palette: (
+  color1: #ff7043, // orange
+  color2: #0077bb, // blue
+  color3: #cc3311, // red
+  color4: #33bbee, // cyan
+  color5: #ee3377, // magenta
+  color6: #009988, // teal
+  color7: #bbbbbb, // grey
+);
+
+@each $color, $value in $palette {
+  .#{$color}.md-checkbox {
+    &.md-checked .md-checkbox-container, .md-radio-container::after  {
+      background-color: $value !important;
+    }
+    .md-checkbox-container, .md-radio-container {
+      border-color: $value !important;
+    }
+  }
+
+  .#{$color}.header-run {
+    background-color: $value !important;
+  }
+}

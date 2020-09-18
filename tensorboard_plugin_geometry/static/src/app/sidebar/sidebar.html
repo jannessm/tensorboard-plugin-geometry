@@ -3,10 +3,15 @@
   <div class="sidebar-section">
     <h3>Reload</h3>
     <div class="reload">
-      <md-checkbox v-model="data.auto_load">Reload Data</md-checkbox>
+      <md-checkbox v-model="data.auto_load" @change="toggleReload">Reload Data</md-checkbox>
       <md-field>
         <label>Reload Period</label>
-        <md-input type="number" :disabled="!data.auto_load"></md-input>
+        <md-input type="number"
+          :disabled="!data.auto_load"
+          v-model="data.load_interval"
+          @change="changeInterval">
+        </md-input>
+        <span class="md-suffix">sec</span>
       </md-field>
       <md-button class="md-icon-button" :class="{'loading': data.loading}" @click="updateData">
         <md-icon>refresh</md-icon>
@@ -36,12 +41,25 @@
 
     <div v-for="run in runs">
       <span v-if="run.display">
-        <md-checkbox v-model="run.checked" @change="data.exclusive = false"></md-checkbox>
-        <md-radio class="double_checkbox" v-model="data.exclusive" :value="run" @change="exclusify(run)">{{ run.name }}</md-radio>
+        <md-checkbox
+          v-model="run.checked"
+          @change="data.exclusive = false"
+          :class="run.color"></md-checkbox>
+        <md-radio
+          class="double_checkbox"
+          v-model="data.exclusive"
+          :value="run"
+          :class="run.color"
+          @change="exclusify(run)">{{ run.name }}</md-radio>
       </span>
     </div>
 
     <md-button @click="toggleAll()" class="sidebar-button toggle">TOGGLE ALL RUNS</md-button>
     <span class="logdir">{{ data.logdir }}</span>
   </div>
+
+  <md-snackbar md-position="center" :md-duration="4000" :md-active.sync="showSnackbar" md-persistent>
+    <span><md-icon style="color: red;">warning</md-icon> Reload interval must be at least 15 sec.</span>
+    <md-button class="md-primary" @click="showSnackbar = false">Ok</md-button>
+  </md-snackbar>
 </div>

@@ -1,3 +1,5 @@
+@import '../colors.scss';
+
 .md-slider {
   box-sizing: border-box;
   width: 100%;
@@ -9,7 +11,7 @@
 
     
     .md-progress-bar-fill {
-      background-color: #f57000 !important;
+      background-color: $primary-color !important;
       transition: none;
     }
   }
@@ -29,7 +31,7 @@
       height: 12px;
       width: 12px;
       border-radius: 50%;
-      background-color: #f57000;
+      background-color: $primary-color;
     }
 
     &:focus {

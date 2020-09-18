@@ -20,6 +20,14 @@ class DataManagerClass {
 
     return this.providers[run][tag];
   }
+
+  async updateProviders() {
+    Object.keys(this.providers).forEach(run => {
+      Object.values(this.providers[run]).forEach(provider => {
+        provider.updateMetaData();
+      })
+    });
+  }
 }
 
 export const DataManager = new DataManagerClass();

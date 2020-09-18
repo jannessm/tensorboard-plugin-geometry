@@ -7,8 +7,8 @@ import { ThreeConfig } from "./models/metadata";
 export class ThreeFactory {
 
   static createGeometry(
-    vertices_shape: number[],
-    vertices_arr: Float32Array,
+    vertices_shape?: number[],
+    vertices_arr?: Float32Array,
     face_shape?: number[],
     faces_arr?: Uint32Array,
     face_colors?: number[],
@@ -89,7 +89,7 @@ export class ThreeFactory {
     for (let i = 0; i < vertices_shape[0]; i++) {
       // add points & mesh
       let mesh_geo = new BufferGeometry();
-      const mesh_mat = new MeshBasicMaterial( { color: 0xf57000 } );
+      const mesh_mat = new MeshBasicMaterial( { color: 0xf57c00 } );
       
       if (!!face_colors && !!face_colors_arr && face_colors_arr.length > 0) {
         console.log(face_colors_arr[i * 3],
@@ -121,14 +121,17 @@ export class ThreeFactory {
   }
 
   static createFeatureArrows(
-    vertices: number[],
-    vertices_arr: Float32Array,
-    features_arr: Float32Array,
+    vertices?: number[],
+    vertices_arr?: Float32Array,
+    features_arr?: Float32Array,
     feat_colors?: Uint8Array,
     config?: ThreeConfig
   ): Group | undefined {
+    if (!vertices || vertices.length == 0 || !vertices_arr || vertices_arr.length == 0) {
+      throw new Error('no vertices provided for feature arrows');
+    }
     if (!features_arr || features_arr.length == 0) {
-      return;
+      throw new Error("can't create features without features");
     }
 
     if (

@@ -6,9 +6,11 @@ import WithRender from './data-run.html'
 import './data-run.scss';
 import SliderComponent from '../slider/slider';
 import PlotComponent from '../plot/plot';
-import { StepData } from '../models/step';
+import { StepData, Steps } from '../models/step';
 import { DataManager } from '../data-manager';
 import { loader } from '../loader';
+import { Subscriber } from '../models/observeable';
+import { colorScale } from '../color-scale';
 
 @WithRender
 @Component({
@@ -24,6 +26,8 @@ export default class DataRunComponent extends Vue {
   dataManager = DataManager;
   last_tag = '';
   last_run = '';
+  steps: Steps = {steps: {}, step_ids: []};
+  steps_subscription: Subscriber | undefined;
   
   data = {
     loading: true,
@@ -31,46 +35,35 @@ export default class DataRunComponent extends Vue {
     current_step_id: -1,
     current_step_label: 0,
     current_wall_time: new Date(),
-    max_step: () => {
-      const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-      if (provider?.initialized.state() === 'resolved') {
-        return provider?.steps_metadata.length - 1
-      }
-
-      return 0;
-    },
+    max_step: 0,
     plot_height: (this.$el as HTMLElement)?.offsetWidth + 'px',
     fullscreen: false,
     plot_data: {},
-    plot_config: () => {
-      const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-      if (provider) {
-        return provider.getConfigById(this.data.current_step_id)
-      }
-      return {};
-    }
+    plot_config: {},
+    color: ''
   };
 
   created() {
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
-    provider?.initialized?.then(() => {
-        this.update(provider.steps.length - 1);
-      });
+    this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
 
     loader.runs.subscribe(runs => {
       // get display status from sidebar
       const run = runs.find(val => val.name === this.$props.run.name)
       const display = run.display && run.checked;
       this.data.display = display ? '' : 'display: none;';
+      this.data.color = colorScale.getColor(this.$props.run.name);
     });
   }
 
+  // vue event
   updated() {
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+
+    // check if tag or run has changed
     if (provider && this.last_run !== this.$props.run || this.last_tag !== this.$props.tag) {
-      provider?.initialized?.then(() => {
-        this.update(provider.steps.length - 1);
-      });
+      this.steps_subscription?.unsubscribe();
+      this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
     }
@@ -84,14 +77,14 @@ export default class DataRunComponent extends Vue {
   }
 
   updateStep(new_value: number) {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+    this.data.current_step_label = this.steps.step_ids[new_value];
     
-    // update header
-    if (!!provider) {
-      provider.initialized.then(() => {
-        this.data.current_step_label = provider.steps_metadata[new_value].step;
-        this.data.current_wall_time = new Date(provider.getWalltimeById(new_value) * 1000);
-      });
+    // if current label is in steps (important for step-up)
+    if (Object.keys(this.steps.steps)
+      .map(val => parseInt(val))
+      .includes(this.data.current_step_label)
+    ) {
+      this.data.current_wall_time = new Date(this.steps.steps[this.data.current_step_label].first_wall_time * 1000);
     }
   }
 
@@ -99,7 +92,7 @@ export default class DataRunComponent extends Vue {
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     if (this.data.current_step_id >= 0 && !!provider) {
       try {
-        this.data.plot_data = await provider.getData(this.data.current_step_id) as StepData;
+        this.data.plot_data = await provider.getData(this.data.current_step_label) as StepData;
       } catch(err) {
         console.log(err);
       }
@@ -128,6 +121,23 @@ export default class DataRunComponent extends Vue {
   getScreenshot() {
     const plot = this.$children.filter(val => val.$el.className.indexOf('plot') >= 0)[0];
     (plot as PlotComponent).screenshot();
+  }
+
+  handleStepsMetadata(steps: Steps) {
+    // if current step is last one 
+    if (this.data.current_step_id === this.data.max_step){
+      this.data.current_step_id = steps.step_ids.length - 1;
+    }
+
+    // set boundaries
+    this.data.max_step = steps.step_ids.length - 1;
+    
+    // set meta data
+    this.data.plot_config = steps.config || {};
+    
+    this.steps = steps;
+
+    this.update(this.data.current_step_id);
   }
 
 }
