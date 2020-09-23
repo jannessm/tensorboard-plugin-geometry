@@ -12,6 +12,10 @@ Main features:
 Known issues:
  * large geometries (above 40K vertices) with feature vectors need some time to be loaded and visualized
  * faces cannot be colored separately. Either use point clouds or color the whole mesh (see Usage).
+ 
+Futute features:
+ - [ ] Save states in cookies
+ - [ ] Wireframe setting for meshes (should then include colored points)
   
 
 ## Installation
