@@ -5,3 +5,10 @@
     display: contents;
   }
 }
+
+
+@media(max-width: 1135px) {
+  #main {
+    width: calc(100% - 260px);
+  }
+}

@@ -5,16 +5,38 @@ import { RunSidebar } from "./models/run";
 import { RawTags, Tags } from "./models/tag";
 import {markdown} from 'markdown';
 import { colorScale } from "./color-scale";
+import { URLParser } from "./url-parser";
 
+/**
+ * handle all data that needs to be loaded asyncly
+ * 
+ * tags, runs, logdir, regexfilter
+ */
 export class LoaderClass {
   logdir = new Observeable<string>('./');
   runs = new Observeable<RunSidebar[]>([]);
   tags = new Observeable<Tags[]>([]);
 
+  regexInput = new Observeable<string>('');
+  tagFilter = new Observeable<string>('');
+
   _tags_data: RawTags = {};
 
   constructor() {
     this.reload();
+    this.reloadFilters();
+  }
+
+  reloadFilters() {
+    const params = ['regexInput', 'tagFilter'];
+
+    params.forEach(param => {
+      const regex = URLParser.getUrlParam('regexInput');
+
+      if (regex && regex !== this[param].value) {
+        this[param].next(regex);
+      }
+    });
   }
 
   async reload() {

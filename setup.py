@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 url = 'https://github.com/jannessm/tensorboard-plugin-geometry'
 
@@ -23,7 +23,8 @@ setuptools.setup(
 	install_requires=parse_requirements("requirements.txt"),
     packages=["tensorboard_plugin_geometry"],
     package_data={
-        "tensorboard_plugin_geometry": ["static/bundle/**"],
+        "tensorboard_plugin_geometry": ["static/bundle/*"],
+        "tensorboard_plugin_geometry": ["static/bundle/assets/*"],
     },
     entry_points={
         "tensorboard_plugins": [
