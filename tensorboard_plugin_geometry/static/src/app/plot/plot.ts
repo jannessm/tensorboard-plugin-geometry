@@ -14,7 +14,8 @@ import {
   Sphere,
   Box3,
   Vector3,
-  OrthographicCamera
+  OrthographicCamera,
+  MeshBasicMaterial
 } from 'three';
 
 import {OrbitControls} from './orbit-controls';
@@ -64,6 +65,27 @@ export default class PlotComponent extends Vue {
     this.controls.addEventListener('change', this.update);
 
     Settings.point_size.subscribe(this.updatePointSize);
+
+    Settings.show_features.subscribe(display => {
+      this.features.map(group => group.visible = display);
+      this.update();
+    });
+    Settings.show_vertices.subscribe(display => {
+      this.geometries.map(group => group.visible = display);
+      this.update();
+    });
+    Settings.show_wireframe.subscribe(display => {
+      this.geometries.forEach(group => {
+        if (group instanceof Group) {
+          (group as Group).traverseVisible(mesh => {
+            if (mesh instanceof Mesh) {
+              (mesh.material as MeshBasicMaterial).wireframe = display;
+            }
+          });
+        }
+      });
+      this.update();
+    });
   }
   
   update() {

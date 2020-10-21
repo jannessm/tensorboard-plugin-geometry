@@ -30,6 +30,9 @@ export default class SidebarComponent extends Vue {
     exclusive: false,
     logdir: './',
     regex: '',
+    show_vertices: true,
+    show_wireframe: true,
+    show_features: true,
   }
 
   mounted() {
@@ -50,6 +53,22 @@ export default class SidebarComponent extends Vue {
     loader.reloadContainer.isReloading$.subscribe(async (loading) => {
       if (loading) {
         await DataManager.updateProviders();
+      }
+    });
+
+    this.settings.show_vertices.subscribe(val => {
+      if (this.data.show_vertices !== val) {
+        this.data.show_vertices = val;
+      }
+    });
+    this.settings.show_features.subscribe(val => {
+      if (this.data.show_features !== val) {
+        this.data.show_features = val;
+      }
+    });
+    this.settings.show_wireframe.subscribe(val => {
+      if (this.data.show_wireframe !== val) {
+        this.data.show_wireframe = val;
       }
     });
   }
@@ -112,4 +131,6 @@ export default class SidebarComponent extends Vue {
   getFormattedSize(value) {
     return parseFloat(value.toLocaleString('en', {maximumFractionDigits: 4}));
   }
+
+  log(e) {console.log(e)}
 } 

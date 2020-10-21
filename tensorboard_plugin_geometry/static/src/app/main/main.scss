@@ -7,9 +7,9 @@
 }
 
 
-@media(max-width: 1280px) {
+@media(max-width: 1040px) {
   #main {
-    min-width: calc(100% - 260px);
-    max-width: calc(100% - 260px);
+    min-width: calc(100% - 260px - 12px);
+    max-width: calc(100% - 260px - 12px);
   }
 }

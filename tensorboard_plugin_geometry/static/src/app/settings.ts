@@ -6,8 +6,8 @@ class SettingsClass {
   min_point_size = 0;
 
   show_features = new Observeable<boolean>(true);
-  show_nodes = new Observeable<boolean>(true);
-  show_faces = new Observeable<boolean>(true);
+  show_vertices = new Observeable<boolean>(true);
+  show_wireframe = new Observeable<boolean>(false);
 }
 
 export const Settings = new SettingsClass();

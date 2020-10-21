@@ -13,6 +13,27 @@
   <md-divider></md-divider>
   
   <div class="sidebar-section">
+    <h3>Meshes</h3>
+
+    <md-checkbox v-model="data.show_vertices"
+      @change="settings.show_vertices.next($event)">
+      Show pointcloud or mesh
+    </md-checkbox>
+
+    <md-checkbox v-model="data.show_features"
+      @change="settings.show_features.next($event)">
+      Show features
+    </md-checkbox>
+
+    <md-checkbox v-model="data.show_wireframe"
+      @change="settings.show_wireframe.next($event)">
+      Show as wireframe
+    </md-checkbox>
+  </div>
+
+  <md-divider></md-divider>
+  
+  <div class="sidebar-section">
     <h3>Runs</h3>
 
     <md-field>
@@ -20,18 +41,20 @@
     </md-field>
 
     <div v-for="run in runs">
-      <span v-if="run.display">
+      <div v-if="run.display" class="md-layout md-alignment-center-left">
         <md-checkbox
           v-model="run.checked"
           @change="data.exclusive = false"
-          :class="run.color"></md-checkbox>
+          :class="run.color + ' md-layout-item md-size-10'"></md-checkbox>
         <md-radio
           class="double_checkbox"
           v-model="data.exclusive"
           :value="run"
-          :class="run.color"
-          @change="exclusify(run)">{{ run.name }}</md-radio>
-      </span>
+          :class="run.color + ' md-layout-item md-size-10'"
+          @change="exclusify(run)"></md-radio>
+        <span
+        class="md-layout-item md-size-75 run-name">{{ run.name }}</span>
+      </div>
     </div>
 
     <md-button @click="toggleAll()" class="sidebar-button toggle">TOGGLE ALL RUNS</md-button>
