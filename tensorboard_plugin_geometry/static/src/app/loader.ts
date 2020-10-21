@@ -7,6 +7,12 @@ import {markdown} from 'markdown';
 import { colorScale } from "./color-scale";
 import { URLParser } from "./url-parser";
 
+interface ReloadContainer {
+  isReloading$: {
+    subscribe: Function;
+  }
+}
+
 /**
  * handle all data that needs to be loaded asyncly
  * 
@@ -16,6 +22,7 @@ export class LoaderClass {
   logdir = new Observeable<string>('./');
   runs = new Observeable<RunSidebar[]>([]);
   tags = new Observeable<Tags[]>([]);
+  reloadContainer: ReloadContainer;
 
   regexInput = new Observeable<string>('');
   tagFilter = new Observeable<string>('');
@@ -24,16 +31,25 @@ export class LoaderClass {
 
   constructor() {
     this.reload();
-    this.reloadFilters();
+    
+    this.reloadContainer = (window.parent.document.getElementsByClassName('reload-button')[0] as any)
+      .__ngContext__
+      .find(val => !!val && !!val.isReloading$);
+
+    this.reloadContainer.isReloading$.subscribe(() => {
+      this.reloadFilters();
+      this.reload();
+    });
   }
 
   reloadFilters() {
     const params = ['regexInput', 'tagFilter'];
 
     params.forEach(param => {
-      const regex = URLParser.getUrlParam('regexInput');
+      const regex = URLParser.getUrlParam(param);
 
       if (regex && regex !== this[param].value) {
+        console.log('reload_filter');
         this[param].next(regex);
       }
     });
@@ -44,24 +60,28 @@ export class LoaderClass {
     const tags: TagsResponse = await ApiService.getTags();
 
     if(this._tags_data !== tags.data){
+      this._tags_data = tags.data;
       this._updateRunData(tags.data);
       this._updateTagData(tags.data);
     }
 
-    this.logdir.next((await ApiService.getLogdir()).data.logdir);
+    const new_logdir = (await ApiService.getLogdir()).data.logdir;
+    if (this.logdir.value !== new_logdir) {
+      this.logdir.next(new_logdir);
+    }
   }
 
   // sidebar.ts
   private async _updateRunData(data: RawTags) {
-    this._tags_data = data;
     colorScale.setDomain(Object.keys(data));
     
     const runs: RunSidebar[] = [];
     Object.keys(data).forEach(run => {
+      const old_run = this.runs.value.find(val => val.name === run);
       runs.push({
         name: run,
-        display: true,
-        checked: true,
+        display: old_run ? old_run.display : true,
+        checked: old_run ? old_run.checked : true,
         color: colorScale.getColor(run)
       });
     });
@@ -77,13 +97,14 @@ export class LoaderClass {
       
       // iter over all tags in run
       Object.keys(data[run]).forEach(tag => {
+        const old_tag = this.tags.value.find(val => val.name === tag);
         
         // add new tag if not exists yet
         if (tags.findIndex(val => val.name === tag) < 0) {
           tags.push({
             name: tag,
             runs: [],
-            display: true
+            display: old_tag ? old_tag.display : true
           });
         }
 

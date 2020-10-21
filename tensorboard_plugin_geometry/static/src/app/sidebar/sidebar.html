@@ -1,26 +1,6 @@
 
 <div class="sidebar">
   <div class="sidebar-section">
-    <h3>Reload</h3>
-    <div class="reload">
-      <md-checkbox v-model="data.auto_load" @change="toggleReload">Reload Data</md-checkbox>
-      <md-field>
-        <label>Reload Period</label>
-        <md-input type="number"
-          :disabled="!data.auto_load"
-          v-model="data.load_interval"
-          @change="changeInterval">
-        </md-input>
-        <span class="md-suffix">sec</span>
-      </md-field>
-      <md-button class="md-icon-button" :class="{'loading': data.loading}" @click="updateData">
-        <md-icon>refresh</md-icon>
-      </md-button>
-    </div>
-  </div>
-
-  <md-divider></md-divider>
-  <div class="sidebar-section">
     <h3>Point size</h3>
     <div class="point_size">
       <slider :value="data.point_size" @changed="updatePointSize"></slider>

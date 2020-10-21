@@ -6,6 +6,7 @@ import { RunSidebar } from '../models/run';
 
 import { Settings } from '../settings';
 import SliderComponent from '../slider/slider';
+import { URLParser } from '../url-parser';
 import WithRender from './sidebar.html';
 
 import './sidebar.scss';
@@ -20,14 +21,10 @@ export default class SidebarComponent extends Vue {
   runs: RunSidebar[] = [];
   colors: string[] = [];
   settings = Settings;
-  load_interval:any = undefined;
-  apply_changes:any = undefined;
+  apply_regex:any = undefined;
   showSnackbar = false;
 
   data = {
-    auto_load: false,
-    load_interval: '30',
-    loading: false,
     point_size: 50,
     formatted_point_size: 5,
     exclusive: false,
@@ -42,6 +39,18 @@ export default class SidebarComponent extends Vue {
 
     loader.logdir.subscribe(logdir => {
       this.data.logdir = logdir
+    });
+
+    loader.regexInput.subscribe(regex => {
+      if (this.data.regex !== regex) {
+        this.data.regex = regex;
+      }
+    });
+
+    loader.reloadContainer.isReloading$.subscribe(async (loading) => {
+      if (loading) {
+        await DataManager.updateProviders();
+      }
     });
   }
 
@@ -71,8 +80,15 @@ export default class SidebarComponent extends Vue {
   }
 
   filterRuns() {
-    this.runs.forEach(val => val.display = !!val.name.match(RegExp(this.data.regex)));
-    loader.runs.next(this.runs);
+    if (this.apply_regex) {
+      clearTimeout(this.apply_regex);
+    }
+    this.apply_regex = setTimeout(() => {
+      this.runs.forEach(val => val.display = !!val.name.match(RegExp(this.data.regex)));
+      loader.runs.next(this.runs);
+      loader.regexInput.next(this.data.regex);
+      URLParser.setUrlParam('regexInput', this.data.regex);
+    }, 500);
   }
 
   exclusify(run: RunSidebar) {
@@ -95,35 +111,5 @@ export default class SidebarComponent extends Vue {
 
   getFormattedSize(value) {
     return parseFloat(value.toLocaleString('en', {maximumFractionDigits: 4}));
-  }
-
-  toggleReload() {
-    if (this.data.auto_load) {
-      this.changeInterval();
-    } else {
-      clearInterval(this.load_interval);
-      this.load_interval = undefined;
-    }
-  }
-  
-  changeInterval() {
-    clearTimeout(this.apply_changes);
-    let secs = parseInt(this.data.load_interval);
-    if (secs < 15) {
-      secs = 15;
-      this.data.load_interval = (15).toString();
-      this.showSnackbar = true;
-    }
-    this.apply_changes = setTimeout(() => {
-      clearInterval(this.load_interval);
-      this.load_interval = setInterval(this.updateData, secs * 1000);
-    }, 1000);
-  }
-
-  async updateData() {
-    this.data.loading = true;
-    await loader.reload();
-    await DataManager.updateProviders();
-    this.data.loading = false;
   }
 } 
