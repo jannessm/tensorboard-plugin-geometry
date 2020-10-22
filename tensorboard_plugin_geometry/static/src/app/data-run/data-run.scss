@@ -28,12 +28,20 @@
     position: absolute;
     top: 0;
     right: 0;
-    line-height: 15px;
+    line-height: 14px;
     font-size: 10px;
     background: grey;
-    padding: 0 4px;
+    padding: 2px 4px;
     color: white;
     border-radius: 0 0 5px 5px;
+    
+    /* ellipsis at beginning */
+    overflow: hidden;
+    max-width: 100px;
+    height: 18px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    direction: rtl;
   }
 
   .actions {
