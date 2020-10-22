@@ -42,6 +42,8 @@ export default class DataRunComponent extends Vue {
     plot_config: {},
     color: '',
     broken_data: false,
+    show_snackbar: false,
+    error: '',
   };
 
   created() {
@@ -99,6 +101,8 @@ export default class DataRunComponent extends Vue {
       } catch(err) {
         this.data.broken_data = true;
         console.error(err);
+        this.data.error = err.message;
+        this.data.show_snackbar = true;
       }
       this.data.loading = false;
     }

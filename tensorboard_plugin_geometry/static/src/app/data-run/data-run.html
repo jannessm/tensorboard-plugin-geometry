@@ -44,4 +44,9 @@
       </md-button>
     </div>
   </div>
+
+  <md-snackbar md-position="center" :md-duration="4000" :md-active.sync="data.show_snackbar" md-persistent>
+    <span>{{data.error}}</span>
+    <md-button class="md-primary" @click="data.show_snackbar = false">Close</md-button>
+  </md-snackbar>
 </div>

@@ -17,26 +17,26 @@ export class ThreeFactory {
     config?: ThreeConfig
   ): Group | Points {
     if (!vertices_shape || !vertices_arr || vertices_arr.length <= 0 || vertices_shape[1] <= 0) {
-      throw new Error('no vertices provided');
+      throw new Error('No vertices provided');
     }
 
     // check shapes
     if (!vertices_shape || vertices_shape.length !== 3 || vertices_shape[1] <= 0) {
-      throw new Error(`vertices must be of shape [b, n, 3] but got ${vertices_shape}`);
+      throw new Error(`Vertices must be of shape [b, n, 3] but got ${vertices_shape}`);
     }
     if ((!face_shape && !!faces_arr) || (!!face_shape && !faces_arr)) {
-      throw new Error('need faces and its shape not only one');
+      throw new Error('Need faces and its shape not only one of them');
     }
     if (!!faces_arr && !!face_shape && face_shape.length > 0 && (faces_arr.length <= 0 || face_shape[1] <= 0)) {
-      throw new Error(`faces must be of shape [b, n, 3], but got ${face_shape}`);
+      throw new Error(`Faces must be of shape [b, n, 3], but got ${face_shape}`);
     }
 
     // check colors
     if (!!vert_colors && vert_colors.length > 0 && vert_colors.length / 3 !== vertices_shape[0] * vertices_shape[1]) {
-      throw new Error(`there must be a color for each vertex, but got ${vert_colors.length / 3} instead of ${vertices_shape[0] * vertices_shape[1]}`);
+      throw new Error(`There must be a color for each vertex, but got ${vert_colors.length / 3} instead of ${vertices_shape[0] * vertices_shape[1]}`);
     }
     if (!!face_shape && !!face_colors && !!face_colors_arr && face_colors_arr.length > 0 && face_colors_arr.length / 3 !== face_shape[0]) {
-      throw new Error(`there must be a color for each sample, but got ${face_colors_arr.length / 3} instead of ${face_shape[0]}`);
+      throw new Error(`There must be a color for each sample, but got ${face_colors_arr.length / 3} instead of ${face_shape[0]}`);
     }
 
     if (!face_shape || !faces_arr || face_shape.length === 0 || faces_arr.length === 0) {
@@ -128,21 +128,21 @@ export class ThreeFactory {
     config?: ThreeConfig
   ): Group | undefined {
     if (!vertices || vertices.length == 0 || !vertices_arr || vertices_arr.length == 0) {
-      throw new Error('no vertices provided for feature arrows');
+      throw new Error('No vertices provided for feature arrows');
     }
     if (!features_arr || features_arr.length == 0) {
-      throw new Error("can't create features without features");
+      throw new Error("Can't create features without features");
     }
 
     if (
       vertices[0] * vertices[1] !== features_arr.length / 3 || 
       vertices[0] * vertices[1] !== vertices_arr.length / 3
     ) {
-      throw new Error('features and vertices do not have the same shape');
+      throw new Error('Features and vertices do not have the same shape');
     }
 
     if (!!feat_colors && feat_colors.length > 0 && feat_colors.length / 3 !== vertices[0] * vertices[1]) {
-      throw new Error('there must be a color for each feature');
+      throw new Error('There must be a color for each feature');
     }
 
     let cmap;
