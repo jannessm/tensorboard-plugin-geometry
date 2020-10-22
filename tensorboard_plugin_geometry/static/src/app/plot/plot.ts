@@ -67,11 +67,11 @@ export default class PlotComponent extends Vue {
     Settings.point_size.subscribe(this.updatePointSize);
 
     Settings.show_features.subscribe(display => {
-      this.features.map(group => group.visible = display);
+      this.features.forEach(group => group.visible = display);
       this.update();
     });
     Settings.show_vertices.subscribe(display => {
-      this.geometries.map(group => group.visible = display);
+      this.geometries.forEach(group => group.visible = display);
       this.update();
     });
     Settings.show_wireframe.subscribe(display => {
@@ -133,6 +133,18 @@ export default class PlotComponent extends Vue {
       this.setOrthoCameraPosition();
     }
 
+    /////// update visibility according to settings ///////
+    this.features.map(group => group.visible = Settings.show_features.value);
+    this.geometries.map(group => group.visible = Settings.show_vertices.value);
+    this.geometries.forEach(group => {
+      if (group instanceof Group) {
+        (group as Group).traverseVisible(mesh => {
+          if (mesh instanceof Mesh) {
+            (mesh.material as MeshBasicMaterial).wireframe = Settings.show_wireframe.value;
+          }
+        });
+      }
+    });
 
     this.renderer.render(this.scene, this.camera);
   }

@@ -131,6 +131,4 @@ export default class SidebarComponent extends Vue {
   getFormattedSize(value) {
     return parseFloat(value.toLocaleString('en', {maximumFractionDigits: 4}));
   }
-
-  log(e) {console.log(e)}
 } 
