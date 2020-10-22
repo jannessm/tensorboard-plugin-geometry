@@ -12,3 +12,28 @@ h3 {
   font-weight: normal;
   margin: 0 0 5px;
 }
+
+.md-switch {
+  margin: 0;
+  
+  .md-switch-container {
+    width: 25px;
+    min-width: 25px;
+    height: 8px;
+  
+    .md-switch-thumb {
+      width: 14px;
+      height: 14px;
+
+      &::before {
+        width: 24px;
+        height: 24px;
+      }
+  
+      .md-ripple {
+        width: 24px !important;
+        height: 24px !important;
+      }
+    }
+  }
+}

@@ -87,7 +87,6 @@ export default class DataRunComponent extends Vue {
       .map(val => parseInt(val))
       .includes(this.data.current_step_label)
     ) {
-      console.log(this.steps.steps[this.data.current_step_label].first_wall_time);
       this.data.current_wall_time = new Date(this.steps.steps[this.data.current_step_label].first_wall_time * 1000);
     }
   }
