@@ -1,7 +1,7 @@
 <div class="md-layout md-gutter">
-  <sidebar class="md-layout-item md-size-25"></sidebar>
+  <sidebar class="md-layout-item md-size-20"></sidebar>
   
-  <div id="main" class="md-layout-item md-size-75" v-if="!loading && data.tags.length > 1">
+  <div id="main" class="md-layout-item md-size-80" v-if="!loading && data.tags.length > 1">
     <md-field>
       <md-icon class="md-prefix">search</md-icon>
       <md-input v-model="tag_regex" placeholder="Filter tags (regular expressions supported)" @input="filterTags"></md-input>
