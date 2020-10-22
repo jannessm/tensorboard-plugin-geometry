@@ -1,5 +1,4 @@
 # Geometry Plugin
-![license](https://img.shields.io/pypi/l/tensorboard-plugin-geometry)
 ![version](https://img.shields.io/pypi/v/tensorboard-plugin-geometry)
 
 Since geometric deep learning is rising, there is the need of a tensorboard plugin to visualize geometric data. In comparison to the Mesh plugin from tensorboard, this plugin is more stable and offers the opportunity to add feature vectors for each vertex.
