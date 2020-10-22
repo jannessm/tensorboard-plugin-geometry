@@ -41,7 +41,7 @@
     </md-field>
 
     <div v-for="run in runs">
-      <div v-if="run.display" class="md-layout md-alignment-center-left">
+      <div v-if="run.display" class="run md-layout md-alignment-center-left">
         <md-checkbox
           v-model="run.checked"
           @change="data.exclusive = false"

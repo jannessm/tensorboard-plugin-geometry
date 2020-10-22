@@ -19,6 +19,12 @@
       overflow-wrap: anywhere;
     }
 
+    .run {
+      margin: 8px 0;
+      font-size: 12px;
+      line-height: 15px;
+    }
+
     .point_size {
       .md-slider {
         width: calc(70% - 5px);

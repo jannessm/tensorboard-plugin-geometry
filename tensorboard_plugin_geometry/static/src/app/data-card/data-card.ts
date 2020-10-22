@@ -4,7 +4,7 @@ import {MdCard} from 'vue-material/dist/components';
 
 import DataRunComponent from '../data-run/data-run';
 import { loader } from '../loader';
-import { Run } from '../models/run';
+import { Run, RunSidebar } from '../models/run';
 import WithRender from './data-card.html';
 
 import './data-card.scss';
@@ -19,6 +19,7 @@ import './data-card.scss';
 export default class DataCardComponent extends Vue {
   tag_regex = '';
   pages: Run[][] = [];
+  runs: RunSidebar[] = [];
 
   data = {
     expanded: false,
@@ -30,17 +31,27 @@ export default class DataCardComponent extends Vue {
     this.data.expanded = this.$props.expanded;
     (this.$children[0] as MdCard).MdCard.expand = this.$props.expanded;
 
-    loader.tags.subscribe(() => this.update()); // got fired immediatly
+    loader.runs.subscribe(runs => {this.runs = runs; this.update();});
+    loader.tags.subscribe(() => this.update());
   }
 
   update() {
     this.data.expanded = (this.$children[0] as MdCard).MdCard.expand;
 
+    let skipped = 0;
     this.pages = this.$props.tag.reduce((reduced, item, id) => {
-      if (id % 3 === 0) {
+      const run = this.runs.find(val => val.name === item.name);
+
+      // ignore invisible
+      if (!!run && !run.display) {
+        skipped += 1;
+        return reduced;
+      }
+
+      if ((id - skipped) % 3 === 0) {
         reduced.push([item]);
       } else {
-        reduced[Math.floor(id / 3.0)].push(item);
+        reduced[Math.floor((id - skipped) / 3.0)].push(item);
       }
       return reduced;
     }, []);
