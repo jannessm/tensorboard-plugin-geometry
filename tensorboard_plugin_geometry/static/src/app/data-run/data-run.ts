@@ -40,7 +40,8 @@ export default class DataRunComponent extends Vue {
     fullscreen: false,
     plot_data: {},
     plot_config: {},
-    color: ''
+    color: '',
+    broken_data: false,
   };
 
   created() {
@@ -89,12 +90,15 @@ export default class DataRunComponent extends Vue {
   }
 
   async updatePlotData() {
+    
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     if (this.data.current_step_id >= 0 && !!provider) {
       try {
+        this.data.broken_data = false;
         this.data.plot_data = await provider.getData(this.data.current_step_label) as StepData;
       } catch(err) {
-        console.log(err);
+        this.data.broken_data = true;
+        console.error(err);
       }
       this.data.loading = false;
     }

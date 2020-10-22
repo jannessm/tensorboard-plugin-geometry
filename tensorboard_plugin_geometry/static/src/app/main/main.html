@@ -8,8 +8,8 @@
     </md-field>
     
     <data-card
-      v-for="tag in data.tags"
       v-if="tag.display"
+      v-for="tag in data.tags"
       :name="tag.name"
       :tag="tag.runs"
       :tag_names="tag.tag_names"

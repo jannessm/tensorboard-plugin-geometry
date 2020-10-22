@@ -17,13 +17,22 @@
       </slider>
     </div>
   
-    <plot
-      class="plot"
-      :data="data.plot_data"
-      :config="data.plot_config"
-      :style="'height: ' + data.plot_height"
-      :width="data.fullscreen"
-      ></plot>
+    <div v-if="!data.broken_data">
+      <plot
+        class="plot"
+        :data="data.plot_data"
+        :config="data.plot_config"
+        :style="'height: ' + data.plot_height"
+        :width="data.fullscreen"
+        ></plot>
+    </div>
+    
+    <md-empty-state 
+      v-else
+      class="loading-error"
+      md-icon="warning"
+      md-label="Data is currupt.">
+    </md-empty-state>
   
     <div class="actions">
       <md-button class="md-icon-button md-dense" @click="getScreenshot">
