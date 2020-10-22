@@ -84,7 +84,7 @@ export class OrbitControls extends EventDispatcher{
 	keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
 	// Mouse buttons
-	mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN };
+	mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN };
 
 	// Touch fingers
 	touches = { ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN };
@@ -831,7 +831,7 @@ export class OrbitControls extends EventDispatcher{
 
 			case 2:
 
-				// mouseAction = this.mouseButtons.RIGHT;
+				mouseAction = this.mouseButtons.RIGHT;
 				break;
 
 			default:
