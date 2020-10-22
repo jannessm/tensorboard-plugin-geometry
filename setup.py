@@ -16,10 +16,12 @@ setuptools.setup(
     name="tensorboard_plugin_geometry",
     version=__version__,
     author='Jannes Magnusson',
+    author_email="j-magnusson@t-online.de",
     url=url,
     description="Tensorboard plugin to visualize 3D data with 3D features.",
 	long_description=long_description,
 	long_description_content_type="text/markdown",
+    license="GNU GPL",
 	install_requires=parse_requirements("requirements.txt"),
     packages=["tensorboard_plugin_geometry"],
     package_data={
