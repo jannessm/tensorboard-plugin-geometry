@@ -1,54 +1,72 @@
 .data-run-component {
-  position: relative;
-
-  .description {
-    padding: 4px;
+  
+  .wrapper{
+    position: relative;
     
-    code {
-      background: rgba(27,31,35,.05);
+    .description {
       padding: 4px;
-      box-sizing: border-box;
+      
+      code {
+        background: rgba(27,31,35,.05);
+        padding: 4px;
+        box-sizing: border-box;
+        border-radius: 5px;
+      }
+    }
+  
+    .loader {
+      position: absolute;
+      bottom: calc(50% - 50px);
+      left: calc(50% - 50px);
+      z-index: 3;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      height: calc(100% + 20px);
+      width: calc(100% + 20px);
+      background: rgba(255, 255, 255, 0.5);
+      z-index: 2;
+      top: -10px;
+      left: -10px;
       border-radius: 5px;
     }
-  }
-
-  .md-progress-bar.loader {
-    position: absolute;
-    top: 0;
-    width: calc(100% - 8px);
-  }
-  
-  .slider {
-    width: 100%;
-    position: relative;
-    font-size: 13px;
-  }
-
-  .header-run {
-    position: absolute;
-    top: 0;
-    right: 0;
-    line-height: 14px;
-    font-size: 10px;
-    background: grey;
-    padding: 2px 4px;
-    color: white;
-    border-radius: 0 0 5px 5px;
     
-    /* ellipsis at beginning */
-    overflow: hidden;
-    max-width: 100px;
-    height: 18px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    direction: rtl;
+    .slider {
+      width: 100%;
+      position: relative;
+      font-size: 13px;
+    }
+  
+    .header-run {
+      position: absolute;
+      z-index: 0;
+      top: 0;
+      right: 0;
+      line-height: 14px;
+      font-size: 10px;
+      background: grey;
+      padding: 2px 4px;
+      color: white;
+      border-radius: 0 0 5px 5px;
+      
+      /* ellipsis at beginning */
+      overflow: hidden;
+      max-width: 100px;
+      height: 18px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      direction: rtl;
+    }
+  
+    .loading-error {
+      zoom: 0.5;
+    }
+  
+    .actions {
+      float: right;
+    }
+
   }
 
-  .loading-error {
-    zoom: 0.5;
-  }
-
-  .actions {
-    float: right;
-  }
 }

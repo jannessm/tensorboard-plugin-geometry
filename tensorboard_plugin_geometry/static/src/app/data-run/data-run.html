@@ -1,9 +1,11 @@
 <div class="data-run-component" :style="data.display">
-  <md-progress-bar class="loader" v-if="data.loading" :md-stroke="3" md-mode="indeterminate"></md-progress-bar>
-
-  {{tag}}<div :class="'header-run ' + data.color" :title="run.name">{{run.name}}</div>
+  <div class="wrapper">
+    <div class="loading-overlay" v-if="data.loading">
+      <md-progress-spinner class="loader" :md-diameter="100" :md-stroke="7" md-mode="indeterminate"></md-progress-spinner>
+    </div>
   
-  <div>
+    {{tag}}<div :class="'header-run ' + data.color" :title="run.name">{{run.name}}</div>
+      
     <div class="description" v-html="run.description"></div>
     <md-divider></md-divider>
     <div class="slider">

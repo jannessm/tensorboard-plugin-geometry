@@ -30,7 +30,7 @@ export class DataProvider {
       
       if (!steps.steps[step.step]) {
         steps.steps[step.step] = {
-          first_wall_time: 0.0,
+          first_wall_time: Infinity,
         }
       }
       steps.steps[step.step].first_wall_time = Math.min(
