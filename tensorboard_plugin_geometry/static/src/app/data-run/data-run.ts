@@ -11,6 +11,7 @@ import { DataManager } from '../data-manager';
 import { loader } from '../loader';
 import { Subscriber } from '../models/observeable';
 import { colorScale } from '../color-scale';
+import { Settings } from '../settings';
 
 @WithRender
 @Component({
@@ -57,6 +58,10 @@ export default class DataRunComponent extends Vue {
       this.data.display = display ? '' : 'display: none;';
       this.data.color = colorScale.getColor(this.$props.run.name);
     });
+
+    Settings.norm_features.subscribe(() => {
+      this.updatePlotData();
+    });
   }
 
   // vue event
@@ -92,7 +97,7 @@ export default class DataRunComponent extends Vue {
   }
 
   async updatePlotData() {
-    
+    this.data.loading = true;
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
     if (this.data.current_step_id >= 0 && !!provider) {
       try {

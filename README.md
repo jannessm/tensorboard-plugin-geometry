@@ -9,6 +9,7 @@ Main features:
  * apply colormaps from [colormap](https://github.com/bpostlethwaite/colormap#readme) to point clouds and 3D feature vectors
  * perspective and orthografic visualization
  * save the visualization as .png
+ * normalize scale of geometries and features
 
 Known issues:
  * large geometries (above 40K vertices) with feature vectors need some time to be loaded and visualized

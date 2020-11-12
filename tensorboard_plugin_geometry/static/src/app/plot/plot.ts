@@ -19,7 +19,7 @@ import {
 } from 'three';
 
 import {OrbitControls} from './orbit-controls';
-import {TraceballControls} from './traceball-controls';
+import {TrackballControls} from './trackball-controls';
 
 import WithRender from './plot.html';
 
@@ -36,13 +36,13 @@ export default class PlotComponent extends Vue {
   scene = new Scene();
   camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.0001, 1000 );
   renderer = new WebGLRenderer();
-  // controls = new OrbitControls( this.camera, this.renderer.domElement );
-  controls = new TraceballControls( this.camera, this.renderer.domElement );
+  // controls: OrbitControls | TrackballControls = new OrbitControls( this.camera, this.renderer.domElement );
+  controls: OrbitControls | TrackballControls = new TrackballControls( this.camera, this.renderer.domElement );
   last_width = 0;
   geometries: (Mesh | Points)[] = [];
   features: Group[] = [];
 
-  updateInterval;
+  is_active = false;
 
   mounted() {
     this.$el.appendChild(this.renderer.domElement);
@@ -56,7 +56,6 @@ export default class PlotComponent extends Vue {
     // empty scene
     this.scene.background = new Color( 0xffffff );
     this.renderer.render( this.scene, this.camera );
-    this.controls = new TraceballControls(this.camera, this.renderer.domElement);
     
     this.scene.background = new Color( 0xf0f0f0 );
     const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
@@ -65,8 +64,14 @@ export default class PlotComponent extends Vue {
     this.scene.add( axesHelper );
     this.scene.add( light );
 
-    this.controls.addEventListener('start', this.startUpdate);
-    this.controls.addEventListener('stop', this.stopUpdate);
+    if (this.controls instanceof OrbitControls) {
+      this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+      this.controls.addEventListener('change', this.update);
+    } else {
+      this.controls = new TrackballControls(this.camera, this.renderer.domElement);
+      this.controls.addEventListener('start', this.startUpdate);
+      this.controls.addEventListener('end', this.stopUpdate);
+    }
 
     Settings.point_size.subscribe(this.updatePointSize);
 
@@ -92,18 +97,22 @@ export default class PlotComponent extends Vue {
       });
       this.update();
     });
-
-    Settings.norm_features.subscribe(norm => {
-
-    });
   }
 
   startUpdate() {
-    this.updateInterval = setInterval(this.update, 10);
+    this.is_active = true;
+    this.animate();
   }
 
   stopUpdate() {
-    clearInterval(this.updateInterval);
+    this.is_active = false;
+  }
+
+  animate() {
+    if (this.is_active) {
+      requestAnimationFrame(this.animate);
+      this.update();
+    }
   }
   
   update() {
@@ -114,14 +123,14 @@ export default class PlotComponent extends Vue {
       (this.camera as PerspectiveCamera).aspect = width / height;
       this.renderer.setSize(width, height);
       this.last_width = width;
-      this.controls.handleResize();
-      this.controls.update();
-      this.renderer.render( this.scene, this.camera );
-    } else {
-      this.controls.handleResize();
-      this.controls.update();
-      this.renderer.render( this.scene, this.camera );
     }
+
+    if (this.controls instanceof TrackballControls) {
+      this.controls.handleResize();
+      this.controls.update();
+    }
+    
+    this.renderer.render( this.scene, this.camera );
   }
 
   updateData() {
@@ -255,9 +264,18 @@ export default class PlotComponent extends Vue {
         this.camera.position.set(0,0,10);
         this.camera.lookAt(0,0,0);
         this.controls.dispose();
-        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls = new TraceballControls(this.camera, this.renderer.domElement);
-        this.controls.addEventListener('change', this.update);
+
+        if (this.controls instanceof OrbitControls) {
+          this.controls.removeEventListener('change', this.update);
+          this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+          this.controls.addEventListener('change', this.update);
+        } else {
+          this.controls.removeEventListener('start', this.startUpdate);
+          this.controls.removeEventListener('end', this.stopUpdate);
+          this.controls = new TrackballControls(this.camera, this.renderer.domElement);
+          this.controls.addEventListener('start', this.startUpdate);
+          this.controls.addEventListener('end', this.stopUpdate);
+        }
       }
   
       // change position

@@ -22,7 +22,7 @@ const changeEvent = { type: 'change' };
 const startEvent = { type: 'start' };
 const endEvent = { type: 'end' };
 
-export class TraceballControls extends EventDispatcher {
+export class TrackballControls extends EventDispatcher {
 	object;
 	domElement;
 
@@ -39,7 +39,7 @@ export class TraceballControls extends EventDispatcher {
 	noZoom = false;
 	noPan = false;
 
-	staticMoving = false;
+	staticMoving = true;
 	dynamicDampingFactor = 0.2;
 
 	minDistance = 0;

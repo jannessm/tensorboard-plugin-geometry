@@ -4,6 +4,7 @@ import { CONTENT_TYPES } from "./models/content-types";
 import { RawStep, StepData, StepMetadata, Steps } from "./models/step";
 import { ThreeFactory } from "./three-factory";
 import { Observeable } from "./models/observeable";
+import { Settings } from "./settings";
 
 export class DataProvider {
 
@@ -11,6 +12,7 @@ export class DataProvider {
   tag = '';
   steps_metadata = new Observeable<Steps>({ steps: {}, step_ids: [] });
   steps_data: (StepData | undefined)[] = [];
+  norm_steps_data: (StepData | undefined)[] = [];
   
   constructor() {}
 
@@ -62,24 +64,29 @@ export class DataProvider {
   }
 
   async getData(id: number): Promise<StepData | undefined> {
-    if (!this.steps_data[id] && id >= 0) {
+    const normalize = Settings.norm_features.value;
+    const this_data = Settings.norm_features.value ? this.norm_steps_data : this.steps_data;
+    
+    if (!this_data[id] && id >= 0) {
       const data = await ApiService.getData(this.run, this.tag, id, this.steps_metadata.value.steps[id]);
 
       if (!data.vertices || !this.steps_metadata.value.steps[id].VERTICES) {
         throw Error(`No vertices available for run ${this.run}, tag ${this.tag}, and step ${id}.`);
       }
       
-      const resp: StepData = {
-        geometry: ThreeFactory.createGeometry(
-          this.steps_metadata.value.steps[id].VERTICES?.shape,
-          data.vertices,
-          this.steps_metadata.value.steps[id].FACES?.shape,
-          data.faces,
-          this.steps_metadata.value.steps[id].FACE_COLORS?.shape,
-          data.face_colors,
-          data.vert_colors,
-          this.steps_metadata.value.config),
-      };
+      const geo = ThreeFactory.createGeometry(
+        this.steps_metadata.value.steps[id].VERTICES?.shape,
+        data.vertices,
+        this.steps_metadata.value.steps[id].FACES?.shape,
+        data.faces,
+        this.steps_metadata.value.steps[id].FACE_COLORS?.shape,
+        data.face_colors,
+        data.vert_colors,
+        this.steps_metadata.value.config,
+        normalize);
+
+      const resp: StepData = {};
+      resp['geometry'] = geo;
 
       if (!!data.features) {
         resp['features'] = ThreeFactory.createFeatureArrows(
@@ -87,13 +94,14 @@ export class DataProvider {
           data.vertices,
           data.features,
           data.feat_colors,
-          this.steps_metadata.value.config);
+          this.steps_metadata.value.config,
+          normalize);
       }
 
-      this.steps_data[id] = resp;
+      this_data[id] = resp;
     }
 
-    return this.steps_data[id];
+    return this_data[id];
   }
 
   getConfigById(id: number): ThreeConfig {

@@ -6,14 +6,18 @@ import { ThreeConfig } from "./models/metadata";
 
 export class ThreeFactory {
 
-  static normalize_scale(geo: BufferGeometry) {
+  static normalize_scale(geo: BufferGeometry): number {
     // normalize to unit sphere since 
     geo.computeBoundingSphere();
     if (geo.boundingSphere) {
       const geo_radius = geo.boundingSphere.radius;
       const scale = 1 / geo_radius * 100; //TODO 100 is a bit large isnt it?!
       geo.scale(scale, scale, scale);
+      
+      return scale;
     }
+
+    return 1;
   }
 
   static createGeometry(
@@ -24,33 +28,9 @@ export class ThreeFactory {
     face_colors?: number[],
     face_colors_arr?: Uint8Array,
     vert_colors?: Uint8Array,
-    config?: ThreeConfig
+    config?: ThreeConfig,
+    normalized = false,
   ): Group | Points {
-    // const vec = new Vector3(1, 5, 1);
-		// const translation = new Matrix4();
-		// translation.identity();
-
-
-    // const geo = new BoxBufferGeometry(0.1, 5, 0.1);
-    // const geo1 = new BoxBufferGeometry(0.1, vec.length(), 0.1);
-    // geo.translate(0, 2.5, 0);
-    // geo1.translate(0, -vec.length()/2, 0);
-		// const quaternation = new Quaternion().setFromUnitVectors(new Vector3(0,1,0), vec.clone().normalize());
-    // translation.makeRotationFromQuaternion(quaternation);
-    // translation.setPosition(new Vector3(0, 5, 0).add(vec));
-    // geo1.applyMatrix4(translation);
-    
-    // const mesh_mat = new MeshBasicMaterial( { color: 0xf57c00 } );
-    // const mesh = new Mesh(geo, mesh_mat);
-    
-    // const mesh_mat1 = new MeshBasicMaterial( { color: 0x000000 } );
-    // const mesh1 = new Mesh(geo1, mesh_mat1);
-    // const g = new Group();
-    // g.add(mesh);
-    // g.add(mesh1);
-
-    // return g;
-
 
     if (!vertices_shape || !vertices_arr || vertices_arr.length <= 0 || vertices_shape[1] <= 0) {
       throw new Error('No vertices provided');
@@ -74,44 +54,53 @@ export class ThreeFactory {
     if (!!face_shape && !!face_colors && !!face_colors_arr && face_colors_arr.length > 0 && face_colors_arr.length / 3 !== face_shape[0]) {
       throw new Error(`There must be a color for each sample, but got ${face_colors_arr.length / 3} instead of ${face_shape[0]}`);
     }
-
+    
+    let geo;
+    
     if (!face_shape || !faces_arr || face_shape.length === 0 || faces_arr.length === 0) {
-      return ThreeFactory.createPointCloud(
+      geo = ThreeFactory.createPointCloud(
         vertices_shape,
         vertices_arr,
         vert_colors,
-        config?.vertices_cmap
+        config?.vertices_cmap,
+        normalized
+      );
+    } else {
+      geo = ThreeFactory.createMesh(
+        vertices_shape,
+        face_shape,
+        vertices_arr,
+        faces_arr,
+        face_colors,
+        face_colors_arr, // no config required, since colors are not supported
+        normalized
       );
     }
 
-    return ThreeFactory.createMesh(
-      vertices_shape,
-      face_shape,
-      vertices_arr,
-      faces_arr,
-      face_colors,
-      face_colors_arr // no config required, since colors are not supported
-    );
+    return geo;
   }
 
   static createPointCloud(
     vertices_shape: number[],
     vertices_arr: Float32Array,
     colors?: Uint8Array,
-    vertices_cmap?: string
+    vertices_cmap?: string,
+    normalized = false
   ): Points {
     const point_size = Settings.point_size.value;
 
     const points_geo = new BufferGeometry();
     points_geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
     
-    ThreeFactory.normalize_scale(points_geo);
+    if (normalized) {
+      ThreeFactory.normalize_scale(points_geo);
+    }
 
     let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
     
     const color_arr = ThreeFactory._getColors(vertices_shape[0] * vertices_shape[1], colors, vertices_cmap);
     points_geo.setAttribute('color', new Float32BufferAttribute(color_arr, 3));
-    
+
     return new Points(points_geo, points_mat);
   }
 
@@ -121,7 +110,8 @@ export class ThreeFactory {
     vertices_arr: Float32Array,
     faces_arr: Uint32Array,
     face_colors?: number[],
-    face_colors_arr?: Uint8Array
+    face_colors_arr?: Uint8Array,
+    normalized = false
   ): Group {
     const geometries = new Group();
 
@@ -143,7 +133,9 @@ export class ThreeFactory {
       const pos_attr = new Float32BufferAttribute(vertices_arr.slice(i * pos_offset, (i+1) * pos_offset), 3);
       mesh_geo.setAttribute( 'position', pos_attr);
 
-      ThreeFactory.normalize_scale(mesh_geo);
+      if (normalized) {
+        ThreeFactory.normalize_scale(mesh_geo);
+      }
       
       const face_offset = faces_shape[1] * 3;
       const face_attr = new Uint32BufferAttribute(faces_arr.slice(i * face_offset, (i + 1) * face_offset), 1);
@@ -163,7 +155,8 @@ export class ThreeFactory {
     vertices_arr?: Float32Array,
     features_arr?: Float32Array,
     feat_colors?: Uint8Array,
-    config?: ThreeConfig
+    config?: ThreeConfig,
+    normalized = false,
   ): Group | undefined {
     // return;
     if (!vertices_shape || vertices_shape.length == 0 || !vertices_arr || vertices_arr.length == 0) {
@@ -209,7 +202,9 @@ export class ThreeFactory {
     const geo = new BufferGeometry();
     geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
     
-    ThreeFactory.normalize_scale(geo);
+    if (normalized) {
+      ThreeFactory.normalize_scale(geo);
+    }
 
     const vertices = geo.getAttribute('position').array;
 
@@ -253,7 +248,7 @@ export class ThreeFactory {
           color = [c.r, c.g, c.b].map(val => Math.floor(val * 255));
         }
         
-        arrowHelper.addArrowToBuffer(origin, direction, color, max_len);
+        arrowHelper.addArrowToBuffer(origin, direction, color, max_len, normalized);
       }
     }
       

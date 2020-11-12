@@ -4,19 +4,26 @@ import { BufferGeometryUtils } from "./buffer-geometry-utils";
 export class ArrowHelper {
 	mat = new MeshBasicMaterial({ vertexColors: true });
 
-	norm_buffer: BufferGeometry[] = [];
 	lines_buffer: BufferGeometry[] = [];
 	cones_buffer: BufferGeometry[] = [];
 
-	addArrowToBuffer(origin: Vector3, direction: Vector3, color: number[], max_len: number) {
-		const height = direction.length();
-		const norm_height = height / max_len * 10;
+	addArrowToBuffer(
+		origin: Vector3,
+		direction: Vector3,
+		color: number[],
+		max_len: number,
+		normalized: boolean
+	) {
+		let height = direction.length();
+
+		if (normalized) {
+			height = height / max_len * 10;
+		}
 		
 		//create geometries
-		const line = new BoxBufferGeometry(0.01, height, 0.01);
+
+		const line = new BoxBufferGeometry(0.1, height, 0.1);
 		line.translate(0, - height / 2, 0);
-		const norm_line = new BoxBufferGeometry(0.1, norm_height, 0.1);
-		norm_line.translate(0, - norm_height / 2, 0);
 		const cone = new CylinderBufferGeometry( 0, 0.025, 0.05, 5, 1 );
 		
 		// rotate in direction
@@ -25,24 +32,23 @@ export class ArrowHelper {
 		translation.makeRotationFromQuaternion(quaternation);
 		
 		// translate to origin
-		translation.setPosition(origin.add(direction.multiplyScalar(1 / max_len * 10)));
+		if (normalized) {
+			translation.setPosition(origin.add(direction.multiplyScalar(1 / max_len * 10)));
+		} else {
+			translation.setPosition(origin.add(direction));
+		}
 		
-		norm_line.applyMatrix4(translation);
 		line.applyMatrix4(translation);
 		cone.applyMatrix4(translation);
 		
-		this._setColor(norm_line, color);
 		this._setColor(line, color);
 		this._setColor(cone, color);
 
-		this.norm_buffer.push(norm_line);
 		this.lines_buffer.push(line);
 		this.cones_buffer.push(cone);
 	}
 
 	finalize() {
-		const merged_normalized = BufferGeometryUtils.mergeBufferGeometries(this.norm_buffer, false);
-		const mesh_n = new Mesh(merged_normalized, this.mat);
 		const merged_lines = BufferGeometryUtils.mergeBufferGeometries(this.lines_buffer, false);
 		const mesh_l = new Mesh(merged_lines, this.mat);
 		const merged_cones = BufferGeometryUtils.mergeBufferGeometries(this.cones_buffer, false);
@@ -52,7 +58,7 @@ export class ArrowHelper {
 		this.cones_buffer = [];
 
 		const group = new Group();
-		group.add(mesh_n);
+		group.add(mesh_l);
 		group.add(mesh_c);
 
 		return group;
