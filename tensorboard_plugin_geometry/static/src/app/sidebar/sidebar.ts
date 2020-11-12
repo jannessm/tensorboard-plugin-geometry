@@ -33,6 +33,7 @@ export default class SidebarComponent extends Vue {
     show_vertices: true,
     show_wireframe: true,
     show_features: true,
+    norm_features: true,
   }
 
   mounted() {

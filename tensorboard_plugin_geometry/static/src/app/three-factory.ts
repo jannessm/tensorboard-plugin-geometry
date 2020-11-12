@@ -1,10 +1,20 @@
-import { BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, Points, PointsMaterial, Uint32BufferAttribute, Vector3 } from "three";
+import { BoxBufferGeometry, BufferGeometry, Color, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, Points, PointsMaterial, Quaternion, TriangleStripDrawMode, Uint32BufferAttribute, Vector3 } from "three";
 import { ArrowHelper } from "./arrow";
 import * as colormap from 'colormap';
 import { Settings } from "./settings";
 import { ThreeConfig } from "./models/metadata";
 
 export class ThreeFactory {
+
+  static normalize_scale(geo: BufferGeometry) {
+    // normalize to unit sphere since 
+    geo.computeBoundingSphere();
+    if (geo.boundingSphere) {
+      const geo_radius = geo.boundingSphere.radius;
+      const scale = 1 / geo_radius * 100; //TODO 100 is a bit large isnt it?!
+      geo.scale(scale, scale, scale);
+    }
+  }
 
   static createGeometry(
     vertices_shape?: number[],
@@ -16,6 +26,32 @@ export class ThreeFactory {
     vert_colors?: Uint8Array,
     config?: ThreeConfig
   ): Group | Points {
+    // const vec = new Vector3(1, 5, 1);
+		// const translation = new Matrix4();
+		// translation.identity();
+
+
+    // const geo = new BoxBufferGeometry(0.1, 5, 0.1);
+    // const geo1 = new BoxBufferGeometry(0.1, vec.length(), 0.1);
+    // geo.translate(0, 2.5, 0);
+    // geo1.translate(0, -vec.length()/2, 0);
+		// const quaternation = new Quaternion().setFromUnitVectors(new Vector3(0,1,0), vec.clone().normalize());
+    // translation.makeRotationFromQuaternion(quaternation);
+    // translation.setPosition(new Vector3(0, 5, 0).add(vec));
+    // geo1.applyMatrix4(translation);
+    
+    // const mesh_mat = new MeshBasicMaterial( { color: 0xf57c00 } );
+    // const mesh = new Mesh(geo, mesh_mat);
+    
+    // const mesh_mat1 = new MeshBasicMaterial( { color: 0x000000 } );
+    // const mesh1 = new Mesh(geo1, mesh_mat1);
+    // const g = new Group();
+    // g.add(mesh);
+    // g.add(mesh1);
+
+    // return g;
+
+
     if (!vertices_shape || !vertices_arr || vertices_arr.length <= 0 || vertices_shape[1] <= 0) {
       throw new Error('No vertices provided');
     }
@@ -69,6 +105,8 @@ export class ThreeFactory {
     const points_geo = new BufferGeometry();
     points_geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
     
+    ThreeFactory.normalize_scale(points_geo);
+
     let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
     
     const color_arr = ThreeFactory._getColors(vertices_shape[0] * vertices_shape[1], colors, vertices_cmap);
@@ -86,26 +124,26 @@ export class ThreeFactory {
     face_colors_arr?: Uint8Array
   ): Group {
     const geometries = new Group();
+
+    // iterate over samples in batch
     for (let i = 0; i < vertices_shape[0]; i++) {
       // add points & mesh
       let mesh_geo = new BufferGeometry();
       const mesh_mat = new MeshBasicMaterial( { color: 0xf57c00 } );
       
       if (!!face_colors && !!face_colors_arr && face_colors_arr.length > 0) {
-        console.log(face_colors_arr[i * 3],
-          face_colors_arr[i * 3 + 1],
-          face_colors_arr[i * 3 + 2]);
         mesh_mat.color = new Color(ThreeFactory._toHex([
           face_colors_arr[i * 3],
           face_colors_arr[i * 3 + 1],
           face_colors_arr[i * 3 + 2]
         ]));
-        console.log(mesh_mat.color);
       }
 
       const pos_offset = vertices_shape[1] * 3;
       const pos_attr = new Float32BufferAttribute(vertices_arr.slice(i * pos_offset, (i+1) * pos_offset), 3);
       mesh_geo.setAttribute( 'position', pos_attr);
+
+      ThreeFactory.normalize_scale(mesh_geo);
       
       const face_offset = faces_shape[1] * 3;
       const face_attr = new Uint32BufferAttribute(faces_arr.slice(i * face_offset, (i + 1) * face_offset), 1);
@@ -121,13 +159,14 @@ export class ThreeFactory {
   }
 
   static createFeatureArrows(
-    vertices?: number[],
+    vertices_shape?: number[],
     vertices_arr?: Float32Array,
     features_arr?: Float32Array,
     feat_colors?: Uint8Array,
     config?: ThreeConfig
   ): Group | undefined {
-    if (!vertices || vertices.length == 0 || !vertices_arr || vertices_arr.length == 0) {
+    // return;
+    if (!vertices_shape || vertices_shape.length == 0 || !vertices_arr || vertices_arr.length == 0) {
       throw new Error('No vertices provided for feature arrows');
     }
     if (!features_arr || features_arr.length == 0) {
@@ -135,13 +174,13 @@ export class ThreeFactory {
     }
 
     if (
-      vertices[0] * vertices[1] !== features_arr.length / 3 || 
-      vertices[0] * vertices[1] !== vertices_arr.length / 3
+      vertices_shape[0] * vertices_shape[1] !== features_arr.length / 3 || 
+      vertices_shape[0] * vertices_shape[1] !== vertices_arr.length / 3
     ) {
       throw new Error('Features and vertices do not have the same shape');
     }
 
-    if (!!feat_colors && feat_colors.length > 0 && feat_colors.length / 3 !== vertices[0] * vertices[1]) {
+    if (!!feat_colors && feat_colors.length > 0 && feat_colors.length / 3 !== vertices_shape[0] * vertices_shape[1]) {
       throw new Error('There must be a color for each feature');
     }
 
@@ -166,49 +205,55 @@ export class ThreeFactory {
 
     
     const arrowHelper = new ArrowHelper();
-    const zero_vec = new Vector3();
+    
+    const geo = new BufferGeometry();
+    geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
+    
+    ThreeFactory.normalize_scale(geo);
+
+    const vertices = geo.getAttribute('position').array;
 
     // get max vector length
     let max_len = 0;
-    for (let i = 0; i < vertices[0]; i++) {
-      for (let j = 0; j < vertices[1]; j++) {
+    for (let i = 0; i < vertices_shape[0]; i++) {
+      for (let j = 0; j < vertices_shape[1]; j++) {
         const direction = new Vector3(
-          features_arr[i * vertices[1] + j * 3],
-          features_arr[i * vertices[1] + j * 3 + 1],
-          features_arr[i * vertices[1] + j * 3 + 2]
+          features_arr[i * vertices_shape[1] + j * 3],
+          features_arr[i * vertices_shape[1] + j * 3 + 1],
+          features_arr[i * vertices_shape[1] + j * 3 + 2]
         );
-        max_len = Math.max(max_len, zero_vec.distanceTo(direction));
+        max_len = Math.max(max_len, direction.length());
       }
     }
 
     // add arrows
-    for (let i = 0; i < vertices[0]; i++) {
-      for (let j = 0; j < vertices[1]; j++) {
+    for (let i = 0; i < vertices_shape[0]; i++) {
+      for (let j = 0; j < vertices_shape[1]; j++) {
         const origin = new Vector3(
-          vertices_arr[i * vertices[1] * 3 + j * 3],
-          vertices_arr[i * vertices[1] * 3 + j * 3 + 1],
-          vertices_arr[i * vertices[1] * 3 + j * 3 + 2]
+          vertices[i * vertices_shape[1] * 3 + j * 3],
+          vertices[i * vertices_shape[1] * 3 + j * 3 + 1],
+          vertices[i * vertices_shape[1] * 3 + j * 3 + 2]
         );
         const direction = new Vector3(
-          features_arr[i * vertices[1] * 3 + j * 3],
-          features_arr[i * vertices[1] * 3 + j * 3 + 1],
-          features_arr[i * vertices[1] * 3 + j * 3 + 2]
+          features_arr[i * vertices_shape[1] * 3 + j * 3],
+          features_arr[i * vertices_shape[1] * 3 + j * 3 + 1],
+          features_arr[i * vertices_shape[1] * 3 + j * 3 + 2]
         );
 
         let color;
         if (!!feat_colors && feat_colors?.length > 0) {
           color = [
-            feat_colors[i * vertices[1] * 3 + j * 3],
-            feat_colors[i * vertices[1] * 3 + j * 3 + 1],
-            feat_colors[i * vertices[1] * 3 + j * 3 + 2]
+            feat_colors[i * vertices_shape[1] * 3 + j * 3],
+            feat_colors[i * vertices_shape[1] * 3 + j * 3 + 1],
+            feat_colors[i * vertices_shape[1] * 3 + j * 3 + 2]
           ];
         } else {
-          const len = zero_vec.distanceTo(direction);
+          const len = direction.length();
           const c = new Color(cmap[Math.floor(len/max_len * 100)]);
           color = [c.r, c.g, c.b].map(val => Math.floor(val * 255));
         }
         
-        arrowHelper.addArrowToBuffer(origin, direction, color);
+        arrowHelper.addArrowToBuffer(origin, direction, color, max_len);
       }
     }
       

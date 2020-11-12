@@ -29,6 +29,11 @@
       @change="settings.show_wireframe.next($event)">
       Show as wireframe
     </md-switch>
+
+    <md-switch v-model="data.norm_features"
+      @change="settings.norm_features.next($event)">
+      Normalize feature vectors
+    </md-switch>
   </div>
 
   <md-divider></md-divider>

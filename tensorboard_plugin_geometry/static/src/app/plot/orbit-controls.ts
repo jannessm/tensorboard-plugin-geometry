@@ -84,7 +84,7 @@ export class OrbitControls extends EventDispatcher{
 	keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
 	// Mouse buttons
-	mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN };
+	mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN };
 
 	// Touch fingers
 	touches = { ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN };
@@ -145,7 +145,6 @@ export class OrbitControls extends EventDispatcher{
 		this.zoom0 = this.object.zoom;
 
 		//
-	
 		this.domElement.addEventListener( 'contextmenu', this.onContextMenu.bind(this), false );
 	
 		this.domElement.addEventListener( 'pointerdown', this.onPointerDown.bind(this), false );

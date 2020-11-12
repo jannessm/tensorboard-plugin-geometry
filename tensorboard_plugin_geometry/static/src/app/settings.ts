@@ -8,6 +8,7 @@ class SettingsClass {
   show_features = new Observeable<boolean>(true);
   show_vertices = new Observeable<boolean>(true);
   show_wireframe = new Observeable<boolean>(false);
+  norm_features = new Observeable<boolean>(true);
 }
 
 export const Settings = new SettingsClass();
