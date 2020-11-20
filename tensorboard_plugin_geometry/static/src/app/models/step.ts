@@ -14,6 +14,7 @@ export interface StepMetadata {
 export interface StepData {
   geometry?: Points | Group;
   features?: Group;
+  broken: boolean;
 }
 
 export interface RawStep {

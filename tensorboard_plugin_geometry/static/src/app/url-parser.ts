@@ -22,7 +22,6 @@ export class URLParser {
         const params = URLParser._parseHash(url.hash);
 
         if (params[param] !== value) {
-            console.log('set URL');
             params[param] = encodeURIComponent(value);
     
             url.hash = URLParser._paramsToHash(params);

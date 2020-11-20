@@ -27,33 +27,45 @@ import './plot.scss';
 import { Settings } from '../settings';
 import { ThreeFactory } from '../three-factory';
 import { CAMERA_TYPE, OrthograficCameraConfig, PerspectiveCameraConfig, ThreeConfig } from '../models/metadata';
+import { StepData } from '../models/step';
 
 @WithRender
 @Component({
-  props: ['data', 'config', 'width'],
+  props: ['data', 'width'],
 })
 export default class PlotComponent extends Vue {
+  plot_data: StepData = {broken: true};
+  config: ThreeConfig = {};
+
   scene = new Scene();
   camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.0001, 1000 );
   renderer = new WebGLRenderer();
   // controls: OrbitControls | TrackballControls = new OrbitControls( this.camera, this.renderer.domElement );
   controls: OrbitControls | TrackballControls = new TrackballControls( this.camera, this.renderer.domElement );
   last_width = 0;
-  geometries: (Mesh | Points)[] = [];
+  geometries: (Group | Points)[] = [];
   features: Group[] = [];
 
   is_active = false;
 
   mounted() {
+    // listeners
     this.$el.appendChild(this.renderer.domElement);
     this.$watch('width', this.update);
-    this.$watch('data', this.updateData);
     window.addEventListener('resize', this.update);
-    
+    this.$props.data.subscribe((data: {data: StepData, config: ThreeConfig}) => {
+      this.plot_data = data.data;
+      this.config = data.config;
+      
+      this.updateData();
+    });
+
+
+
+    // empty scene
     this.camera.position.set(0,0,-5);
     this.camera.lookAt(0,0,0);
     
-    // empty scene
     this.scene.background = new Color( 0xffffff );
     this.renderer.render( this.scene, this.camera );
     
@@ -134,6 +146,7 @@ export default class PlotComponent extends Vue {
   }
 
   updateData() {
+    console.log('updateData');
     this.update();
     this.scene.remove.apply(this.scene, this.features);
     this.scene.remove.apply(this.scene, this.geometries);
@@ -141,16 +154,16 @@ export default class PlotComponent extends Vue {
     this.geometries = [];
 
     ////////// update mesh /////////
-    if (!!this.$props.data && !!this.$props.data.geometry) {
+    if (!!this.plot_data && !!this.plot_data.geometry) {
 
-      this.geometries.push(this.$props.data.geometry);
-      this.scene.add(this.$props.data.geometry);
+      this.geometries.push(this.plot_data.geometry);
+      this.scene.add(this.plot_data.geometry);
 
     } 
     ///////// update features ////////
-    if (!!this.$props.data && !!this.$props.data.features) {
-      this.features.push(this.$props.data.features);
-      this.scene.add(this.$props.data.features);
+    if (!!this.plot_data && !!this.plot_data.features) {
+      this.features.push(this.plot_data.features);
+      this.scene.add(this.plot_data.features);
     }
 
     /////// update config ////////
@@ -193,7 +206,7 @@ export default class PlotComponent extends Vue {
   }
 
   setPerspCameraPosition() {
-    const config = this.$props.config as ThreeConfig;
+    const config = this.config;
     if (!!config.camera && !!config.camera.position) {
       return
     }
@@ -215,7 +228,7 @@ export default class PlotComponent extends Vue {
   }
 
   setOrthoCameraPosition() {
-    const config = this.$props.config as ThreeConfig;
+    const config = this.config;
     if (!!config.camera && !!config.camera.position) {
       return
     }
@@ -245,7 +258,7 @@ export default class PlotComponent extends Vue {
   }
 
   updateConfig() {
-    const config = this.$props.config as ThreeConfig;
+    const config = this.config;
 
     //// update scene ////
     if (!!config.scene && !!config.scene.background_color && config.scene.background_color.length === 3) {

@@ -9,9 +9,10 @@ import PlotComponent from '../plot/plot';
 import { StepData, Steps } from '../models/step';
 import { DataManager } from '../data-manager';
 import { loader } from '../loader';
-import { Subscriber } from '../models/observeable';
+import { Observeable, Subscriber } from '../models/observeable';
 import { colorScale } from '../color-scale';
 import { Settings } from '../settings';
+import { ThreeConfig } from '../models/metadata';
 
 @WithRender
 @Component({
@@ -29,7 +30,12 @@ export default class DataRunComponent extends Vue {
   last_run = '';
   steps: Steps = {steps: {}, step_ids: []};
   steps_subscription: Subscriber | undefined;
-  
+
+  plot = new Observeable<{
+    data:StepData,
+    config: ThreeConfig
+  }>({data: {broken: false}, config: {}});
+
   data = {
     loading: true,
     display: '',
@@ -39,10 +45,7 @@ export default class DataRunComponent extends Vue {
     max_step: 0,
     plot_height: (this.$el as HTMLElement)?.offsetWidth + 'px',
     fullscreen: false,
-    plot_data: {},
-    plot_config: {},
     color: '',
-    broken_data: false,
     show_snackbar: false,
     error: '',
   };
@@ -99,18 +102,20 @@ export default class DataRunComponent extends Vue {
   async updatePlotData() {
     this.data.loading = true;
     const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+    
     if (this.data.current_step_id >= 0 && !!provider) {
       try {
-        this.data.broken_data = false;
-        this.data.plot_data = await provider.getData(this.data.current_step_label) as StepData;
+        this.plot.value.data = await provider.getData(this.data.current_step_label) as StepData;
+        this.plot.next(this.plot.value);
       } catch(err) {
-        this.data.broken_data = true;
-        console.error(err);
-        this.data.error = err.message;
+        this.plot.value.data.broken = true;
+        console.error(this.$props.run.name, this.$props.run.tag, err.message);
+        this.data.error = [this.$props.run.name + ' ' + this.$props.run.tag, err.message].join(': ');
         this.data.show_snackbar = true;
       }
-      this.data.loading = false;
+      
     }
+    this.data.loading = false;
   }
 
   togglePlotSize() {
@@ -146,7 +151,8 @@ export default class DataRunComponent extends Vue {
     this.data.max_step = steps.step_ids.length - 1;
     
     // set meta data
-    this.data.plot_config = steps.config || {};
+    this.plot.value.config = steps.config || {};
+    this.plot.next(this.plot.value);
     
     this.steps = steps;
 

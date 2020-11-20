@@ -49,7 +49,7 @@
       <div v-if="run.display" class="run md-layout md-alignment-center-left">
         <md-checkbox
           v-model="run.checked"
-          @change="data.exclusive = false"
+          @change="checkboxChange(run)"
           :class="run.color + ' md-layout-item md-size-10'"></md-checkbox>
         <md-radio
           class="double_checkbox"

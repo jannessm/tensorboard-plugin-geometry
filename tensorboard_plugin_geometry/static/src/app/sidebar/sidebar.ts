@@ -111,6 +111,12 @@ export default class SidebarComponent extends Vue {
     }, 500);
   }
 
+  checkboxChange(run: RunSidebar) {
+    this.data.exclusive = false;
+    loader.runStateSelection[run.name] = run.checked;
+    loader.updateRunStates(loader.runStateSelection);
+  }
+
   exclusify(run: RunSidebar) {
     this.runs.forEach(r => {
       r.checked = (run.name == r.name);

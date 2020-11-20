@@ -21,6 +21,7 @@ interface ReloadContainer {
 export class LoaderClass {
   logdir = new Observeable<string>('./');
   runs = new Observeable<RunSidebar[]>([]);
+  runStateSelection = {};
   tags = new Observeable<Tags[]>([]);
   reloadContainer: ReloadContainer;
 
@@ -65,6 +66,7 @@ export class LoaderClass {
 
     if (regex) {
       const obj = JSON.parse(atob(regex));
+      this.runStateSelection = obj;
       let runs = this.runs.value;
 
       runs.forEach(run => {
@@ -75,6 +77,11 @@ export class LoaderClass {
 
       this.runs.next(runs);
     }
+  }
+
+  updateRunStates(new_states) {
+    this.runStateSelection = new_states;
+    URLParser.setUrlParam('runSelectionState', btoa(JSON.stringify(new_states)));
   }
 
   async reload() {

@@ -11,8 +11,8 @@ export class DataProvider {
   run = '';
   tag = '';
   steps_metadata = new Observeable<Steps>({ steps: {}, step_ids: [] });
-  steps_data: (StepData | undefined)[] = [];
-  norm_steps_data: (StepData | undefined)[] = [];
+  steps_data: StepData[] = [];
+  norm_steps_data: StepData[] = [];
   
   constructor() {}
 
@@ -74,6 +74,10 @@ export class DataProvider {
         throw Error(`No vertices available for run ${this.run}, tag ${this.tag}, and step ${id}.`);
       }
       
+      const resp: StepData = {broken: true};
+      
+      this_data[id] = resp;
+
       const geo = ThreeFactory.createGeometry(
         this.steps_metadata.value.steps[id].VERTICES?.shape,
         data.vertices,
@@ -84,9 +88,8 @@ export class DataProvider {
         data.vert_colors,
         this.steps_metadata.value.config,
         normalize);
-
-      const resp: StepData = {};
       resp['geometry'] = geo;
+
 
       if (!!data.features) {
         resp['features'] = ThreeFactory.createFeatureArrows(
@@ -98,6 +101,8 @@ export class DataProvider {
           normalize);
       }
 
+      resp.broken = false;
+      
       this_data[id] = resp;
     }
 
@@ -116,7 +121,7 @@ export class DataProvider {
     if (arr1.length !== arr2.length) {
       return false;
     }
-    console.log(arr1, arr2);
+
     return arr1.map((val, id) => val === arr2[id])
       .reduce((is_eq, val) => val || is_eq, false);
   }

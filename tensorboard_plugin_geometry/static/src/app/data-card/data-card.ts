@@ -20,6 +20,7 @@ export default class DataCardComponent extends Vue {
   tag_regex = '';
   pages: Run[][] = [];
   runs: RunSidebar[] = [];
+  _reload_timeout: NodeJS.Timeout | undefined = undefined;
 
   data = {
     expanded: false,
@@ -31,11 +32,30 @@ export default class DataCardComponent extends Vue {
     this.data.expanded = this.$props.expanded;
     (this.$children[0] as MdCard).MdCard.expand = this.$props.expanded;
 
-    loader.runs.subscribe(runs => {this.runs = runs; this.update();});
-    loader.tags.subscribe(() => this.update());
+    loader.runs.subscribe(runs => {
+      //discard old runs
+      if (this._reload_timeout) {
+        clearTimeout(this._reload_timeout);
+      }
+      this._reload_timeout = setTimeout(() => {
+        this.runs = runs;
+        this.update();
+      }, 200);
+    });
+
+    loader.tags.subscribe(() => {
+      //discard old runs
+      if (this._reload_timeout) {
+        clearTimeout(this._reload_timeout);
+      }
+      this._reload_timeout = setTimeout(() => {
+        this.update();
+      }, 200);
+    });
   }
 
   update() {
+    console.log('update')
     this.data.expanded = (this.$children[0] as MdCard).MdCard.expand;
 
     let skipped = 0;

@@ -19,11 +19,10 @@
       </slider>
     </div>
   
-    <div v-if="!data.broken_data">
+    <div v-if="!plot.value.data.broken">
       <plot
         class="plot"
-        :data="data.plot_data"
-        :config="data.plot_config"
+        :data="plot"
         :style="'height: ' + data.plot_height"
         :width="data.fullscreen"
         ></plot>
