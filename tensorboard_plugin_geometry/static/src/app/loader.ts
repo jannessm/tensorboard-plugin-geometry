@@ -55,7 +55,6 @@ export class LoaderClass {
       const regex = URLParser.getUrlParam(param);
 
       if (regex && regex !== this[param].value) {
-        console.log('reload_filter');
         this[param].next(regex);
       }
     });
@@ -66,7 +65,7 @@ export class LoaderClass {
 
     if (regex) {
       const obj = JSON.parse(atob(regex));
-      const runs = this.runs.value;
+      let runs = this.runs.value;
 
       runs.forEach(run => {
         if (obj[run.name] !== undefined) {
@@ -95,10 +94,11 @@ export class LoaderClass {
 
   // sidebar.ts
   private async _updateRunData(data: RawTags) {
-    colorScale.setDomain(Object.keys(data));
+    const run_names = Object.keys(data).sort(this._sortRuns);
+    colorScale.setDomain(run_names);
     
     const runs: RunSidebar[] = [];
-    Object.keys(data).forEach(run => {
+    run_names.forEach(run => {
       const old_run = this.runs.value.find(val => val.name === run);
       runs.push({
         name: run,
@@ -107,6 +107,7 @@ export class LoaderClass {
         color: colorScale.getColor(run)
       });
     });
+
     this.runs.next(runs);
   }
 
@@ -146,6 +147,12 @@ export class LoaderClass {
 
   private _parseMarkdown(str): string {
     return markdown.toHTML(str.replace(/<\/?[^>]+(>|$)/g, ""));
+  }
+
+  private _sortRuns(a: string, b: string): number {
+    const run_a = a.replace(RegExp('.*/'), '');
+    const run_b = b.replace(RegExp('.*/'), '');
+    return run_a.localeCompare(run_b);
   }
 }
 
