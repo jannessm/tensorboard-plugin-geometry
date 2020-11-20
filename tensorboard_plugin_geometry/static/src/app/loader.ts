@@ -37,9 +37,15 @@ export class LoaderClass {
       .find(val => !!val && !!val.isReloading$);
 
     this.reloadContainer.isReloading$.subscribe(() => {
-      this.reloadFilters();
       this.reload();
     });
+
+    window.parent.addEventListener('popstate', () => {
+      this.reloadRunStates();
+      this.reloadFilters();
+    });
+    this.reloadFilters();
+    this.reloadRunStates();
   }
 
   reloadFilters() {
@@ -55,8 +61,24 @@ export class LoaderClass {
     });
   }
 
+  reloadRunStates() {
+    const regex = URLParser.getUrlParam('runSelectionState');
+
+    if (regex) {
+      const obj = JSON.parse(atob(regex));
+      const runs = this.runs.value;
+
+      runs.forEach(run => {
+        if (obj[run.name] !== undefined) {
+          run.checked = obj[run.name];
+        }
+      });
+
+      this.runs.next(runs);
+    }
+  }
+
   async reload() {
-    console.log('reload_data');
     const tags: TagsResponse = await ApiService.getTags();
 
     if(this._tags_data !== tags.data){

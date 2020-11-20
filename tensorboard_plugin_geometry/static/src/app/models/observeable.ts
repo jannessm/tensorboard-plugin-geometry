@@ -3,7 +3,7 @@ export interface Subscriber {
 }
 
 export class Observeable<T> {
-  private _subscriptions: Function[] = [];
+  protected _subscriptions: Function[] = [];
   value: T;
 
   constructor(init_value: T) {
