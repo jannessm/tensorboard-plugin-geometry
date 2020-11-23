@@ -1,13 +1,13 @@
-export interface Run {
-  name: string;
-  tag: string;
-  samples: number;
-  description: string;
+import { RawTagCollection, TagCollection } from "./tag";
+
+export interface RawRuns {
+  [run: string]: RawTagCollection;
 }
 
-export interface RunSidebar {
+export interface Run {
   name: string;
+  tags: TagCollection;
   display: boolean;
-  checked: boolean;
+  selected: boolean;
   color: string;
 }

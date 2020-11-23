@@ -6,7 +6,7 @@ import SidebarComponent from '../sidebar/sidebar';
 
 import './main.scss';
 import DataCardComponent from '../data-card/data-card';
-import {Tags} from '../models/tag';
+import {Tag, TagCard} from '../models/tag';
 
 import { loader } from '../loader';
 import { URLParser } from '../url-parser';
@@ -22,7 +22,7 @@ export default class MainComponent extends Vue {
   tag_regex = '';
   loading = true;
   data = {
-    tags: new Array<Tags>()
+    tags: new Array<TagCard>(),
   }
   apply_regex: any = undefined;
 
@@ -30,9 +30,10 @@ export default class MainComponent extends Vue {
     loader.tags.subscribe(tags => {
       tags.unshift({
         name: this.tag_regex,
-        runs: [],
         display: !!this.tag_regex,
         isRegex: true,
+        expanded: true,
+        runs: []
       });
 
       this.data.tags = tags;
@@ -55,9 +56,11 @@ export default class MainComponent extends Vue {
     this.apply_regex = setTimeout(() => {
       this.data.tags[0].name = this.tag_regex;
       this.data.tags[0].display = !!this.tag_regex;
-      this.data.tags[0].runs = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.runs : [])
-                                             .reduce((concated, val) => concated.concat(val), []);
-      this.data.tags[0].tag_names = this.data.tags.map((val, id) => id > 0 && !!val.name.match(this.tag_regex) ? val.name : '');
+      this.data.tags.forEach(tag => tag.display = !!tag.name.match(RegExp(this.tag_regex)));
+      
+      this.data.tags[0].runs = this.data.tags.map(tag => tag.display ? tag.runs : [])
+        .reduce((all, runs) => all.concat(runs), []);
+      
 
       loader.tagFilter.next(this.tag_regex);
       URLParser.setUrlParam('tagFilter', this.tag_regex);

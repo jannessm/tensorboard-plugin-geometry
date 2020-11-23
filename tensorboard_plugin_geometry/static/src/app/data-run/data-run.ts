@@ -13,6 +13,7 @@ import { Observeable, Subscriber } from '../models/observeable';
 import { colorScale } from '../color-scale';
 import { Settings } from '../settings';
 import { ThreeConfig } from '../models/metadata';
+import { Run } from '../models/run';
 
 @WithRender
 @Component({
@@ -23,11 +24,17 @@ import { ThreeConfig } from '../models/metadata';
   }
 })
 export default class DataRunComponent extends Vue {
-  tag_regex = '';
-  default_class = '';
   dataManager = DataManager;
+  default_class = '';
   last_tag = '';
   last_run = '';
+  run_instance: Run = {
+    name: '',
+    tags: {},
+    display: true,
+    selected: true,
+    color: '',
+  };
   steps: Steps = {steps: {}, step_ids: []};
   steps_subscription: Subscriber | undefined;
 
@@ -38,7 +45,6 @@ export default class DataRunComponent extends Vue {
 
   data = {
     loading: true,
-    display: '',
     current_step_id: -1,
     current_step_label: 0,
     current_wall_time: new Date(),
@@ -50,17 +56,9 @@ export default class DataRunComponent extends Vue {
     error: '',
   };
 
-  created() {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+  mounted() {
+    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
     this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
-
-    loader.runs.subscribe(runs => {
-      // get display status from sidebar
-      const run = runs.find(val => val.name === this.$props.run.name)
-      const display = run.display && run.checked;
-      this.data.display = display ? '' : 'display: none;';
-      this.data.color = colorScale.getColor(this.$props.run.name);
-    });
 
     Settings.norm_features.subscribe(() => {
       this.updatePlotData();
@@ -69,14 +67,17 @@ export default class DataRunComponent extends Vue {
 
   // vue event
   updated() {
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
+    const run = loader.getRun(this.$props.run);
 
     // check if tag or run has changed
-    if (provider && this.last_run !== this.$props.run || this.last_tag !== this.$props.tag) {
+    if (provider && run && (this.last_run !== this.$props.run || this.last_tag !== this.$props.tag)) {
       this.steps_subscription?.unsubscribe();
       this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
+      this.data.color = colorScale.getColor(this.$props.run);
+      this.run_instance = run;
     }
   }
 
@@ -101,7 +102,7 @@ export default class DataRunComponent extends Vue {
 
   async updatePlotData() {
     this.data.loading = true;
-    const provider = this.dataManager.getProvider(this.$props.run.name, this.$props.run.tag);
+    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
     
     if (this.data.current_step_id >= 0 && !!provider) {
       try {
@@ -109,8 +110,8 @@ export default class DataRunComponent extends Vue {
         this.plot.next(this.plot.value);
       } catch(err) {
         this.plot.value.data.broken = true;
-        console.error(this.$props.run.name, this.$props.run.tag, err.message);
-        this.data.error = [this.$props.run.name + ' ' + this.$props.run.tag, err.message].join(': ');
+        console.error(this.$props.run, this.$props.tag, err.message);
+        this.data.error = [this.$props.run + ' ' + this.$props.tag, err.message].join(': ');
         this.data.show_snackbar = true;
       }
       

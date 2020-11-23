@@ -1,11 +1,10 @@
 import { ApiService } from "./api";
 import { Observeable } from "./models/observeable";
 import { TagsResponse } from "./models/responses";
-import { RunSidebar } from "./models/run";
-import { RawTags, Tags } from "./models/tag";
-import {markdown} from 'markdown';
-import { colorScale } from "./color-scale";
+import { RawRuns, Run } from "./models/run";
+import { TagCard } from "./models/tag";
 import { URLParser } from "./url-parser";
+import { RunCollection } from "./models/run-collection";
 
 interface ReloadContainer {
   isReloading$: {
@@ -20,15 +19,23 @@ interface ReloadContainer {
  */
 export class LoaderClass {
   logdir = new Observeable<string>('./');
-  runs = new Observeable<RunSidebar[]>([]);
-  runStateSelection = {};
-  tags = new Observeable<Tags[]>([]);
+  private _runCollection = new RunCollection();
+  tags = new Observeable<TagCard[]>([]);
+  
+  private _runSelectionState = {};
+  runSelectionChanged = new Observeable<undefined>(undefined);
+  
   reloadContainer: ReloadContainer;
 
   regexInput = new Observeable<string>('');
   tagFilter = new Observeable<string>('');
 
-  _tags_data: RawTags = {};
+  // raw data buffer to check if there are changes
+  _tags_data: RawRuns = {};
+
+  get runs() {
+    return this._runCollection.runs;
+  }
 
   constructor() {
     this.reload();
@@ -49,6 +56,10 @@ export class LoaderClass {
     this.reloadRunStates();
   }
 
+  getRun(name: string) {
+    return this._runCollection.runs.value[name];
+  }
+
   reloadFilters() {
     const params = ['regexInput', 'tagFilter'];
 
@@ -66,22 +77,28 @@ export class LoaderClass {
 
     if (regex) {
       const obj = JSON.parse(atob(regex));
-      this.runStateSelection = obj;
+      this._runSelectionState = obj;
       let runs = this.runs.value;
 
       runs.forEach(run => {
         if (obj[run.name] !== undefined) {
-          run.checked = obj[run.name];
+          this._runCollection.setVisibilityForRun(run.name, obj[run.name]);
         }
       });
 
+      this.runSelectionChanged.next(undefined);
       this.runs.next(runs);
     }
   }
 
-  updateRunStates(new_states) {
-    this.runStateSelection = new_states;
-    URLParser.setUrlParam('runSelectionState', btoa(JSON.stringify(new_states)));
+  setVisibilityForRun(name: string, visible: boolean) {
+    this._runCollection.setVisibilityForRun(name, visible);
+    this._runSelectionState[name] = visible;
+  }
+
+  updateRunStates() {
+    this.runSelectionChanged.next(undefined);
+    URLParser.setUrlParam('runSelectionState', btoa(JSON.stringify(this._runSelectionState)));
   }
 
   async reload() {
@@ -89,77 +106,17 @@ export class LoaderClass {
 
     if(this._tags_data !== tags.data){
       this._tags_data = tags.data;
-      this._updateRunData(tags.data);
-      this._updateTagData(tags.data);
+      this._runCollection.updateRuns(this._tags_data);
+
+      this.tags.next(this._runCollection.tags);
+    } else {
+      console.log('no new tagdata');
     }
 
     const new_logdir = (await ApiService.getLogdir()).data.logdir;
     if (this.logdir.value !== new_logdir) {
       this.logdir.next(new_logdir);
     }
-  }
-
-  // sidebar.ts
-  private async _updateRunData(data: RawTags) {
-    const run_names = Object.keys(data).sort(this._sortRuns);
-    colorScale.setDomain(run_names);
-    
-    const runs: RunSidebar[] = [];
-    run_names.forEach(run => {
-      const old_run = this.runs.value.find(val => val.name === run);
-      runs.push({
-        name: run,
-        display: old_run ? old_run.display : true,
-        checked: old_run ? old_run.checked : true,
-        color: colorScale.getColor(run)
-      });
-    });
-
-    this.runs.next(runs);
-  }
-
-  // main.ts
-  private async _updateTagData(data: RawTags) {
-    const tags: Tags[] = [];
-      
-    // iter over all runs
-    Object.keys(data).forEach(run => {
-      
-      // iter over all tags in run
-      Object.keys(data[run]).forEach(tag => {
-        const old_tag = this.tags.value.find(val => val.name === tag);
-        
-        // add new tag if not exists yet
-        if (tags.findIndex(val => val.name === tag) < 0) {
-          tags.push({
-            name: tag,
-            runs: [],
-            display: old_tag ? old_tag.display : true
-          });
-        }
-
-        const tag_index = tags.findIndex((val) => val.name === tag);
-
-        tags[tag_index].runs.push({
-          name: run,
-          tag,
-          samples: data[run][tag].samples,
-          description: this._parseMarkdown(data[run][tag].description)
-        });
-      });
-    });
-
-    this.tags.next(tags);
-  }
-
-  private _parseMarkdown(str): string {
-    return markdown.toHTML(str.replace(/<\/?[^>]+(>|$)/g, ""));
-  }
-
-  private _sortRuns(a: string, b: string): number {
-    const run_a = a.replace(RegExp('.*/'), '');
-    const run_b = b.replace(RegExp('.*/'), '');
-    return run_a.localeCompare(run_b);
   }
 }
 

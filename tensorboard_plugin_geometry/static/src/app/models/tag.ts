@@ -1,18 +1,26 @@
-import { Run } from "./run";
-
-export interface RawTags {
-  [run: string]: {
-    [tag: string]: {
-      samples: number;
-      description: string;
-    }
-  }
+export interface RawTagCollection {
+  [tag: string]: RawTag;
 }
 
-export interface Tags {
+export interface RawTag {
+  samples: number;
+  description: string;
+}
+
+export interface TagCollection {
+  [tag: string]: Tag;
+}
+
+export interface Tag {
   name: string;
-  runs: Run[];
-  tag_names?: string[];
+  description: string;
+  samples: number;
+}
+
+export interface TagCard {
+  name: string;
+  isRegex: boolean;
   display: boolean;
-  isRegex?: boolean;
+  expanded: boolean;
+  runs: string[];
 }

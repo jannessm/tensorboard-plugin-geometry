@@ -8,13 +8,12 @@
     </md-field>
     
     <data-card
-      v-if="tag.display"
       v-for="tag in data.tags"
+      v-if="tag.display"
       :name="tag.name"
-      :tag="tag.runs"
-      :tag_names="tag.tag_names"
       :isRegex="tag.isRegex"
-      :expanded="tag === data.tags[1]"
+      :expanded="tag.expanded"
+      :runs="tag.runs"
     ></data-card>
   </div>
 

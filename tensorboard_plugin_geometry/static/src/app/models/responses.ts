@@ -1,8 +1,8 @@
+import { RawRuns } from "./run";
 import { RawStep } from "./step";
-import { RawTags } from "./tag";
 
 export interface TagsResponse {
-  data: RawTags
+  data: RawRuns
 }
 
 export interface MetadataResponse {

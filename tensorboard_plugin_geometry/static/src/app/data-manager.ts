@@ -1,10 +1,11 @@
+import { type } from "os";
 import { DataProvider } from "./data-provider";
 
 class DataManagerClass {
   providers: { [run: string]: { [tag: string]: DataProvider } } = {};
 
   getProvider(run: string, tag: string) {
-    if (!run || !tag) {
+    if (typeof(run) !== 'string' || typeof(tag) !== 'string') {
       return;
     }
     

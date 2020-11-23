@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { DataManager } from '../data-manager';
 import { loader } from '../loader';
-import { RunSidebar } from '../models/run';
+import { Run } from '../models/run';
 
 import { Settings } from '../settings';
 import SliderComponent from '../slider/slider';
@@ -18,9 +18,8 @@ import './sidebar.scss';
   }
 })
 export default class SidebarComponent extends Vue {
-  runs: RunSidebar[] = [];
+  runs: Run[] = [];
   colors: string[] = [];
-  settings = Settings;
   apply_regex:any = undefined;
   showSnackbar = false;
 
@@ -57,46 +56,42 @@ export default class SidebarComponent extends Vue {
       }
     });
 
-    this.settings.show_vertices.subscribe(val => {
+    Settings.show_vertices.subscribe(val => {
       if (this.data.show_vertices !== val) {
         this.data.show_vertices = val;
       }
     });
-    this.settings.show_features.subscribe(val => {
+    Settings.show_features.subscribe(val => {
       if (this.data.show_features !== val) {
         this.data.show_features = val;
       }
     });
-    this.settings.show_wireframe.subscribe(val => {
+    Settings.show_wireframe.subscribe(val => {
       if (this.data.show_wireframe !== val) {
         this.data.show_wireframe = val;
       }
     });
   }
 
-  updated() {
-    loader.runs.next(this.runs);
-  }
-
   updatePointSize(new_value) {
     new_value = this.getPointSize(new_value);
     this.data.formatted_point_size = this.getFormattedSize(new_value);
-    this.settings.point_size.next(new_value);
+    Settings.point_size.next(new_value);
   }
 
   updatePointSizeInput(new_value) {
-    if (new_value > this.settings.max_point_size) {
-      new_value = this.settings.max_point_size;
+    if (new_value > Settings.max_point_size) {
+      new_value = Settings.max_point_size;
     }
-    if (new_value < this.settings.min_point_size) {
-      new_value = this.settings.min_point_size;
+    if (new_value < Settings.min_point_size) {
+      new_value = Settings.min_point_size;
     }
 
-    this.data.point_size = new_value / (this.settings.max_point_size - this.settings.min_point_size) * 100 - this.settings.min_point_size;
+    this.data.point_size = new_value / (Settings.max_point_size - Settings.min_point_size) * 100 - Settings.min_point_size;
     
     this.data.formatted_point_size = this.getFormattedSize(new_value);
 
-    this.settings.point_size.next(new_value);
+    Settings.point_size.next(new_value);
   }
 
   filterRuns() {
@@ -104,35 +99,35 @@ export default class SidebarComponent extends Vue {
       clearTimeout(this.apply_regex);
     }
     this.apply_regex = setTimeout(() => {
-      this.runs.forEach(val => val.display = !!val.name.match(RegExp(this.data.regex)));
+      this.runs.forEach(r => r.display = !!r.name.match(RegExp(this.data.regex)));
       loader.runs.next(this.runs);
       loader.regexInput.next(this.data.regex);
       URLParser.setUrlParam('regexInput', this.data.regex);
     }, 500);
   }
 
-  checkboxChange(run: RunSidebar) {
+  checkboxChange(run: Run) {
     this.data.exclusive = false;
-    loader.runStateSelection[run.name] = run.checked;
-    loader.updateRunStates(loader.runStateSelection);
+    loader.setVisibilityForRun(run.name, run.selected);
+    loader.updateRunStates();
   }
 
-  exclusify(run: RunSidebar) {
+  exclusify(run: Run) {
     this.runs.forEach(r => {
-      r.checked = (run.name == r.name);
+      loader.setVisibilityForRun(r.name, r.name === run.name);
     });
-    loader.runs.next(this.runs);
+    loader.updateRunStates();
   }
 
   toggleAll() {
-    const checked = this.runs.reduce((allChecked, val) => val.checked || allChecked, false);
-    this.runs.forEach(val => val.checked = !checked);
+    const oneIsSelected = this.runs.reduce((oneIsSelected, r) => r.selected || oneIsSelected, false);
+    this.runs.forEach(r => loader.setVisibilityForRun(r.name, !oneIsSelected));
     this.data.exclusive = false;
-    loader.runs.next(this.runs);
+    loader.updateRunStates();
   }
 
   getPointSize(size: number) {
-    return size / 100 * (this.settings.max_point_size - this.settings.min_point_size) + this.settings.min_point_size;
+    return size / 100 * (Settings.max_point_size - Settings.min_point_size) + Settings.min_point_size;
   }
 
   getFormattedSize(value) {
