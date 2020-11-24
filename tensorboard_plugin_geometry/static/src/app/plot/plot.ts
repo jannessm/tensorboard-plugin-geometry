@@ -170,12 +170,16 @@ export default class PlotComponent extends Vue {
     this.updateConfig();
 
     //////// update camera position ////////
-    if (this.camera instanceof PerspectiveCamera) {
+    if (this.plot_data.camera) {
+      this.camera = this.plot_data.camera;
+    
+    } else if (this.camera instanceof PerspectiveCamera) {
       this.setPerspCameraPosition();
-    }
-    if (this.camera instanceof OrthographicCamera) {
+    
+    } else if (this.camera instanceof OrthographicCamera) {
       this.setOrthoCameraPosition();
     }
+    // this.plot_data['camera'] = this.camera;
 
     /////// update visibility according to settings ///////
     this.features.map(group => group.visible = Settings.show_features.value);
@@ -322,6 +326,7 @@ export default class PlotComponent extends Vue {
         this.camera.bottom = (config.camera as OrthograficCameraConfig).bottom || -1;
       }
 
+      // this.plot_data.camera = this.camera;
     }
   }
 

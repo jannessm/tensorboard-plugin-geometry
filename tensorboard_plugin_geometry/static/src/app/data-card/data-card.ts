@@ -21,8 +21,8 @@ export default class DataCardComponent extends Vue {
 
   data = {
     expanded: false,
-    current_page: 1,
-    max_pages: 1,
+    current_page_id: 0,
+    max_page: 1,
     filtered_runs: []
   }
 
@@ -36,31 +36,34 @@ export default class DataCardComponent extends Vue {
   }
 
   update() {
-    console.log('update')
-    if(this.$props.runs){
-
+    if (this.$props.runs){
       this.data.expanded = (this.$children[0] as MdCard).MdCard.expand;
   
       this.data.filtered_runs = this.$props.runs.filter(name => {
         const run = loader.getRun(name);
   
         // ignore invisible
-        return !!run && !run.display;
+        return !!run && run.display && run.selected;
       });
+      console.log(this.data.filtered_runs);
   
-      this.data.max_pages = Math.ceil((this.$props.runs.length - this.data.filtered_runs.length) / 3);
+      this.data.max_page = Math.ceil(this.data.filtered_runs.length / 3);
+
+      if (this.data.max_page < this.data.current_page_id + 1) {
+        this.data.current_page_id = this.data.max_page - 1;
+      }
     }
   }
 
   nextPage() {
-    if (this.data.current_page < this.data.max_pages) {
-      this.data.current_page++;
+    if (this.data.current_page_id + 1 < this.data.max_page) {
+      this.data.current_page_id++;
     }
   }
 
   prevPage() {
-    if (this.data.current_page > 1) {
-      this.data.current_page--;
+    if (this.data.current_page_id > 0) {
+      this.data.current_page_id--;
     }
   }
 }

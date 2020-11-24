@@ -40,10 +40,11 @@ export default class DataRunComponent extends Vue {
 
   plot = new Observeable<{
     data:StepData,
-    config: ThreeConfig
+    config: ThreeConfig,
   }>({data: {broken: false}, config: {}});
 
   data = {
+    description: '',
     loading: true,
     current_step_id: -1,
     current_step_label: 0,
@@ -72,12 +73,16 @@ export default class DataRunComponent extends Vue {
 
     // check if tag or run has changed
     if (provider && run && (this.last_run !== this.$props.run || this.last_tag !== this.$props.tag)) {
+      console.log('data-run updated', this.$props.run, this.$props.tag);
       this.steps_subscription?.unsubscribe();
-      this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
+      this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata); // updates step data
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
-      this.data.color = colorScale.getColor(this.$props.run);
       this.run_instance = run;
+      this.data.color = colorScale.getColor(this.$props.run);
+      this.data.description = run.tags[this.$props.tag].description;
+      this.data.current_step_id = this.data.max_step;
+      this.updatePlotData();
     }
   }
 
@@ -106,8 +111,11 @@ export default class DataRunComponent extends Vue {
     
     if (this.data.current_step_id >= 0 && !!provider) {
       try {
-        this.plot.value.data = await provider.getData(this.data.current_step_label) as StepData;
-        this.plot.next(this.plot.value);
+        const data = await provider.getData(this.data.current_step_label) as StepData;
+        if (!!data) {
+          this.plot.value.data = data;
+          this.plot.next(this.plot.value);
+        }
       } catch(err) {
         this.plot.value.data.broken = true;
         console.error(this.$props.run, this.$props.tag, err.message);
@@ -142,12 +150,13 @@ export default class DataRunComponent extends Vue {
     (plot as PlotComponent).screenshot();
   }
 
-  handleStepsMetadata(steps: Steps) {
-    // if current step is last one 
+  handleStepsMetadata(steps: Steps) {    
+    // if current step is last one move to newset (latest)
     if (this.data.current_step_id === this.data.max_step){
       this.data.current_step_id = steps.step_ids.length - 1;
     }
 
+    this.steps = steps;
     // set boundaries
     this.data.max_step = steps.step_ids.length - 1;
     
@@ -155,9 +164,8 @@ export default class DataRunComponent extends Vue {
     this.plot.value.config = steps.config || {};
     this.plot.next(this.plot.value);
     
-    this.steps = steps;
-
     this.update(this.data.current_step_id);
+    console.log('updated stepmetadata', this.data.current_step_id, )
   }
 
 }

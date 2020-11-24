@@ -18,26 +18,26 @@
       <md-card-content>
         <div class="md-layout md-gutter" v-if="data.expanded">
           <data-run
-            v-if="runs.length > data.current_page * 3 + 0"
-            :run="runs[data.current_page * 3 + 0]"
+            v-if="data.filtered_runs.length > data.current_page_id * 3 + 0"
+            :run="data.filtered_runs[data.current_page_id * 3 + 0]"
             :tag="name"
             class="md-layout-item md-size-33"></data-run>
           <data-run
-            v-if="runs.length > data.current_page * 3 + 1"
-            :run="runs[data.current_page * 3 + 1]"
+            v-if="data.filtered_runs.length > data.current_page_id * 3 + 1"
+            :run="data.filtered_runs[data.current_page_id * 3 + 1]"
             :tag="name"
             class="md-layout-item md-size-33"></data-run>
           <data-run
-            v-if="runs.length > data.current_page * 3 + 2"
-            :run="runs[data.current_page * 3 + 2]"
+            v-if="data.filtered_runs.length > data.current_page_id * 3 + 2"
+            :run="data.filtered_runs[data.current_page_id * 3 + 2]"
             :tag="name"
             class="md-layout-item md-size-33"></data-run>
         </div>
 
         <div class="md-layout md-gutter md-alignment-top-center paginator">  
-          <md-button @click="prevPage" :disabled="data.current_page === 1" class="md-layout-item md-size-33">Prev</md-button>
-          <span class="md-layout-item md-size-33 page_label">{{data.current_page}} / {{data.max_pages}}</span>
-          <md-button @click="nextPage" :disabled="data.current_page === data.max_pages" class="md-layout-item md-size-33">Next</md-button>
+          <md-button @click="prevPage" :disabled="data.current_page_id + 1 === 1" class="md-layout-item md-size-33">Prev</md-button>
+          <span class="md-layout-item md-size-33 page_label">{{data.current_page_id + 1}} / {{data.max_page}}</span>
+          <md-button @click="nextPage" :disabled="data.current_page_id + 1 === data.max_pages" class="md-layout-item md-size-33">Next</md-button>
         </div>
       </md-card-content>
     </md-card-expand-content>

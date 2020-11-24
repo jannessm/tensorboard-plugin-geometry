@@ -4,9 +4,9 @@
       <md-progress-spinner class="loader" :md-diameter="100" :md-stroke="7" md-mode="indeterminate"></md-progress-spinner>
     </div>
   
-    {{tag}}<div :class="'header-run ' + data.color" :title="run_instance.name">{{run_instance.name}}</div>
+    {{tag}}<div :class="'header-run ' + data.color" :title="run">{{run}}</div>
       
-    <div class="description" v-html="run_instance.tags[$props.tag].description"></div>
+    <div class="description" v-html="data.description"></div>
     <md-divider></md-divider>
     <div class="slider">
       step: <b>{{data.current_step_label}}</b><br>
@@ -14,8 +14,7 @@
       <slider
         :value="data.current_step_id"
         :max="data.max_step"
-        v-on:value="update"
-        v-if="data.max_step !== 0">
+        v-on:value="update">
       </slider>
     </div>
   

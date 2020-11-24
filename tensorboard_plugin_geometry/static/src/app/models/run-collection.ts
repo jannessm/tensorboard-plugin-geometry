@@ -42,6 +42,10 @@ export class RunCollection {
 
     return sortedTags;
   }
+
+  getRun(name: string): Run | undefined {
+    return this._runs.value.find(val => val.name === name);
+  }
   
   updateRuns(data: RawRuns) {
     const run_names = Object.keys(data).sort(this._sortRuns);
@@ -64,7 +68,10 @@ export class RunCollection {
   }
 
   setVisibilityForRun(name: string, visible: boolean) {
-    this._runs[name].display = visible;
+    const run = this.getRun(name);
+    if (run) {
+      run.selected = visible;
+    }
   }
 
   private _getTagCollection(tags: RawTagCollection): TagCollection {

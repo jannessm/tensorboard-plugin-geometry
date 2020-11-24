@@ -56,8 +56,8 @@ export class LoaderClass {
     this.reloadRunStates();
   }
 
-  getRun(name: string) {
-    return this._runCollection.runs.value[name];
+  getRun(name: string): Run | undefined {
+    return this._runCollection.getRun(name);
   }
 
   reloadFilters() {

@@ -1,7 +1,7 @@
 import { ApiService } from "./api";
-import { Metadata, ThreeConfig } from "./models/metadata";
+import { ThreeConfig } from "./models/metadata";
 import { CONTENT_TYPES } from "./models/content-types";
-import { RawStep, StepData, StepMetadata, Steps } from "./models/step";
+import { StepData, Steps } from "./models/step";
 import { ThreeFactory } from "./three-factory";
 import { Observeable } from "./models/observeable";
 import { Settings } from "./settings";

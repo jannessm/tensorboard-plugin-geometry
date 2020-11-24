@@ -1,4 +1,4 @@
-import { Group, Points } from "three";
+import { Group, OrthographicCamera, PerspectiveCamera, Points } from "three";
 import { Metadata, ThreeConfig } from "./metadata";
 
 export interface StepMetadata {
@@ -15,6 +15,7 @@ export interface StepData {
   geometry?: Points | Group;
   features?: Group;
   broken: boolean;
+  camera?: OrthographicCamera | PerspectiveCamera;
 }
 
 export interface RawStep {
