@@ -13,6 +13,7 @@ export class DataProvider {
   steps_metadata = new Observeable<Steps>({ steps: {}, step_ids: [] });
   steps_data: StepData[] = [];
   norm_steps_data: StepData[] = [];
+  current_step_id = -1;
   
   constructor() {}
 
@@ -63,7 +64,8 @@ export class DataProvider {
     }
   }
 
-  async getData(id: number): Promise<StepData | undefined> {
+  async getData(): Promise<StepData | undefined> {
+    const id = this.current_step_id;
     const normalize = Settings.norm_features.value;
     const this_data = Settings.norm_features.value ? this.norm_steps_data : this.steps_data;
     

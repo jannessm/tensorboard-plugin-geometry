@@ -45,7 +45,6 @@ export default class DataCardComponent extends Vue {
         // ignore invisible
         return !!run && run.display && run.selected;
       });
-      console.log(this.data.filtered_runs);
   
       this.data.max_page = Math.ceil(this.data.filtered_runs.length / 3);
 

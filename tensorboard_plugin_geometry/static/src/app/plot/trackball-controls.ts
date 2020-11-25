@@ -151,14 +151,30 @@ export class TrackballControls extends EventDispatcher {
     return vector;
   }
 
+  rotate(axis: Vector3, angle: number) {
+    let quaternion = new Quaternion(),
+      eyeDirection = new Vector3();
+    
+
+    this._eye.copy( this.object.position ).sub( this.target );
+
+    eyeDirection.copy( this._eye ).normalize();
+
+    angle *= this.rotateSpeed;
+    quaternion.setFromAxisAngle( axis, angle );
+
+    this._eye.applyQuaternion( quaternion );
+    this.object.up.applyQuaternion( quaternion );
+  }
+
   rotateCamera() {
     let axis = new Vector3(),
-			quaternion = new Quaternion(),
-			eyeDirection = new Vector3(),
-			objectUpDirection = new Vector3(),
-			objectSidewaysDirection = new Vector3(),
-			moveDirection = new Vector3(),
-      angle = 0;
+		quaternion = new Quaternion(),
+		eyeDirection = new Vector3(),
+		objectUpDirection = new Vector3(),
+		objectSidewaysDirection = new Vector3(),
+		moveDirection = new Vector3(),
+    	angle = 0;
     
     moveDirection.set( this._moveCurr.x - this._movePrev.x, this._moveCurr.y - this._movePrev.y, 0 );
     angle = moveDirection.length();

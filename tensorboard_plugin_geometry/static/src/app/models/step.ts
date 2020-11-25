@@ -14,8 +14,8 @@ export interface StepMetadata {
 export interface StepData {
   geometry?: Points | Group;
   features?: Group;
-  broken: boolean;
-  camera?: OrthographicCamera | PerspectiveCamera;
+  broken?: boolean;
+  not_initialized?: boolean;
 }
 
 export interface RawStep {

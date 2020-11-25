@@ -31,17 +31,13 @@ import { StepData } from '../models/step';
 
 @WithRender
 @Component({
-  props: ['data', 'width'],
+  props: ['data', 'width', 'config'],
 })
 export default class PlotComponent extends Vue {
-  plot_data: StepData = {broken: true};
-  config: ThreeConfig = {};
-
   scene = new Scene();
   camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.0001, 1000 );
   renderer = new WebGLRenderer();
-  // controls: OrbitControls | TrackballControls = new OrbitControls( this.camera, this.renderer.domElement );
-  controls: OrbitControls | TrackballControls = new TrackballControls( this.camera, this.renderer.domElement );
+  controls: TrackballControls = new TrackballControls(this.camera, this.renderer.domElement);
   last_width = 0;
   geometries: (Group | Points)[] = [];
   features: Group[] = [];
@@ -53,14 +49,7 @@ export default class PlotComponent extends Vue {
     this.$el.appendChild(this.renderer.domElement);
     this.$watch('width', this.update);
     window.addEventListener('resize', this.update);
-    this.$props.data.subscribe((data: {data: StepData, config: ThreeConfig}) => {
-      this.plot_data = data.data;
-      this.config = data.config;
-      
-      this.updateData();
-    });
-
-
+    this.$props.data.subscribe(this.updateData);
 
     // empty scene
     this.camera.position.set(0,0,-5);
@@ -76,14 +65,9 @@ export default class PlotComponent extends Vue {
     this.scene.add( axesHelper );
     this.scene.add( light );
 
-    if (this.controls instanceof OrbitControls) {
-      this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-      this.controls.addEventListener('change', this.update);
-    } else {
-      this.controls = new TrackballControls(this.camera, this.renderer.domElement);
-      this.controls.addEventListener('start', this.startUpdate);
-      this.controls.addEventListener('end', this.stopUpdate);
-    }
+    this.controls = new TrackballControls(this.camera, this.renderer.domElement);
+    this.controls.addEventListener('start', this.startUpdate);
+    this.controls.addEventListener('end', this.stopUpdate);
 
     Settings.point_size.subscribe(this.updatePointSize);
 
@@ -137,49 +121,39 @@ export default class PlotComponent extends Vue {
       this.last_width = width;
     }
 
-    if (this.controls instanceof TrackballControls) {
-      this.controls.handleResize();
-      this.controls.update();
-    }
+    this.controls.handleResize();
+    this.controls.update();
     
     this.renderer.render( this.scene, this.camera );
   }
 
-  updateData() {
-    console.log('updateData');
-    this.update();
+  updateData(data: StepData) {
     this.scene.remove.apply(this.scene, this.features);
     this.scene.remove.apply(this.scene, this.geometries);
     this.features = [];
     this.geometries = [];
+    
+    this.update();
+    if (data.broken || data.not_initialized) {
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
 
     ////////// update mesh /////////
-    if (!!this.plot_data && !!this.plot_data.geometry) {
+    if (!!data && !!data.geometry) {
 
-      this.geometries.push(this.plot_data.geometry);
-      this.scene.add(this.plot_data.geometry);
+      this.geometries.push(data.geometry);
+      this.scene.add(data.geometry);
 
     } 
     ///////// update features ////////
-    if (!!this.plot_data && !!this.plot_data.features) {
-      this.features.push(this.plot_data.features);
-      this.scene.add(this.plot_data.features);
+    if (!!data && !!data.features) {
+      this.features.push(data.features);
+      this.scene.add(data.features);
     }
 
     /////// update config ////////
     this.updateConfig();
-
-    //////// update camera position ////////
-    if (this.plot_data.camera) {
-      this.camera = this.plot_data.camera;
-    
-    } else if (this.camera instanceof PerspectiveCamera) {
-      this.setPerspCameraPosition();
-    
-    } else if (this.camera instanceof OrthographicCamera) {
-      this.setOrthoCameraPosition();
-    }
-    // this.plot_data['camera'] = this.camera;
 
     /////// update visibility according to settings ///////
     this.features.map(group => group.visible = Settings.show_features.value);
@@ -194,6 +168,16 @@ export default class PlotComponent extends Vue {
       }
     });
 
+    //////// update camera position ////////
+    if (this.camera instanceof PerspectiveCamera) {
+      this.setPerspCameraPosition();
+    
+    } else if (this.camera instanceof OrthographicCamera) {
+      this.setOrthoCameraPosition();
+    }
+
+    this.controls = new TrackballControls(this.camera, this.renderer.domElement);
+    console.log(this.camera.position.x, this.camera.position.y, this.camera.position.z);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -210,14 +194,14 @@ export default class PlotComponent extends Vue {
   }
 
   setPerspCameraPosition() {
-    const config = this.config;
+    const config = this.$props.config;
     if (!!config.camera && !!config.camera.position) {
       return
     }
 
     const camera = this.camera as PerspectiveCamera;
     const bounds = this._getBoundingBox();
-    
+
     const offset = 0.1;
     const bounding_sphere = new Sphere();
     bounds.getBoundingSphere(bounding_sphere);
@@ -226,13 +210,14 @@ export default class PlotComponent extends Vue {
     r += r * offset;
     const distance = r / Math.sin(camera.getEffectiveFOV() / 2 * Math.PI / 180);
     const new_position = bounding_sphere.center.add(new Vector3(0, 0, distance));
-    
-    camera.position.set(new_position.x, new_position.y, new_position.z);
-    camera.lookAt(bounding_sphere.center);
+
+    this.controls.object.position.copy(new_position);
+    this.controls.target.copy(bounding_sphere.center);
+    this.controls.update();
   }
 
   setOrthoCameraPosition() {
-    const config = this.config;
+    const config = this.$props.config;
     if (!!config.camera && !!config.camera.position) {
       return
     }
@@ -262,7 +247,7 @@ export default class PlotComponent extends Vue {
   }
 
   updateConfig() {
-    const config = this.config;
+    const config = this.$props.config;
 
     //// update scene ////
     if (!!config.scene && !!config.scene.background_color && config.scene.background_color.length === 3) {
@@ -282,17 +267,11 @@ export default class PlotComponent extends Vue {
         this.camera.lookAt(0,0,0);
         this.controls.dispose();
 
-        if (this.controls instanceof OrbitControls) {
-          this.controls.removeEventListener('change', this.update);
-          this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-          this.controls.addEventListener('change', this.update);
-        } else {
-          this.controls.removeEventListener('start', this.startUpdate);
-          this.controls.removeEventListener('end', this.stopUpdate);
-          this.controls = new TrackballControls(this.camera, this.renderer.domElement);
-          this.controls.addEventListener('start', this.startUpdate);
-          this.controls.addEventListener('end', this.stopUpdate);
-        }
+        this.controls.removeEventListener('start', this.startUpdate);
+        this.controls.removeEventListener('end', this.stopUpdate);
+        this.controls = new TrackballControls(this.camera, this.renderer.domElement);
+        this.controls.addEventListener('start', this.startUpdate);
+        this.controls.addEventListener('end', this.stopUpdate);
       }
   
       // change position
@@ -326,7 +305,6 @@ export default class PlotComponent extends Vue {
         this.camera.bottom = (config.camera as OrthograficCameraConfig).bottom || -1;
       }
 
-      // this.plot_data.camera = this.camera;
     }
   }
 

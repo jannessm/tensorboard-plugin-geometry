@@ -12,8 +12,8 @@ import { loader } from '../loader';
 import { Observeable, Subscriber } from '../models/observeable';
 import { colorScale } from '../color-scale';
 import { Settings } from '../settings';
-import { ThreeConfig } from '../models/metadata';
 import { Run } from '../models/run';
+import { DataProvider } from '../data-provider';
 
 @WithRender
 @Component({
@@ -24,7 +24,6 @@ import { Run } from '../models/run';
   }
 })
 export default class DataRunComponent extends Vue {
-  dataManager = DataManager;
   default_class = '';
   last_tag = '';
   last_run = '';
@@ -38,10 +37,8 @@ export default class DataRunComponent extends Vue {
   steps: Steps = {steps: {}, step_ids: []};
   steps_subscription: Subscriber | undefined;
 
-  plot = new Observeable<{
-    data:StepData,
-    config: ThreeConfig,
-  }>({data: {broken: false}, config: {}});
+  plot = new Observeable<StepData>({not_initialized: true});
+  provider: DataProvider | undefined;
 
   data = {
     description: '',
@@ -55,11 +52,12 @@ export default class DataRunComponent extends Vue {
     color: '',
     show_snackbar: false,
     error: '',
+    plot_config: {},
   };
 
   mounted() {
-    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
-    this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata);
+    this.provider = DataManager.getProvider(this.$props.run, this.$props.tag);
+    this.steps_subscription = this.provider?.steps_metadata.subscribe(this.handleStepsMetadata);
 
     Settings.norm_features.subscribe(() => {
       this.updatePlotData();
@@ -68,27 +66,30 @@ export default class DataRunComponent extends Vue {
 
   // vue event
   updated() {
-    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
+    this.provider = DataManager.getProvider(this.$props.run, this.$props.tag);
     const run = loader.getRun(this.$props.run);
 
     // check if tag or run has changed
-    if (provider && run && (this.last_run !== this.$props.run || this.last_tag !== this.$props.tag)) {
-      console.log('data-run updated', this.$props.run, this.$props.tag);
+    if (!!this.provider && run && (this.last_run !== this.$props.run || this.last_tag !== this.$props.tag)) {
       this.steps_subscription?.unsubscribe();
-      this.steps_subscription = provider?.steps_metadata.subscribe(this.handleStepsMetadata); // updates step data
+      this.steps_subscription = this.provider.steps_metadata.subscribe(this.handleStepsMetadata); // updates step data
       this.last_run = this.$props.run;
       this.last_tag = this.$props.tag;
       this.run_instance = run;
       this.data.color = colorScale.getColor(this.$props.run);
       this.data.description = run.tags[this.$props.tag].description;
-      this.data.current_step_id = this.data.max_step;
-      this.updatePlotData();
     }
   }
 
   update(new_value: number) {
+    if (!this.provider) {
+      console.warn('data-run update without provider');
+      return;
+    }
+    
     this.data.loading = true;
-    this.data.current_step_id = new_value;
+    this.provider.current_step_id = new_value;
+    this.data.current_step_id = this.provider.current_step_id;
     this.updateStep(new_value);
     this.updatePlotData();
   }
@@ -107,17 +108,18 @@ export default class DataRunComponent extends Vue {
 
   async updatePlotData() {
     this.data.loading = true;
-    const provider = this.dataManager.getProvider(this.$props.run, this.$props.tag);
-    
-    if (this.data.current_step_id >= 0 && !!provider) {
+    this.provider = DataManager.getProvider(this.$props.run, this.$props.tag);
+
+    if (!!this.provider && this.provider.current_step_id >= 0) {
       try {
-        const data = await provider.getData(this.data.current_step_label) as StepData;
+        const data = await this.provider.getData() as StepData;
         if (!!data) {
-          this.plot.value.data = data;
-          this.plot.next(this.plot.value);
+          console.log('data', this.$props.run);
+          this.plot.next(data);
         }
       } catch(err) {
-        this.plot.value.data.broken = true;
+        console.log('data', this.$props.run);
+        this.plot.next({broken: true});
         console.error(this.$props.run, this.$props.tag, err.message);
         this.data.error = [this.$props.run + ' ' + this.$props.tag, err.message].join(': ');
         this.data.show_snackbar = true;
@@ -150,22 +152,22 @@ export default class DataRunComponent extends Vue {
     (plot as PlotComponent).screenshot();
   }
 
-  handleStepsMetadata(steps: Steps) {    
-    // if current step is last one move to newset (latest)
-    if (this.data.current_step_id === this.data.max_step){
-      this.data.current_step_id = steps.step_ids.length - 1;
+  handleStepsMetadata(steps: Steps) {
+    if (!!this.provider) {
+      // if current step is last one move to newset (latest)
+      if (this.provider.current_step_id === this.data.max_step){
+        this.provider.current_step_id = steps.step_ids.length - 1;
+      }
+  
+      this.steps = steps;
+      // set boundaries
+      this.data.max_step = steps.step_ids.length - 1;
+      
+      // set meta data
+      this.data.plot_config = steps.config || {};
+      
+      this.update(this.provider.current_step_id);
     }
-
-    this.steps = steps;
-    // set boundaries
-    this.data.max_step = steps.step_ids.length - 1;
-    
-    // set meta data
-    this.plot.value.config = steps.config || {};
-    this.plot.next(this.plot.value);
-    
-    this.update(this.data.current_step_id);
-    console.log('updated stepmetadata', this.data.current_step_id, )
   }
 
 }

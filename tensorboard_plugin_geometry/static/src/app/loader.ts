@@ -109,8 +109,6 @@ export class LoaderClass {
       this._runCollection.updateRuns(this._tags_data);
 
       this.tags.next(this._runCollection.tags);
-    } else {
-      console.log('no new tagdata');
     }
 
     const new_logdir = (await ApiService.getLogdir()).data.logdir;

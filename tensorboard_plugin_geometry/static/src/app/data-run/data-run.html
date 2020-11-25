@@ -18,17 +18,16 @@
       </slider>
     </div>
   
-    <div v-if="!plot.value.data.broken">
-      <plot
-        class="plot"
-        :data="plot"
-        :style="'height: ' + data.plot_height"
-        :width="data.fullscreen"
-        ></plot>
-    </div>
+    <plot
+      class="plot"
+      :data="plot"
+      :config="data.plot_config"
+      :style="'height: ' + data.plot_height"
+      :width="data.fullscreen"
+      ></plot>
     
     <md-empty-state 
-      v-else
+      v-if="plot.value.broken"
       class="loading-error"
       md-icon="warning"
       md-label="Data is currupt.">
