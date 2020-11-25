@@ -4,7 +4,7 @@
       <md-progress-spinner class="loader" :md-diameter="100" :md-stroke="7" md-mode="indeterminate"></md-progress-spinner>
     </div>
   
-    {{tag}}<div :class="'header-run ' + data.color" :title="run">{{run}}</div>
+    {{tag}}<div :class="'header-run ' + data.color" :title="run">{{run.replace(RegExp('.*/'), '')}}</div>
       
     <div class="description" v-html="data.description"></div>
     <md-divider></md-divider>

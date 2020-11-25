@@ -114,11 +114,9 @@ export default class DataRunComponent extends Vue {
       try {
         const data = await this.provider.getData() as StepData;
         if (!!data) {
-          console.log('data', this.$props.run);
           this.plot.next(data);
         }
       } catch(err) {
-        console.log('data', this.$props.run);
         this.plot.next({broken: true});
         console.error(this.$props.run, this.$props.tag, err.message);
         this.data.error = [this.$props.run + ' ' + this.$props.tag, err.message].join(': ');

@@ -177,7 +177,6 @@ export default class PlotComponent extends Vue {
     }
 
     this.controls = new TrackballControls(this.camera, this.renderer.domElement);
-    console.log(this.camera.position.x, this.camera.position.y, this.camera.position.z);
     this.renderer.render(this.scene, this.camera);
   }
 

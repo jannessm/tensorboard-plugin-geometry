@@ -5,34 +5,6 @@ class DataManagerClass {
   providers: { [run: string]: { [tag: string]: DataProvider } } = {};
   get_data_lock = Promise.resolve();
 
-
-  // async getData(run: string, tag: string, step: number): Promise<StepData | undefined> {
-  //   await this.get_data_lock;
-  //   console.log('processing getData')
-  //   let res;
-  //   this.get_data_lock = new Promise<undefined>((resolve, reject) => {
-  //     res = resolve;
-  //   });
-
-  //   const provider = DataManager.getProvider(run, tag);
-
-  //   let data, error;
-  //   if (!!provider) {
-  //     try {
-  //       data = provider.getData(step);
-  //     } catch (e) {
-  //       error = e;
-  //     }
-  //   }
-
-  //   res();
-  //   console.log('done processing');
-  //   if (error) {
-  //     throw error;
-  //   }
-  //   return data;
-  // }
-
   getProvider(run: string, tag: string) {
     if (typeof(run) !== 'string' || typeof(tag) !== 'string') {
       return;

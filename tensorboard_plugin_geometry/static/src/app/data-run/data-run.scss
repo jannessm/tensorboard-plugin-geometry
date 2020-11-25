@@ -46,14 +46,14 @@
       line-height: 14px;
       font-size: 10px;
       background: grey;
-      padding: 2px 4px;
+      padding: 4px 4px;
       color: white;
       border-radius: 0 0 5px 5px;
       
       /* ellipsis at beginning */
       overflow: hidden;
-      max-width: 100px;
-      height: 18px;
+      max-width: 150px;
+      height: 24px;
       white-space: nowrap;
       text-overflow: ellipsis;
       direction: rtl;
@@ -61,14 +61,17 @@
   
     .loading-error {
       zoom: 0.5;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: calc(100% - 30px);
+      background: rgba(255,255,255,0.8);
     }
   
     .actions {
       float: right;
-    }
-
-    .invisible-plot {
-      height: 0 !important;
     }
 
   }
