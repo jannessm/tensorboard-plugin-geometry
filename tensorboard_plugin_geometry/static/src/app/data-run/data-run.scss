@@ -60,18 +60,29 @@
     }
   
     .loading-error {
-      zoom: 0.5;
       position: absolute;
       bottom: 0;
       left: 0;
+      right: 0;
       z-index: 1;
-      width: 100%;
+      min-width: 100%;
       height: calc(100% - 30px);
       background: rgba(255,255,255,0.8);
     }
   
     .actions {
       float: right;
+
+      .md-button:not(.md-icon-button) {
+        color: rgba(0,0,0,0.54);
+        font-weight: bold;
+        margin: 6px 0;
+        min-width: 50px;
+      }
+
+      .md-button.md-icon-button {
+        margin: 6px 0;
+      }
     }
 
   }

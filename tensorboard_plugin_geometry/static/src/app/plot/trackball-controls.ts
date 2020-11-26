@@ -1,5 +1,6 @@
 import {
 	EventDispatcher,
+  Matrix4,
 	MOUSE,
 	OrthographicCamera,
 	PerspectiveCamera,
@@ -151,20 +152,25 @@ export class TrackballControls extends EventDispatcher {
     return vector;
   }
 
-  rotate(axis: Vector3, angle: number) {
-    let quaternion = new Quaternion(),
-      eyeDirection = new Vector3();
-    
-
+  rotateUpwards(angle: number) {
     this._eye.copy( this.object.position ).sub( this.target );
+    
+    const eyeDirection = this._eye.clone().normalize();
+    const rotation = new Matrix4().makeRotationAxis(eyeDirection, angle);
 
-    eyeDirection.copy( this._eye ).normalize();
+    this._eye.applyMatrix4( rotation );
+    this.object.up.applyMatrix4( rotation );
+  }
 
-    angle *= this.rotateSpeed;
-    quaternion.setFromAxisAngle( axis, angle );
+  rotateSideways(angle: number) {
+    this._eye.copy( this.object.position ).sub( this.target );
+    
+    const objectUpDirection = this.object.up.clone().normalize();
 
-    this._eye.applyQuaternion( quaternion );
-    this.object.up.applyQuaternion( quaternion );
+    const rotation = new Matrix4().makeRotationAxis(objectUpDirection, angle);
+
+    this._eye.applyMatrix4( rotation );
+    this.object.up.applyMatrix4( rotation );
   }
 
   rotateCamera() {
@@ -336,8 +342,6 @@ export class TrackballControls extends EventDispatcher {
   }
 
   update() {
-    this._eye.subVectors( this.object.position, this.target );
-
 		if ( ! this.noRotate ) {
 
 			this.rotateCamera();

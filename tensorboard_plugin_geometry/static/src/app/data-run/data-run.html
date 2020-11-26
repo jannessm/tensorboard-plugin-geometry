@@ -34,6 +34,15 @@
     </md-empty-state>
   
     <div class="actions">
+      <md-button class="md-dense" @click="resetCamera">
+        reset
+      </md-button>
+      <md-button class="md-icon-button md-dense" @click="rotateUpwards()">
+        <md-icon>refresh</md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense" @click="rotateSideways()">
+        <md-icon>360</md-icon>
+      </md-button>
       <md-button class="md-icon-button md-dense" @click="getScreenshot">
         <md-icon>save_alt</md-icon>
       </md-button>

@@ -146,11 +146,26 @@ export default class DataRunComponent extends Vue {
   }
 
   getScreenshot() {
-    const plot = this.$children.filter(val => val.$el.className.indexOf('plot') >= 0)[0];
-    (plot as PlotComponent).screenshot();
+    this.getPlot().screenshot();
   }
 
-  handleStepsMetadata(steps: Steps) {
+  resetCamera() {
+    this.getPlot().reset();
+  }
+
+  rotateUpwards() {
+    this.getPlot().rotateUpwards();
+  }
+
+  rotateSideways() {
+    this.getPlot().rotateSideways();
+  }
+
+  private getPlot(): PlotComponent {
+    return this.$children.filter(val => val.$el.className !== undefined && val.$el.className.indexOf('plot') >= 0)[0] as PlotComponent;
+  }
+
+  private handleStepsMetadata(steps: Steps) {
     if (!!this.provider) {
       // if current step is last one move to newset (latest)
       if (this.provider.current_step_id === this.data.max_step){

@@ -177,7 +177,7 @@ export default class PlotComponent extends Vue {
     }
 
     this.controls = new TrackballControls(this.camera, this.renderer.domElement);
-    this.renderer.render(this.scene, this.camera);
+    this.reset();
   }
 
   updatePointSize(new_point_size: number) {
@@ -208,7 +208,7 @@ export default class PlotComponent extends Vue {
     let r = bounding_sphere.radius;
     r += r * offset;
     const distance = r / Math.sin(camera.getEffectiveFOV() / 2 * Math.PI / 180);
-    const new_position = bounding_sphere.center.add(new Vector3(0, 0, distance));
+    const new_position = bounding_sphere.center.add(new Vector3(distance, 0, 0));
 
     this.controls.object.position.copy(new_position);
     this.controls.target.copy(bounding_sphere.center);
@@ -323,7 +323,26 @@ export default class PlotComponent extends Vue {
     document.body.removeChild(link);
   }
 
-  _getBoundingBox() {
+  reset() {
+    console.log('reset scene to ', this.controls.position0.x, this.controls.position0.y, this.controls.position0.z)
+    this.controls.reset();
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  rotateUpwards() {
+    this.controls.rotateUpwards(Math.PI / 2); // 90 deg
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  rotateSideways() {
+    this.controls.rotateSideways( - Math.PI / 2); // 90 deg
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  private _getBoundingBox() {
     const bounds = new Box3();
     this.scene.updateWorldMatrix(false, true);
     
