@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, BufferGeometry, Color, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, Points, PointsMaterial, Quaternion, TriangleStripDrawMode, Uint32BufferAttribute, Vector3 } from "three";
+import { BoxBufferGeometry, BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshPhongMaterial, Points, PointsMaterial, Quaternion, TriangleStripDrawMode, Uint32BufferAttribute, Vector3 } from "three";
 import { ArrowHelper } from "./arrow";
 import * as colormap from 'colormap';
 import { Settings } from "./settings";
@@ -119,7 +119,7 @@ export class ThreeFactory {
     for (let i = 0; i < vertices_shape[0]; i++) {
       // add points & mesh
       let mesh_geo = new BufferGeometry();
-      const mesh_mat = new MeshBasicMaterial( { color: 0xf57c00 } );
+      const mesh_mat = new MeshPhongMaterial( { color: 0xf57c00, side: DoubleSide, flatShading: true } );
       
       if (!!face_colors && !!face_colors_arr && face_colors_arr.length > 0) {
         mesh_mat.color = new Color(ThreeFactory._toHex([
@@ -143,8 +143,11 @@ export class ThreeFactory {
       
       // meshes do not support colors!!! (only opporunity would be to color each face separetly.
       // this is too inefficient! use point cloud instead and adjust point_size
-      
-      geometries.add(new Mesh(mesh_geo, mesh_mat));
+      mesh_geo.computeVertexNormals();
+      const newMesh = new Mesh(mesh_geo, mesh_mat);
+      newMesh.castShadow = true;
+      newMesh.receiveShadow = true;
+      geometries.add(newMesh);
     }
 
     return geometries;

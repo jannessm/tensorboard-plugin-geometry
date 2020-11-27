@@ -16,6 +16,7 @@ import {
   Vector3,
   OrthographicCamera,
   MeshBasicMaterial,
+  DirectionalLight,
 } from 'three';
 
 import {OrbitControls} from './orbit-controls';
@@ -37,6 +38,8 @@ export default class PlotComponent extends Vue {
   scene = new Scene();
   camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.0001, 1000 );
   renderer = new WebGLRenderer();
+  hemiLight = new HemisphereLight( 0xffffbb, 0x080820, 0.7);
+  dirLight = new DirectionalLight(0xffffbb, 1);
   controls: TrackballControls = new TrackballControls(this.camera, this.renderer.domElement);
   last_width = 0;
   geometries: (Group | Points)[] = [];
@@ -47,8 +50,8 @@ export default class PlotComponent extends Vue {
   mounted() {
     // listeners
     this.$el.appendChild(this.renderer.domElement);
-    this.$watch('width', this.update);
-    window.addEventListener('resize', this.update);
+    this.$watch('width', this.update); // for toggle fullscreen
+    window.addEventListener('resize', this.update); // for window resize
     this.$props.data.subscribe(this.updateData);
 
     // empty scene
@@ -56,14 +59,16 @@ export default class PlotComponent extends Vue {
     this.camera.lookAt(0,0,0);
     
     this.scene.background = new Color( 0xffffff );
+    this.renderer.shadowMap.enabled = true;
     this.renderer.render( this.scene, this.camera );
     
     this.scene.background = new Color( 0xf0f0f0 );
-    const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
-    light.position.set( 0, 50, 0 );
+    this.scene.add( this.hemiLight );
+    this.dirLight.castShadow = true;
+    this.scene.add(this.dirLight);
+
     const axesHelper = new AxesHelper( 1000000 );
     this.scene.add( axesHelper );
-    this.scene.add( light );
 
     this.controls = new TrackballControls(this.camera, this.renderer.domElement);
     this.controls.addEventListener('start', this.startUpdate);
@@ -209,11 +214,15 @@ export default class PlotComponent extends Vue {
     r += r * offset;
     const distance = r / Math.sin(camera.getEffectiveFOV() / 2 * Math.PI / 180);
     const new_position = bounding_sphere.center.add(new Vector3(distance, 0, 0));
+    const target = bounding_sphere.center;
+    const backside = new Vector3().addScaledVector(new_position, -1);
 
+    this.dirLight.position.copy(new_position);
+    this.hemiLight.position.copy(backside);
     this.controls.position0.copy(new_position);
     this.controls.object.position.copy(new_position);
-    this.controls.target0.copy(bounding_sphere.center);
-    this.controls.target.copy(bounding_sphere.center);
+    this.controls.target0.copy(target);
+    this.controls.target.copy(target);
     this.controls.update();
   }
 
@@ -243,8 +252,16 @@ export default class PlotComponent extends Vue {
     camera.bottom = max_side / -2;
 
     const new_position = bounding_sphere.center.add(new Vector3(0,0, max_side));
-    camera.position.set(new_position.x, new_position.y, new_position.z);
-    camera.lookAt(bounding_sphere.center);
+    const target = bounding_sphere.center;
+    const backside = new Vector3().addScaledVector(new_position, -1);
+
+    this.dirLight.position.copy(new_position);
+    this.hemiLight.position.copy(backside);
+    this.controls.position0.copy(new_position);
+    this.controls.object.position.copy(new_position);
+    this.controls.target0.copy(target);
+    this.controls.target.copy(target);
+    this.controls.update();
   }
 
   updateConfig() {
@@ -326,7 +343,6 @@ export default class PlotComponent extends Vue {
   }
 
   reset() {
-    console.log('reset scene to ', this.controls.position0.x, this.controls.position0.y, this.controls.position0.z)
     this.controls.reset();
     this.controls.update();
     this.renderer.render(this.scene, this.camera);

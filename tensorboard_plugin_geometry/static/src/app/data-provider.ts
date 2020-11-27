@@ -70,7 +70,6 @@ export class DataProvider {
     const this_data = Settings.norm_features.value ? this.norm_steps_data : this.steps_data;
     
     if (!this_data[id] && id >= 0) {
-      console.log(this.steps_metadata, id);
       const data = await ApiService.getData(this.run, this.tag, id, this.steps_metadata.value.steps[id]);
 
       if (!data.vertices || !this.steps_metadata.value.steps[id].VERTICES) {

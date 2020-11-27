@@ -50,7 +50,6 @@ export default class DataCardComponent extends Vue {
     }
 
     if (this.data.page_size !== old_page_size) {
-      console.log('update', this.data.page_size);
       this.update();
     }
   }
