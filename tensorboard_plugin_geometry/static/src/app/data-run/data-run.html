@@ -19,7 +19,7 @@
     </div>
   
     <plot
-      class="plot"
+      :class="{'plot': true, 'invisible-plot': plot.value.broken}"
       :data="plot"
       :config="data.plot_config"
       :style="'height: ' + data.plot_height"

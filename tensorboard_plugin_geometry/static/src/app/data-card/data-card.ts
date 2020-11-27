@@ -23,6 +23,7 @@ export default class DataCardComponent extends Vue {
     expanded: false,
     current_page_id: 0,
     max_page: 1,
+    page_size: 3,
     filtered_runs: []
   }
 
@@ -33,6 +34,25 @@ export default class DataCardComponent extends Vue {
     loader.runSelectionChanged.subscribe(() => {
       this.update();
     });
+
+    window.addEventListener('resize', this.updatePageSize);
+    this.updatePageSize();
+  }
+
+  updatePageSize() {
+    const old_page_size = this.data.page_size;
+    if (window.innerWidth < 900) {
+      this.data.page_size = 1;
+    } else if (window.innerWidth < 1200) {
+      this.data.page_size = 2;
+    } else {
+      this.data.page_size = 3;
+    }
+
+    if (this.data.page_size !== old_page_size) {
+      console.log('update', this.data.page_size);
+      this.update();
+    }
   }
 
   update() {
@@ -46,7 +66,7 @@ export default class DataCardComponent extends Vue {
         return !!run && run.display && run.selected;
       });
   
-      this.data.max_page = Math.ceil(this.data.filtered_runs.length / 3);
+      this.data.max_page = Math.ceil(this.data.filtered_runs.length / this.data.page_size);
 
       if (this.data.max_page < this.data.current_page_id + 1) {
         this.data.current_page_id = this.data.max_page - 1;

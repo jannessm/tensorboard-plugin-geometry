@@ -18,20 +18,11 @@
       <md-card-content>
         <div class="md-layout md-gutter" v-if="data.expanded">
           <data-run
-            v-if="data.filtered_runs.length > data.current_page_id * 3 + 0"
-            :run="data.filtered_runs[data.current_page_id * 3 + 0]"
+            v-for="i in data.page_size"
+            v-if="data.filtered_runs.length > data.current_page_id * data.page_size + i - 1"
+            :run="data.filtered_runs[data.current_page_id * data.page_size + i - 1]"
             :tag="name"
-            class="md-layout-item md-size-33"></data-run>
-          <data-run
-            v-if="data.filtered_runs.length > data.current_page_id * 3 + 1"
-            :run="data.filtered_runs[data.current_page_id * 3 + 1]"
-            :tag="name"
-            class="md-layout-item md-size-33"></data-run>
-          <data-run
-            v-if="data.filtered_runs.length > data.current_page_id * 3 + 2"
-            :run="data.filtered_runs[data.current_page_id * 3 + 2]"
-            :tag="name"
-            class="md-layout-item md-size-33"></data-run>
+            :class="'md-layout-item md-size-' + Math.floor(100 / data.page_size)"></data-run>
         </div>
 
         <div class="md-layout md-gutter md-alignment-top-center paginator">  
