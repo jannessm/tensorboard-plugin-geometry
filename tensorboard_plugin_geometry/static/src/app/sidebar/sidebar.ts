@@ -22,6 +22,7 @@ export default class SidebarComponent extends Vue {
   colors: string[] = [];
   apply_regex:any = undefined;
   showSnackbar = false;
+  settings = Settings;
 
   data = {
     point_size: 50,
