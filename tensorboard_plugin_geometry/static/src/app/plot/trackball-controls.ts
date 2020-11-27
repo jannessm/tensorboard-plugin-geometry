@@ -159,6 +159,7 @@ export class TrackballControls extends EventDispatcher {
     const rotation = new Matrix4().makeRotationAxis(eyeDirection, angle);
 
     this._eye.applyMatrix4( rotation );
+    this.object.position.addVectors(this.object.position, this.target);
     this.object.up.applyMatrix4( rotation );
   }
 
@@ -169,7 +170,7 @@ export class TrackballControls extends EventDispatcher {
 
     const rotation = new Matrix4().makeRotationAxis(objectUpDirection, angle);
 
-    this._eye.applyMatrix4( rotation );
+	  this._eye.applyMatrix4( rotation );
     this.object.up.applyMatrix4( rotation );
   }
 
@@ -341,7 +342,10 @@ export class TrackballControls extends EventDispatcher {
 		}
   }
 
-  update() {
+  update(onlyRotate=false) {
+	  if (!onlyRotate) {
+		  this._eye.subVectors(this.object.position, this.target);
+	  }
 		if ( ! this.noRotate ) {
 
 			this.rotateCamera();

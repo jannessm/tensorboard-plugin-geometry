@@ -61,7 +61,7 @@ export default class PlotComponent extends Vue {
     this.scene.background = new Color( 0xf0f0f0 );
     const light = new HemisphereLight( 0xffffbb, 0x080820, 1 );
     light.position.set( 0, 50, 0 );
-    const axesHelper = new AxesHelper( 1000 );
+    const axesHelper = new AxesHelper( 1000000 );
     this.scene.add( axesHelper );
     this.scene.add( light );
 
@@ -210,7 +210,9 @@ export default class PlotComponent extends Vue {
     const distance = r / Math.sin(camera.getEffectiveFOV() / 2 * Math.PI / 180);
     const new_position = bounding_sphere.center.add(new Vector3(distance, 0, 0));
 
+    this.controls.position0.copy(new_position);
     this.controls.object.position.copy(new_position);
+    this.controls.target0.copy(bounding_sphere.center);
     this.controls.target.copy(bounding_sphere.center);
     this.controls.update();
   }
@@ -332,13 +334,13 @@ export default class PlotComponent extends Vue {
 
   rotateUpwards() {
     this.controls.rotateUpwards(Math.PI / 2); // 90 deg
-    this.controls.update();
+    this.controls.update(true);
     this.renderer.render(this.scene, this.camera);
   }
 
   rotateSideways() {
     this.controls.rotateSideways( - Math.PI / 2); // 90 deg
-    this.controls.update();
+    this.controls.update(true);
     this.renderer.render(this.scene, this.camera);
   }
 
