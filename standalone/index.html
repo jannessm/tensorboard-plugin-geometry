@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>GeoBoard</title>
+    </head>
+    <body>
+        <script>
+            const reload_button = document.createElement('div');
+            reload_button.className = 'reload-button';
+            reload_button.style = 'display: none;';
+            reload_button.__ngContext__ = [{
+                    isReloading$: {
+                        subscribe: () => {}
+                    }
+                }];
+            document.body.appendChild(reload_button);
+        </script>
+        <script src="index.js"></script>
+    </body>
+</html>
