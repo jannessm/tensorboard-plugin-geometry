@@ -28,13 +28,17 @@ class RunManager(PatternMatchingEventHandler):
                             
                             for sample in os.listdir(osp.join(logdir, run, tag)):
                                 if sample.endswith('.pkl'):
-                                    step = int(re.match('.*(\d+)_.*\.pkl', sample)[1])
-                                    new_sample = Sample(osp.join(logdir, run, tag, sample))
-                                    new_sample.step = step
-                                    new_tag.add_sample(step, new_sample)
+                                    match = re.match('(\d+)_', sample)
+
+                                    if match is not None:
+                                        step = int(match[1])
+                                        new_sample = Sample(osp.join(logdir, run, tag, sample))
+                                        new_sample.step = step
+                                        new_tag.add_sample(step, new_sample)
+                                    else:
+                                        print('no match for', sample)
                     
                     self.runs[run] = new_run
-        print(self.runs)
 
     def get_tags(self):
         return self.runs.__str__()

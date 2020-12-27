@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 
 parser = argparse.ArgumentParser(description='standalone GeoBoard to visualize geometrical data')
@@ -11,10 +12,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 import os.path as osp
 from watchdog.observers import Observer
-
+import asyncio
 import torch
 
 from run_manager import RunManager
+from file_loader import loader
 
 STANDALONE_DIR = osp.abspath(osp.dirname(__file__))
 STATIC_DIR = osp.join(osp.abspath(osp.dirname(__file__)), '..', 'tensorboard_plugin_geometry', 'static', 'bundle')
@@ -43,6 +45,13 @@ class GeoBoard(HTTPServer):
     def get_samples_for_tag(self, run, tag):
         return self.run_manager.runs[run].tags[tag].get_samples_metadata()
 
+    def get_data(self, run, tag, step, content_type):
+        try:
+            data = self.run_manager.runs[run].tags[tag].samples[int(step)].get_data(content_type)
+            return data
+        except Exception as e:
+            print(e)
+            return None
 
 class GeoBoardRequestHandler(BaseHTTPRequestHandler):
 
@@ -79,6 +88,23 @@ class GeoBoardRequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(webServer.get_samples_for_tag(args['run'][0], args['tag'][0]))
+        
+        elif 'data' in self.path:
+            args = parse_qs(self.path[6:])
+            data = webServer.get_data(
+                    args['run'][0],
+                    args['tag'][0],
+                    args['step'][0],
+                    args['content_type'][0]
+                )
+            
+            if data is not None:
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                self.wfile.write(data)
+            else:
+                self.send_response(500)
 
         else:
             self.send_response(404)

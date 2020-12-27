@@ -28,8 +28,12 @@ export class DataProvider {
     // save steps
     const steps: Steps = { steps: {}, step_ids: [] };
     res.data.forEach(step => {
-      steps.config = steps.config || JSON.parse(step.config);
-      steps.description = steps.description || JSON.parse(step.config);
+      if (!steps.config && typeof step.config == 'string') {
+        steps.config = JSON.parse(step.config);
+      } else if (!steps.config && typeof step.config == 'object') {
+        steps.config = step.config;
+      }
+      steps.description = step.description;
       
       if (!steps.steps[step.step]) {
         steps.steps[step.step] = {

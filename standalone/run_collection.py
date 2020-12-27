@@ -1,9 +1,12 @@
 import torch
 import os.path as osp
 import json
+import numpy as np
+from file_loader import loader
+import io
 
 class Sample:
-    file = ''
+    file_path = ''
     tensors = {}
     wall_time = 0
     step = 0
@@ -15,30 +18,38 @@ class Sample:
             metadata.append({
                 'wall_time': self.wall_time,
                 'step': self.step,
-                'content_type': i,
+                'content_type': tensor['content_type'],
                 'components': 10,
-                'config': {},
+                'config': '{ }',
                 'data_shape': tensor['data_shape'],
                 'description': ''
             })
         return metadata
 
     def __init__(self, file_path):
-        self.file = file_path
+        self.file_path = file_path
         self.wall_time = osp.getmtime(file_path)
         
-        t = torch.load(self.file)
-        self.tensors['vertices'] = {
+        loader.register(file_path, self.handle_tensor)
+
+    def handle_tensor(self, tensor):
+        self.tensors['VERTICES'] = {
             'content_type': 1,
             'components': 10,
-            'data_shape': t['pos'].shape
+            'data_shape': tensor['pos'].shape,
+            'data': tensor['pos'].numpy().astype(np.float32)
         }
-        self.tensors['features'] = {
+        self.tensors['FEATURES'] = {
             'content_type': 3,
             'components': 10,
-            'data_shape': t['wss'].shape
+            'data_shape': tensor['wss'].shape,
+            'data': tensor['wss'].numpy().astype(np.float32)
         }
-        self.step = t['step']
+        self.step = tensor['step']
+    
+    def get_data(self, content_type):
+        tensor = self.tensors[content_type]['data']
+        return tensor.reshape(-1).tobytes()
 
 class Tag:
     samples = {}
@@ -61,8 +72,9 @@ class Tag:
     
     def get_samples_metadata(self):
         obj = []
-        for _, s in self.samples.items():
+        for i, s in self.samples.items():
             obj += s.metadata
+        obj.sort(key=lambda x: x['step'])
         return json.dumps(obj).encode()
 
 class Run:
