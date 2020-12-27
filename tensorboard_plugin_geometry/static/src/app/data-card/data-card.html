@@ -26,9 +26,9 @@
         </div>
 
         <div class="md-layout md-gutter md-alignment-top-center paginator">  
-          <md-button @click="prevPage" :disabled="data.current_page_id + 1 === 1" class="md-layout-item md-size-33">Prev</md-button>
+          <md-button @click="prevPage" :disabled="data.current_page_id === 0" class="md-layout-item md-size-33">Prev</md-button>
           <span class="md-layout-item md-size-33 page_label">{{data.current_page_id + 1}} / {{data.max_page}}</span>
-          <md-button @click="nextPage" :disabled="data.current_page_id + 1 === data.max_pages" class="md-layout-item md-size-33">Next</md-button>
+          <md-button @click="nextPage" :disabled="data.current_page_id + 1 >= data.max_page" class="md-layout-item md-size-33">Next</md-button>
         </div>
       </md-card-content>
     </md-card-expand-content>

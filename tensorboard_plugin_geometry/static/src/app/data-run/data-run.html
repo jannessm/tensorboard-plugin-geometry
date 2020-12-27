@@ -9,7 +9,14 @@
     <div class="description" v-html="data.description"></div>
     <md-divider></md-divider>
     <div class="slider">
-      step: <b>{{data.current_step_label}}</b><br>
+      step: 
+      <md-button class="md-icon-button" @click="update(data.current_step_id - 1)" :disabled="data.current_step_id === 0">
+        <md-icon>arrow_back_ios</md-icon>
+      </md-button>
+        <b>{{data.current_step_label}}</b>
+      <md-button class="md-icon-button" @click="update(data.current_step_id + 1)" :disabled="data.current_step_id === data.max_step">
+        <md-icon>arrow_forward_ios</md-icon>
+      </md-button><br>
       {{data.current_wall_time}}
       <slider
         :value="data.current_step_id"
