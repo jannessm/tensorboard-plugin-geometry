@@ -48,6 +48,30 @@ writer = SummaryWriter(log_dir='/a/path/to/logs')
 writer.add_geometry('a beautiful tag', pos.reshape(1, 100, 3), features=wss.reshape(1, 100, 3), global_step=1)
 ```
 
+### Tip for tensorboard
+
+If this dashboard should be use for visualizing final results, the option `samples_per_plugin` might be of interest:
+
+```
+--samples_per_plugin SAMPLES_PER_PLUGIN
+                      An optional comma separated list of
+                      plugin_name=num_samples pairs to explicitly specify
+                      how many samples to keep per tag for that plugin. For
+                      unspecified plugins, TensorBoard randomly downsamples
+                      logged summaries to reasonable values to prevent out-
+                      of-memory errors for long running jobs. This flag
+                      allows fine control over that downsampling. Note that
+                      0 means keep all samples of that type. For instance
+                      "scalars=500,images=0" keeps 500 scalars and all
+                      images. Most users should not need to set this flag.
+```
+
+For this plugin, tensors are of interest:
+
+```
+tensorboard --logdir=./logs --samples_per_plugin tensors=0 --tag=groundtruth
+```
+
 ## Docs
 
 ### add_geometry()

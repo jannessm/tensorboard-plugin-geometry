@@ -146,7 +146,24 @@ export default class DataRunComponent extends Vue {
   }
 
   getScreenshot() {
-    this.getPlot().screenshot();
+    const plot = this.getPlot();
+    const old_fullscreen_state = {
+      'width': (plot.$el as HTMLElement).offsetWidth,
+      'height': (plot.$el as HTMLElement).offsetHeight
+    };
+    plot.update(undefined, 2000, 2000);
+    const link = plot.screenshot(this.data.current_step_label + '_' + this.$props.tag + '_' + this.run_instance.name + '.png');
+
+    //Firefox requires the link to be in the body
+    document.body.appendChild(link);
+    
+    //simulate click
+    link.click();
+
+    //remove the link when done
+    document.body.removeChild(link);
+
+    plot.update(undefined, old_fullscreen_state.width, old_fullscreen_state.height);
   }
 
   resetCamera() {

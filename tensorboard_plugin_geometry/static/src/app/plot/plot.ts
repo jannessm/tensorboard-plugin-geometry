@@ -19,7 +19,6 @@ import {
   DirectionalLight,
 } from 'three';
 
-import {OrbitControls} from './orbit-controls';
 import {TrackballControls} from './trackball-controls';
 
 import WithRender from './plot.html';
@@ -27,7 +26,7 @@ import WithRender from './plot.html';
 import './plot.scss';
 import { Settings } from '../settings';
 import { ThreeFactory } from '../three-factory';
-import { CAMERA_TYPE, OrthograficCameraConfig, PerspectiveCameraConfig, ThreeConfig } from '../models/metadata';
+import { CAMERA_TYPE, OrthograficCameraConfig, PerspectiveCameraConfig } from '../models/metadata';
 import { StepData } from '../models/step';
 
 @WithRender
@@ -116,9 +115,11 @@ export default class PlotComponent extends Vue {
     }
   }
   
-  update() {
-    const width = (this.$el as HTMLElement).offsetWidth;
-    const height = (this.$el as HTMLElement).offsetWidth;
+  update(event: Event | undefined = undefined, width: number | undefined = undefined, height: number | undefined = undefined) {
+    if (width === undefined || height === undefined) {
+      width = (this.$el as HTMLElement).offsetWidth;
+      height = (this.$el as HTMLElement).offsetWidth;
+    }
 
     if (width !== this.last_width) {
       (this.camera as PerspectiveCamera).aspect = width / height;
@@ -326,20 +327,13 @@ export default class PlotComponent extends Vue {
     }
   }
 
-  screenshot() {    
+  screenshot(filename='plot.png') {    
     this.renderer.render(this.scene, this.camera);
     const link = document.createElement('a');
     link.href = this.renderer.domElement.toDataURL();
-    link.download = 'plot.png';
-    
-    //Firefox requires the link to be in the body
-    document.body.appendChild(link);
-    
-    //simulate click
-    link.click();
+    link.download = filename;
 
-    //remove the link when done
-    document.body.removeChild(link);
+    return link;
   }
 
   reset() {
