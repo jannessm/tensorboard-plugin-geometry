@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Group, Matrix4, Mesh, MeshBasicMaterial, MeshPhongMaterial, Points, PointsMaterial, Quaternion, TriangleStripDrawMode, Uint32BufferAttribute, Vector3 } from "three";
+import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Group, Mesh, MeshPhongMaterial, Points, PointsMaterial, Uint32BufferAttribute, Vector3 } from "three";
 import { ArrowHelper } from "./arrow";
 import * as colormap from 'colormap';
 import { Settings } from "./settings";

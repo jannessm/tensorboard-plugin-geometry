@@ -152,7 +152,11 @@ export default class DataRunComponent extends Vue {
       'height': (plot.$el as HTMLElement).offsetHeight
     };
     plot.update(undefined, 2000, 2000);
-    const link = plot.screenshot(this.data.current_step_label + '_' + this.$props.tag + '_' + this.run_instance.name + '.png');
+
+    const filename = this.data.current_step_label + '.png';
+    // const filename = this.data.current_step_label + '_' + this.$props.tag + '_' + this.run_instance.name + '.png';
+
+    const link = plot.screenshot(filename);
 
     //Firefox requires the link to be in the body
     document.body.appendChild(link);

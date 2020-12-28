@@ -11,8 +11,8 @@ export class DataProvider {
   run = '';
   tag = '';
   steps_metadata = new Observeable<Steps>({ steps: {}, step_ids: [] });
-  steps_data: StepData[] = [];
-  norm_steps_data: StepData[] = [];
+  steps_data: (StepData | undefined)[] = [];
+  norm_steps_data: (StepData | undefined)[] = [];
   current_step_id = -1;
   
   constructor() {}
@@ -68,10 +68,27 @@ export class DataProvider {
     }
   }
 
-  async getData(): Promise<StepData | undefined> {
-    const id = this.steps_metadata.value.step_ids[this.current_step_id];
+  async getData(id: undefined | number = undefined, isBufferCall = false): Promise<StepData | undefined> {
+    if (!id) {
+      id = this.steps_metadata.value.step_ids[this.current_step_id];
+    }
     const normalize = Settings.norm_features.value;
     const this_data = Settings.norm_features.value ? this.norm_steps_data : this.steps_data;
+    const last_step_id = this.steps_metadata.value.step_ids.length - 1;
+
+    // buffer geo
+    if (this.current_step_id > 0 && !isBufferCall) {
+      this.getData(this.steps_metadata.value.step_ids[this.current_step_id - 1], true);
+    }
+    if (this.current_step_id < last_step_id && !isBufferCall) {
+      this.getData(this.steps_metadata.value.step_ids[this.current_step_id + 1], true);
+    }
+    if (this.current_step_id > 9 && !isBufferCall) {
+      delete this_data[this.current_step_id - 10];
+    }
+    if (this.current_step_id < last_step_id - 10 && !isBufferCall) {
+      delete this_data[this.current_step_id + 10];
+    }
     
     if (!this_data[id] && id >= 0) {
       const data = await ApiService.getData(this.run, this.tag, id, this.steps_metadata.value.steps[id]);
