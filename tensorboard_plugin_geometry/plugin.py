@@ -61,7 +61,7 @@ class GeoPlugin(base_plugin.TBPlugin):
     elif req_path == 'index':
       filepath = osp.join(base_path, 'index.js')
     
-    with open(filepath) as infile:
+    with open(filepath, 'r', encoding='utf8') as infile:
       contents = infile.read()
     return werkzeug.Response(
       contents, content_type="application/javascript"
