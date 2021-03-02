@@ -160,8 +160,8 @@ export class ThreeFactory {
     feat_colors?: Uint8Array,
     config?: ThreeConfig,
     normalized = false,
-  ): Group | undefined {
-    // return;
+  ): {'features':Group, 'max_magnitude': number} | undefined {
+
     if (!vertices_shape || vertices_shape.length == 0 || !vertices_arr || vertices_arr.length == 0) {
       throw new Error('No vertices provided for feature arrows');
     }
@@ -255,7 +255,10 @@ export class ThreeFactory {
       }
     }
       
-    return arrowHelper.finalize();
+    return {
+      'features': arrowHelper.finalize(),
+      'max_magnitude': max_len
+    };
   }
 
   static _getColors(vertices: number, colors?: Uint8Array, cmap?: string): number[] {

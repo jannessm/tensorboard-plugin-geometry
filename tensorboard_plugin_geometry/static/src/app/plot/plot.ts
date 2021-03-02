@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Component from "vue-class-component";
+import * as colormap from 'colormap';
 
 import {
   Scene,
@@ -17,9 +18,13 @@ import {
   OrthographicCamera,
   MeshBasicMaterial,
   DirectionalLight,
+  Sprite,
+  SpriteMaterial,
+  CanvasTexture
 } from 'three';
 
 import {TrackballControls} from './trackball-controls';
+import {Lut, ColorMapKeywords} from './lut';
 
 import WithRender from './plot.html';
 
@@ -35,7 +40,9 @@ import { StepData } from '../models/step';
 })
 export default class PlotComponent extends Vue {
   scene = new Scene();
+  lutScene = new Scene();
   camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.0001, 1000 );
+  orthoCamera = new OrthographicCamera( - 1, 1, 1, - 1, 0.1, 1000 );
   renderer = new WebGLRenderer();
   hemiLight = new HemisphereLight( 0xffffbb, 0x080820, 0.7);
   dirLight = new DirectionalLight(0xffffbb, 1);
@@ -43,7 +50,10 @@ export default class PlotComponent extends Vue {
   last_width = 0;
   geometries: (Group | Points)[] = [];
   features: Group[] = [];
-
+  lut: Lut = new Lut();
+  lut_plane: Sprite | undefined;
+  show_lut = false;
+  max_mag = 1.0;
   is_active = false;
 
   mounted() {
@@ -53,13 +63,18 @@ export default class PlotComponent extends Vue {
     window.addEventListener('resize', this.update); // for window resize
     this.$props.data.subscribe(this.updateData);
 
+    // ui Scene
+    this.orthoCamera.position.set( 0, 0, 10 );
+
     // empty scene
     this.camera.position.set(0,0,-5);
     this.camera.lookAt(0,0,0);
     
     this.scene.background = new Color( 0xffffff );
     this.renderer.shadowMap.enabled = true;
-    this.renderer.render( this.scene, this.camera );
+    this.renderer.autoClear = false;
+    this.renderer.setPixelRatio( window.devicePixelRatio );
+    this.refresh();
     
     this.scene.background = new Color( 0xf0f0f0 );
     this.scene.add( this.hemiLight );
@@ -77,6 +92,7 @@ export default class PlotComponent extends Vue {
 
     Settings.show_features.subscribe(display => {
       this.features.forEach(group => group.visible = display);
+      this.show_lut = display;
       this.update();
     });
     
@@ -130,7 +146,7 @@ export default class PlotComponent extends Vue {
     this.controls.handleResize();
     this.controls.update();
     
-    this.renderer.render( this.scene, this.camera );
+    this.refresh();
   }
 
   updateData(data: StepData) {
@@ -141,7 +157,7 @@ export default class PlotComponent extends Vue {
     
     this.update();
     if (data.broken || data.not_initialized) {
-      this.renderer.render(this.scene, this.camera);
+      this.refresh();
       return;
     }
 
@@ -156,6 +172,42 @@ export default class PlotComponent extends Vue {
     if (!!data && !!data.features) {
       this.features.push(data.features);
       this.scene.add(data.features);
+
+      if (!this.lut_plane) {
+        this.lut_plane = new Sprite( new SpriteMaterial( {
+          map: new CanvasTexture( this.lut.createCanvas() )
+        } ) );
+        this.lut_plane.castShadow = false;
+        this.lut_plane.position.set(-1.8, 0, 1);
+        this.lut_plane.scale.setY(2);
+        this.lut_plane.scale.setX(2);
+        this.lutScene.add(this.lut_plane);
+      }
+
+      const cmap_label = this.$props.config?.features_cmap || 'jet';
+      this.max_mag = data.max_magnitude || 1.0;
+      this.lut.setMax(this.max_mag);
+      
+      if (Object.keys(ColorMapKeywords).indexOf(cmap_label) < 0) {
+        const cmap = colormap({
+          colormap: cmap_label,
+          nshades: 101,
+          format: 'hex'
+        }).map((val: string, id) => 
+          [id / 101.0, parseInt(val.substr(1), 16)]
+        );
+        this.lut.addColorMap(cmap_label, cmap);
+      }
+      
+      this.lut.setColorMap(cmap_label, 101);
+      this.show_lut = true;
+      const map = this.lut_plane.material.map;
+      if (map) {
+        this.lut.updateCanvas(map.image);
+        map.needsUpdate = true;
+      }
+    } else {
+      this.show_lut = false;
     }
 
     /////// update config ////////
@@ -195,7 +247,7 @@ export default class PlotComponent extends Vue {
       })
     });
 
-    this.renderer.render(this.scene, this.camera);
+    this.refresh();
   }
 
   setPerspCameraPosition() {
@@ -328,7 +380,7 @@ export default class PlotComponent extends Vue {
   }
 
   screenshot(filename='plot.png') {    
-    this.renderer.render(this.scene, this.camera);
+    this.refresh();
     const link = document.createElement('a');
     link.href = this.renderer.domElement.toDataURL();
     link.download = filename;
@@ -339,19 +391,19 @@ export default class PlotComponent extends Vue {
   reset() {
     this.controls.reset();
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    this.refresh();
   }
 
   rotateUpwards() {
     this.controls.rotateUpwards(Math.PI / 2); // 90 deg
     this.controls.update(true);
-    this.renderer.render(this.scene, this.camera);
+    this.refresh();
   }
 
   rotateSideways() {
     this.controls.rotateSideways( - Math.PI / 2); // 90 deg
     this.controls.update(true);
-    this.renderer.render(this.scene, this.camera);
+    this.refresh();
   }
 
   private _getBoundingBox() {
@@ -364,5 +416,14 @@ export default class PlotComponent extends Vue {
       }
     });
     return bounds;
+  }
+
+  refresh() {
+    this.renderer.clear();
+    this.renderer.render(this.scene, this.camera);
+
+    if (this.show_lut) {
+      this.renderer.render(this.lutScene, this.orthoCamera);
+    }
   }
 }

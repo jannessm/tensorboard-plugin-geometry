@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import Vue from 'vue';
+import Component from 'vue-class-component';
 
-import WithRender from './data-run.html'
+import WithRender from './data-run.html';
 
 import './data-run.scss';
 import SliderComponent from '../slider/slider';
@@ -14,6 +14,7 @@ import { colorScale } from '../color-scale';
 import { Settings } from '../settings';
 import { Run } from '../models/run';
 import { DataProvider } from '../data-provider';
+import { ThreeConfig } from "../models/metadata";
 
 @WithRender
 @Component({
@@ -52,7 +53,7 @@ export default class DataRunComponent extends Vue {
     color: '',
     show_snackbar: false,
     error: '',
-    plot_config: {},
+    plot_config: {} as ThreeConfig,
   };
 
   mounted() {

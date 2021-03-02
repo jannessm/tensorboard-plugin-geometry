@@ -115,13 +115,15 @@ export class DataProvider {
 
 
       if (!!data.features) {
-        resp['features'] = ThreeFactory.createFeatureArrows(
+        const feats = ThreeFactory.createFeatureArrows(
           this.steps_metadata.value.steps[id].VERTICES?.shape,
           data.vertices,
           data.features,
           data.feat_colors,
           this.steps_metadata.value.config,
           normalize);
+        resp['features'] = feats?.features;
+        resp['max_magnitude'] = feats?.max_magnitude;
       }
 
       resp.broken = false;

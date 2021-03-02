@@ -16,6 +16,7 @@ export interface StepData {
   features?: Group;
   broken?: boolean;
   not_initialized?: boolean;
+  max_magnitude?: number;
 }
 
 export interface RawStep {

@@ -38,4 +38,3 @@ document.body.appendChild(body);
 
 const main = new MainComponent();
 main.$mount('#geo_body');
-
