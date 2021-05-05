@@ -25,8 +25,14 @@ setuptools.setup(
 	install_requires=parse_requirements("requirements.txt"),
     packages=["tensorboard_plugin_geometry"],
     package_data={
-        "tensorboard_plugin_geometry": ["static/bundle/*"],
-        "tensorboard_plugin_geometry": ["static/bundle/assets/*"],
+        "tensorboard_plugin_geometry": [
+            "static/bundle/index.js",
+            "static/bundle/render.js",
+            "static/bundle/assets/MaterialIcons-Regular.eot",
+            "static/bundle/assets/MaterialIcons-Regular.ttf",
+            "static/bundle/assets/MaterialIcons-Regular.woff",
+            "static/bundle/assets/MaterialIcons-Regular.woff2",
+        ],
     },
     entry_points={
         "tensorboard_plugins": [
