@@ -64,7 +64,10 @@ class GeoPlugin(base_plugin.TBPlugin):
     with open(filepath, 'r', encoding='utf8') as infile:
       contents = infile.read()
     return werkzeug.Response(
-      contents, content_type="application/javascript"
+      contents, content_type="application/javascript",
+      headers=[
+        ('X-Content-Type-Options', 'nosniff')
+      ]
     )
 
   @wrappers.Request.application
@@ -82,6 +85,7 @@ class GeoPlugin(base_plugin.TBPlugin):
       headers=[
         ('Content-Length', str(file_size)),
         ('Content-Disposition', "attachment; filename=\"%s\"" % req_path),
+        ('X-Content-Type-Options', 'nosniff')
       ],
       direct_passthrough=True)
 
@@ -97,7 +101,10 @@ class GeoPlugin(base_plugin.TBPlugin):
     """
     return werkzeug.Response(
       json.dumps(self._tag_server.get_tags_response()),
-      content_type="application/json"
+      content_type="application/json",
+      headers=[
+        ('X-Content-Type-Options', 'nosniff')
+      ]
     )
 
   @wrappers.Request.application
@@ -118,18 +125,26 @@ class GeoPlugin(base_plugin.TBPlugin):
     
     except ValueError as err:
       raise err
-      res = werkzeug.Response("Bad content_type", "text/plain")
+      res = werkzeug.Response("Bad content_type", "text/plain", headers=[
+      ('X-Content-Type-Options', 'nosniff')
+    ])
       res.status_code = 400
       return res
 
-    res = werkzeug.Response(response, "arraybuffer")
+    res = werkzeug.Response(response, "arraybuffer", headers=[
+      ('X-Content-Type-Options', 'nosniff')
+    ])
     res.status_code = 200
     return res
 
   @wrappers.Request.application
   def _serve_logdir(self, request):
     return werkzeug.Response(
-      json.dumps({ 'logdir': self._logdir}), content_type="application/javascript"
+      json.dumps({ 'logdir': self._logdir}),
+      content_type="application/javascript",
+      headers=[
+        ('X-Content-Type-Options', 'nosniff')
+      ]
     )
 
   @wrappers.Request.application
@@ -156,7 +171,10 @@ class GeoPlugin(base_plugin.TBPlugin):
           "description": description,
       } for meta, event, description in tensor_events]
 
-      res = werkzeug.Response(json.dumps(response), "application/json")
+      res = werkzeug.Response(json.dumps(response), "application/json",
+        headers=[
+          ('X-Content-Type-Options', 'nosniff')
+        ])
       res.status_code = 200
       return res
 

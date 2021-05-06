@@ -1,5 +1,5 @@
 torch
-tensorboard>=2.3.0
+tensorboard<=2.4.1, >=2.3.0
 six
 werkzeug
 numpy
