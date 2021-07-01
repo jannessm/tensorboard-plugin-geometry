@@ -1,5 +1,6 @@
 import { Group, OrthographicCamera, PerspectiveCamera, Points } from "three";
 import { Metadata, ThreeConfig } from "./metadata";
+import { DataResponse } from "./responses";
 
 export interface StepMetadata {
   first_wall_time: number;
@@ -17,6 +18,7 @@ export interface StepData {
   broken?: boolean;
   not_initialized?: boolean;
   max_magnitude?: number;
+  raw_data?: DataResponse;
 }
 
 export interface RawStep {

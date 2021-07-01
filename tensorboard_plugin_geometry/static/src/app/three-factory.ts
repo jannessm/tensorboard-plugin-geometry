@@ -30,7 +30,7 @@ export class ThreeFactory {
     vert_colors?: Uint8Array,
     config?: ThreeConfig,
     normalized = false,
-  ): Group | Points {
+  ): Group {
 
     if (!vertices_shape || !vertices_arr || vertices_arr.length <= 0 || vertices_shape[1] <= 0) {
       throw new Error('No vertices provided');
@@ -86,22 +86,31 @@ export class ThreeFactory {
     colors?: Uint8Array,
     vertices_cmap?: string,
     normalized = false
-  ): Points {
-    const point_size = Settings.point_size.value;
+  ): Group {
+    const geometries = new Group();
 
-    const points_geo = new BufferGeometry();
-    points_geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(0, vertices_shape[0] * vertices_shape[1] * vertices_shape[2]), 3 ));
-    
-    if (normalized) {
-      ThreeFactory.normalize_scale(points_geo);
+    // iterate over samples in batch
+    for (let i = 0; i < vertices_shape[0]; i++) {
+      const point_size = Settings.point_size.value;
+
+      const points_geo = new BufferGeometry();
+      
+      const pos_offset = vertices_shape[1] * 3;
+      points_geo.setAttribute('position', new Float32BufferAttribute( vertices_arr.slice(i * pos_offset, (i+1) * pos_offset), 3 ));
+      
+      if (normalized) {
+        ThreeFactory.normalize_scale(points_geo);
+      }
+
+      let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
+      
+      const color_arr = ThreeFactory._getColors(pos_offset, colors, vertices_cmap);
+      points_geo.setAttribute('color', new Float32BufferAttribute(color_arr, 3));
+
+      geometries.add(new Points(points_geo, points_mat));
     }
 
-    let points_mat = new PointsMaterial( { size: point_size, vertexColors: true } );
-    
-    const color_arr = ThreeFactory._getColors(vertices_shape[0] * vertices_shape[1], colors, vertices_cmap);
-    points_geo.setAttribute('color', new Float32BufferAttribute(color_arr, 3));
-
-    return new Points(points_geo, points_mat);
+    return geometries
   }
 
   static createMesh(
@@ -160,7 +169,7 @@ export class ThreeFactory {
     feat_colors?: Uint8Array,
     config?: ThreeConfig,
     normalized = false,
-  ): {'features':Group, 'max_magnitude': number} | undefined {
+  ): {'features': Group, 'max_magnitude': number} | undefined {
 
     if (!vertices_shape || vertices_shape.length == 0 || !vertices_arr || vertices_arr.length == 0) {
       throw new Error('No vertices provided for feature arrows');

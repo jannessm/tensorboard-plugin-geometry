@@ -12,8 +12,7 @@ from tensorboard_plugin_geometry.summary import add_geometry
 SummaryWriter.add_geometry = add_geometry
 
 def test(log_name, callback):
-  log_dir = log_name
-  writer = SummaryWriter(log_dir=log_dir)
+  writer = SummaryWriter(log_dir=log_name)
   
   suite = callback(writer)
 

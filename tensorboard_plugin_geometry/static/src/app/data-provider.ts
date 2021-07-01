@@ -97,7 +97,10 @@ export class DataProvider {
         throw Error(`No vertices available for run ${this.run}, tag ${this.tag}, and step ${id}.`);
       }
       
-      const resp: StepData = {broken: true};
+      const resp: StepData = {
+        raw_data: data,
+        broken: true
+      };
       
       this_data[id] = resp;
 

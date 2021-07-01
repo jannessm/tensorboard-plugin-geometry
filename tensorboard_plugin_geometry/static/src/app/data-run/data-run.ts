@@ -15,6 +15,8 @@ import { Settings } from '../settings';
 import { Run } from '../models/run';
 import { DataProvider } from '../data-provider';
 import { ThreeConfig } from "../models/metadata";
+import { BufferGeometry, Group, Mesh, Points } from 'three';
+import { Geometry } from '../models/geometry';
 
 @WithRender
 @Component({
@@ -171,6 +173,36 @@ export default class DataRunComponent extends Vue {
     plot.update(undefined, old_fullscreen_state.width, old_fullscreen_state.height);
   }
 
+  getData() {
+    const data = this.plot.value;
+    const raw_data = data.raw_data;
+    let vertices, features, faces;
+    
+    if (raw_data && raw_data.vertices) {
+      vertices = this.bufferToArray(raw_data?.vertices, [raw_data.vertices.length / 3, 3]);
+    }
+    if (raw_data && raw_data.features) {
+      features = this.bufferToArray(raw_data?.vertices, [raw_data.features.length / 3, 3]);
+    }
+    if (raw_data && raw_data.faces) {
+      faces = this.bufferToArray(raw_data?.vertices, [raw_data.faces.length / 3, 3]);
+    }
+
+    const json = {
+      vertices,
+      features,
+      faces,
+    };
+
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", "data.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
   resetCamera() {
     this.getPlot().reset();
   }
@@ -181,6 +213,20 @@ export default class DataRunComponent extends Vue {
 
   rotateSideways() {
     this.getPlot().rotateSideways();
+  }
+
+  private bufferToArray(array, shape) {
+    const final_array: Array<Array<number>> = [];
+
+    for (let i = 0; i < shape[0]; i++) {
+      const item: Array<number> = [];
+      for (let j = 0; j < shape[1]; j++) {
+        item.push(array[i * shape[1] + j]);
+      }
+      final_array.push(item);
+    }
+
+    return final_array;
   }
 
   private getPlot(): PlotComponent {

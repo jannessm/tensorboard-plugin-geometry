@@ -23,7 +23,7 @@
         :max="data.max_step"
         v-on:value="update">
       </slider>
-    </div>
+    </div> 
   
     <plot
       :class="{'plot': true, 'invisible-plot': plot.value.broken}"
@@ -48,9 +48,12 @@
         <md-icon>refresh</md-icon>
       </md-button>
       <md-button class="md-icon-button md-dense" @click="rotateSideways()">
-        <md-icon>360</md-icon>
+        <md-icon class="material-icons">360</md-icon>
       </md-button>
       <md-button class="md-icon-button md-dense" @click="getScreenshot">
+        <md-icon>camera</md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense" @click="getData">
         <md-icon>save_alt</md-icon>
       </md-button>
       <md-button class="md-icon-button md-dense" @click="togglePlotSize">
